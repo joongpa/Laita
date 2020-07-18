@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:miatracker/AddHours.dart';
 import 'package:miatracker/DataStorageHelper.dart';
 import 'package:miatracker/DrawerMenu.dart';
 import 'package:miatracker/GlobalProgressWidget.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
+import 'package:miatracker/Map.dart';
+
+import 'InputLog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +24,7 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
+
     return MaterialApp(
       title: 'MIA Tracker',
       theme: ThemeData(
@@ -64,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final pageNames = [
     "Daily Goals",
     "Log",
+    "Statistics"
   ];
 
   onItemTap(int index) {
@@ -74,12 +80,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    //DataStorageHelper().deleteAllInputEntries();
+    //DataStorageHelper().resetAllHours();
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -96,16 +99,13 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                StreamBuilder<Object>(
-                    stream: InputHoursUpdater.ihu.rStream$,
-                    builder: (context, snapshot) {
-                      return GlobalProgressWidget(
-                          "Reading", snapshot.data, InputHoursUpdater.ihu.rgStream$);
-                    }),
-                GlobalProgressWidget("Listening", 0, InputHoursUpdater.ihu.lgStream$),
-                GlobalProgressWidget("Anki", 0, InputHoursUpdater.ihu.agStream$),
+                GlobalProgressWidget(InputType.Reading),
+                GlobalProgressWidget(InputType.Listening),
+                GlobalProgressWidget(InputType.Anki),
               ],
             ),
+            InputLog(),
+            //Container(),
             Container(),
           ],
         ),
@@ -117,11 +117,15 @@ class _MyHomePageState extends State<MyHomePage> {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              title: Text('Home'),
+              title: Text('Daily Goals'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
               title: Text('Log'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.show_chart),
+              title: Text('Stats'),
             )
           ],
           currentIndex: selectedIndex,

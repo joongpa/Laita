@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/DataStorageHelper.dart';
+import 'package:miatracker/Map.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import 'InputHoursUpdater.dart';
 
 class GlobalProgressWidget extends StatelessWidget {
   final f = new NumberFormat('0.0');
-  final String inputType;
-  final double value;
-  final Stream stream;
+  final InputType inputType;
 
-  GlobalProgressWidget(this.inputType, this.value, this.stream);
+  GlobalProgressWidget(this.inputType);
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class GlobalProgressWidget extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Text(
-                inputType,
+                inputType.name,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
@@ -35,7 +34,7 @@ class GlobalProgressWidget extends StatelessWidget {
                     child: Column(
                       children: <Widget>[
                         Text(
-                          f.format(value ?? 0),
+                          f.format(DataStorageHelper().getHoursOfInput(inputType)),
                           style: TextStyle(fontSize: 30.0),
                         ),
                         const Divider(
@@ -45,17 +44,13 @@ class GlobalProgressWidget extends StatelessWidget {
                           indent: 0,
                           endIndent: 0,
                         ),
-                        StreamBuilder(
-                            stream: stream,
-                            builder: (context, snapshot) {
-                              return Text(
-                                f.format(snapshot.data ?? 0.0),
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  color: Colors.grey,
-                                ),
-                              );
-                            }),
+                        Text(
+                          f.format(DataStorageHelper().getGoalOfInput(inputType) ?? 0.0),
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -75,11 +70,9 @@ class GlobalProgressWidget extends StatelessWidget {
                       padding: const EdgeInsets.all(0.0),
                       child: LinearPercentIndicator(
                         lineHeight: 20.0,
-                        percent: ((value ?? 0.0) / 3.0 > 1.0)
-                            ? 1.0
-                            : (value ?? 0.0) / 3.0,
+                        percent: _getPercent(DataStorageHelper().getHoursOfInput(inputType), DataStorageHelper().getGoalOfInput(inputType)),
                         linearStrokeCap: LinearStrokeCap.roundAll,
-                        progressColor: ((value ?? 0.0) / 3.0 >= 1.0)
+                        progressColor: _getPercent(DataStorageHelper().getHoursOfInput(inputType), DataStorageHelper().getGoalOfInput(inputType)) == 1.0
                             ? Colors.green
                             : Colors.blue,
                         backgroundColor: Color.fromRGBO(237, 237, 237, 1),
@@ -91,5 +84,13 @@ class GlobalProgressWidget extends StatelessWidget {
             ],
           )),
     );
+  }
+
+  _getPercent(double num, double dom) {
+    if(num < 0 || dom < 0) return 0.0;
+    if(num == null) num = 0;
+    if(dom == null) dom = 0;
+    if(dom == 0.0) return 1.0;
+    return (num > dom) ? 1.0 : num/dom;
   }
 }

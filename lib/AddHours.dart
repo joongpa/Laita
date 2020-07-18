@@ -1,6 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:miatracker/DataStorageHelper.dart';
+import 'package:miatracker/InputEntry.dart';
+import 'package:miatracker/InputHoursUpdater.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+
+import 'Map.dart';
 
 class AddHours extends StatefulWidget {
   @override
@@ -8,40 +14,183 @@ class AddHours extends StatefulWidget {
 }
 
 class _AddHoursState extends State<AddHours> {
+  NumberFormat f = NumberFormat("#");
+  double hours = 0.0;
+  double minutes = 0.0;
+  String description = "";
+  bool buttonDisabled = true;
+
+  List<bool> _selections = [true, false, false];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Add Hours"),
-        ),
-        body: Center(
-            child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            GestureDetector(
-              //onPanUpdate: _panHandler,
-              child: CircularPercentIndicator(
-                radius: 200,
-                lineWidth: 30,
-                percent: 0.5,
-                animateFromLastPercent: true,
-                animation: true,
-                circularStrokeCap: CircularStrokeCap.round,
-              ),
-            ),
-            Container(
-              height: 140,
-              width: 140,
-              decoration:
-                  BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-              child: Center(
-                child: Text(
-                  '0.5',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+      appBar: AppBar(
+        title: Text("New Immersion Entry"),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20.0, 10, 10, 10),
+          child: Column(
+            children: <Widget>[
+              TextField(
+                decoration: InputDecoration(
+                  labelText: "Description (optional)"
                 ),
+                onChanged: (s) {
+                  description = s;
+                },
               ),
-            )
-          ],
-        )));
+              SizedBox(
+                height: 20,
+              ),
+              ToggleButtons(
+                children: <Widget>[
+                  choiceButton("Reading"),
+                  choiceButton("Listening"),
+                  choiceButton("   Anki   ")
+                ],
+                borderRadius: BorderRadius.circular(10),
+                selectedColor: Colors.white,
+                fillColor: Colors.red,
+                isSelected: _selections,
+                onPressed: (int index) {
+                  setState(() {
+                    for (int buttonIndex = 0;
+                        buttonIndex < _selections.length;
+                        buttonIndex++) {
+                      if (buttonIndex == index) {
+                        _selections[buttonIndex] = true;
+                      } else {
+                        _selections[buttonIndex] = false;
+                      }
+                    }
+                  });
+                },
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(color: Colors.black, fontSize: 20),
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: f.format(hours),
+                              style: TextStyle(fontSize: 25)),
+                          TextSpan(text: " hrs")
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 4,
+                    child: Slider(
+                      value: hours,
+                      min: 0,
+                      max: 6,
+                      onChanged: (newValue) {
+                        setState(() {
+                          hours = newValue;
+                          if(newValue != 0) buttonDisabled = false;
+                          else if(minutes == 0 && hours == 0) buttonDisabled = true;
+                        });
+                      },
+                      divisions: 6,
+                      onChangeEnd: (double) {},
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(color: Colors.black, fontSize: 20),
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: f.format(minutes),
+                              style: TextStyle(fontSize: 25)),
+                          TextSpan(text: " min")
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 4,
+                    child: Slider(
+                      value: minutes,
+                      min: 0,
+                      max: 55,
+                      onChanged: (newValue) {
+                        setState(() {
+                          minutes = newValue;
+                          if(newValue != 0) buttonDisabled = false;
+                          else if(minutes == 0 && hours == 0) buttonDisabled = true;
+                        });
+                      },
+                      divisions: 11,
+                      onChangeEnd: (double) {},
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              _submitButton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _submitButton() => RaisedButton(
+        child: Text(
+          "Done",
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        onPressed: buttonDisabled ? null : _buttonAction,
+        color: Colors.lightBlue,
+      );
+
+  _buttonAction() {
+    double totalTime = hours + minutes/60;
+    InputEntry entry = InputEntry.now(description: description, inputType: numToInput(), duration: totalTime);
+    DataStorageHelper().insertInputEntry(entry).then((thing) {
+      InputHoursUpdater.ihu.update();
+    });
+    DataStorageHelper().addInput(numToInput(), totalTime);
+    Navigator.pop(context);
+  }
+
+  Widget choiceButton(String text) => Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Text(text),
+      );
+
+  // ignore: missing_return
+  InputType numToInput() {
+    int i = 0;
+    for(; i < _selections.length; i++) {
+      if(_selections[i]) break;
+    }
+    switch(i) {
+      case 0:
+        return InputType.Reading;
+      case 1:
+        return InputType.Listening;
+      case 2:
+        return InputType.Anki;
+    }
   }
 }

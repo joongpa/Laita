@@ -18,14 +18,6 @@ class DrawerMenu extends StatelessWidget {
                   builder: (BuildContext context) => GoalsPageWidget()));
             },
           ),
-          _createDrawerItem(
-            icon: Icons.insert_chart,
-            text: 'Stats',
-          ),
-          _createDrawerItem(
-            icon: Icons.note,
-            text: 'Notes',
-          ),
           Divider(),
           _createDrawerItem(icon: Icons.contacts,text: "Log in",)
         ],
@@ -42,7 +34,7 @@ class DrawerMenu extends StatelessWidget {
           Positioned(
               bottom: 12.0,
               left: 16.0,
-              child: Text("Mass Immersion Approach",
+              child: Text("Immersion Tracker",
                   style: TextStyle(
                       color: Colors.black,
                       fontSize: 20.0,

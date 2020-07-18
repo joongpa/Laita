@@ -6,12 +6,19 @@ class InputHoursUpdater {
   InputHoursUpdater._();
   static final InputHoursUpdater ihu = InputHoursUpdater._();
 
+  BehaviorSubject _update = BehaviorSubject.seeded(0.0);
+  Stream get updateStream$ => _update.stream;
+
   BehaviorSubject _readingHours = BehaviorSubject.seeded(0.0);
   Stream get rStream$ => _readingHours.stream;
   double get rCurrent => _readingHours.value;
 
   BehaviorSubject _readingGoal = BehaviorSubject.seeded(0.0);
   Stream get rgStream$ => _readingGoal.stream;
+
+  void update() {
+    _update.add(0.0);
+  }
 
   void addReading(double hours) {
     _readingHours.add(rCurrent + hours);

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/DataStorageHelper.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
+import 'package:miatracker/Map.dart';
 
 class GoalsPageWidget extends StatefulWidget {
   @override
@@ -36,7 +37,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                         border: OutlineInputBorder(),
                         labelText: 'Hours per day',
                       ),
-                      onChanged: (s) => InputHoursUpdater.ihu.setReadingGoal(double.parse(s)),
+                      onChanged: (s) => DataStorageHelper().setGoalOfInput(InputType.Reading, double.parse(s)),
                     ),
                   ),
                 ],
@@ -60,7 +61,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                         border: OutlineInputBorder(),
                         labelText: 'Hours per day',
                       ),
-                      onChanged: (s) => InputHoursUpdater.ihu.setListeningGoal(double.parse(s)),
+                      onChanged: (s) => DataStorageHelper().setGoalOfInput(InputType.Listening, double.parse(s)),
                     ),
                   ),
                 ],
@@ -84,7 +85,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                         border: OutlineInputBorder(),
                         labelText: 'Hours per day',
                       ),
-                      onChanged: (s) => InputHoursUpdater.ihu.setAnkiGoal(double.parse(s)),
+                      onChanged: (s) => DataStorageHelper().setGoalOfInput(InputType.Anki, double.parse(s)),
                     ),
                   ),
                 ],
