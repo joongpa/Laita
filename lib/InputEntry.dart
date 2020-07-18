@@ -6,30 +6,39 @@ import 'Map.dart';
 class InputEntry {
   int id;
   DateTime dateTime;
+  String date;
   String time;
   String description;
   InputType inputType;
   double duration;
 
-  InputEntry.now({this.description, this.inputType, this.duration}) {
-    dateTime = DateTime.now();
-    time = DateFormat("kk:mm").format(dateTime);
-  }
-
   InputEntry({this.id, this.dateTime, this.description, this.inputType, this.duration}) {
-    time = DateFormat("kk:mm").format(dateTime);
+    date = DateFormat("yyyy-MM-dd").format(dateTime);
+    time = DateFormat("HH:mm").format(dateTime);
   }
 
-  factory InputEntry.fromMap(Map<String,dynamic> map) => InputEntry(
+  InputEntry.now({this.id, this.description, this.inputType, this.duration}) {
+    dateTime = DateTime.now();
+    date = DateFormat("yyyy-MM-dd").format(dateTime);
+    time = DateFormat("HH:mm").format(dateTime);
+  }
+
+  InputEntry.explicitTime({this.id, this.date, this.time, this.description, this.inputType, this.duration}) {
+    dateTime = DateTime.parse('$date $time');
+  }
+
+  factory InputEntry.fromMap(Map<String,dynamic> map) => InputEntry.explicitTime(
     id: map['id'],
-    dateTime: DateTime.parse(map['dateTime']),
+    date: map['date'],
+    time: map['time'],
     description: map['description'],
     inputType: _stringToEnum(map['inputType']),
     duration: map['duration']
   );
 
   Map<String,dynamic> toMap() => {
-    "dateTime": dateTime.toString(),
+    "date": date,
+    "time": time,
     "description": description,
     "inputType": inputType.name,
     "duration": duration

@@ -7,6 +7,7 @@ import 'package:miatracker/DrawerMenu.dart';
 import 'package:miatracker/GlobalProgressWidget.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
+import 'package:miatracker/Lifecycle.dart';
 import 'package:miatracker/Map.dart';
 
 import 'InputLog.dart';
@@ -79,6 +80,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(
+        LifecycleEventHandler(resumeCallBack: () async {
+          InputHoursUpdater.ihu.update();
+        })
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     //DataStorageHelper().deleteAllInputEntries();
     //DataStorageHelper().resetAllHours();
@@ -96,6 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
           index: selectedIndex,
           children: <Widget>[
             Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[

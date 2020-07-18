@@ -169,7 +169,6 @@ class _AddHoursState extends State<AddHours> {
     DataStorageHelper().insertInputEntry(entry).then((thing) {
       InputHoursUpdater.ihu.update();
     });
-    DataStorageHelper().addInput(numToInput(), totalTime);
     Navigator.pop(context);
   }
 

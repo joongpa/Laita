@@ -56,15 +56,15 @@ class _InputLogState extends State<InputLog> {
   }
 
   void _delete(InputEntry inputEntry) async {
-    int result = await DataStorageHelper().deleteInputEntry(inputEntry.dateTime.toString());
+    int result = await DataStorageHelper().deleteInputEntry(inputEntry.id);
     DataStorageHelper().addInput(inputEntry.inputType, -inputEntry.duration);
     if (result != 0) {
-      _updateList();
+      InputHoursUpdater.ihu.update();
     }
   }
 
   void _updateList() {
-    final Future<List<InputEntry>> futureList = DataStorageHelper().getInputEntries();
+    final Future<List<InputEntry>> futureList = DataStorageHelper().getInputEntriesOnDay(DateTime.now());
     futureList.then((list) {
       setState(() {
         inputList = list;
