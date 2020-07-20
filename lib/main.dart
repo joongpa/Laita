@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
   bool visible = true;
 
-  final pageNames = ["Daily Goals", "Log", "Statistics"];
+  final pageNames = ["Daily Goals", "Statistics", "Log"];
 
   onItemTap(int index) {
     setState(() {
@@ -118,9 +118,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 GlobalProgressWidget(InputType.Anki),
               ],
             ),
-            MultiInputLog(),
-            //Container(),
             StatisticsSummaryWidget(),
+            MultiInputLog(),
           ],
         ),
       ),
@@ -134,13 +133,13 @@ class _MyHomePageState extends State<MyHomePage> {
               title: Text('Daily Goals'),
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.show_chart),
+              title: Text('Stats'),
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.list),
               title: Text('Log'),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.show_chart),
-              title: Text('Stats'),
-            )
           ],
           currentIndex: selectedIndex,
           onTap: onItemTap,
