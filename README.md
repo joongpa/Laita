@@ -26,6 +26,5 @@ mia immersion tracker todo
 BUGS
 - Log screen does not immediately update with date changes
 - Not achieving 60fps, optimize!!!!!!
-- Protect against SQL injection
 - Slight jitter in numbers when changing time interval of statistics page
 
