@@ -1,6 +1,5 @@
 mia immersion tracker todo
 
-- Convert decimals to hh:mm format
 - Statistics page
     - streaks for meeting daily goals
     - percentage of days meeting daily goals
