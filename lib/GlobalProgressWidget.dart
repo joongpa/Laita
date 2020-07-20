@@ -51,7 +51,7 @@ class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
                     child: Column(
                       children: <Widget>[
                         Text(
-                          f.format(value),
+                          UsefulShit.convertToTime(value),
                           style: TextStyle(fontSize: 30.0),
                         ),
                         const Divider(
@@ -62,7 +62,7 @@ class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
                           endIndent: 0,
                         ),
                         Text(
-                          f.format(DataStorageHelper().getGoalOfInput(widget.inputType) ?? 0.0),
+                          UsefulShit.convertToTime(DataStorageHelper().getGoalOfInput(widget.inputType) ?? 0.0),
                           style: TextStyle(
                             fontSize: 20.0,
                             color: Colors.grey,

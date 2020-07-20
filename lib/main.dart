@@ -9,8 +9,10 @@ import 'package:flutter/services.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
 import 'package:miatracker/Lifecycle.dart';
 import 'package:miatracker/Map.dart';
+import 'package:miatracker/StatisticsPageWidget.dart';
 
 import 'InputLog.dart';
+import 'StatisticsSummaryWidget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,27 +68,27 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final bucket = PageStorageBucket();
   int selectedIndex = 0;
+  bool visible = true;
 
-  final pageNames = [
-    "Daily Goals",
-    "Log",
-    "Statistics"
-  ];
+  final pageNames = ["Daily Goals", "Log", "Statistics"];
 
   onItemTap(int index) {
     setState(() {
       selectedIndex = index;
+      if (index != 0)
+        visible = false;
+      else
+        visible = true;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(
-        LifecycleEventHandler(resumeCallBack: () async {
-          InputHoursUpdater.ihu.update();
-        })
-    );
+    WidgetsBinding.instance
+        .addObserver(LifecycleEventHandler(resumeCallBack: () async {
+      InputHoursUpdater.ihu.resumeUpdate();
+    }));
   }
 
   @override
@@ -116,9 +118,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 GlobalProgressWidget(InputType.Anki),
               ],
             ),
-            InputLog(),
+            MultiInputLog(),
             //Container(),
-            Container(),
+            StatisticsSummaryWidget(),
           ],
         ),
       ),
@@ -144,14 +146,17 @@ class _MyHomePageState extends State<MyHomePage> {
           onTap: onItemTap,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddHours()),
-          );
-        },
+      floatingActionButton: Visibility(
+        visible: visible,
+        child: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddHours()),
+            );
+          },
+        ),
       ),
     );
   }

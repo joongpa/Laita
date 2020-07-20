@@ -12,4 +12,8 @@ class InputHoursUpdater {
   void update() {
     _update.add(0.0);
   }
+
+  void resumeUpdate() {
+    _update.add(1.0);
+  }
 }

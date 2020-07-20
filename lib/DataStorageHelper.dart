@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/InputEntry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,15 +85,7 @@ class DataStorageHelper {
   }
 
   Future<double> calculateInputToday(InputType inputType) async{
-    double temp = 0;
-    String compare = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final db = await database;
-    var result = await db.query(inputEntries, where: '${this.date} = ?', whereArgs: [compare]);
-    List list = result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList();
-    for(InputEntry inputEntry in list) {
-      if(inputEntry.inputType == inputType) temp += inputEntry.duration;
-    }
-    return temp;
+    return getTotalHoursInput(inputType, DateTime.now());
   }
 
   Future<int> updateInputEntry(InputEntry inputEntry) async {
@@ -102,47 +97,53 @@ class DataStorageHelper {
 
   Future<int> deleteInputEntry(int id) async {
     final db = await database;
-    int result = await db.rawDelete('DELETE FROM $inputEntries WHERE ${this.id} = $id');
+    int result = await db.delete(inputEntries, where: '${this.id} = ?', whereArgs: [id]);
     return result;
   }
 
   void deleteAllInputEntries() async {
     final db = await database;
     db.rawDelete('DELETE FROM $inputEntries');
-    db.execute("DROP TABLE IF EXISTS $inputEntries");
   }
 
-
-
-
-
-
-
-
-
-
-  double getHoursOfInput(InputType inputType) {
-    return _pref.get('hours' + inputType.name) ?? 0;
-
+  Future<double> getTotalHoursInput(InputType inputType, DateTime startDate, [DateTime endDate]) async {
+    final start1 = DateFormat("yyyy-MM-dd").format(startDate);
+    final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? startDate);
+    final db = await database;
+    final result = await db.query(inputEntries, columns: ['SUM($duration)'], where: '$date >= ? AND $date <= ? AND ${this.inputType} = ?', whereArgs: [start1, end1, inputType.name]);
+    return result[0]['SUM($duration)'] ?? 0;
   }
 
   double getGoalOfInput(InputType inputType) {
     return _pref.get('goals' + inputType.name) ?? 0;
   }
 
-  void addInput(InputType inputType, double hours) {
-    double totalHours = (_pref.get('hours' + inputType.name) ?? 0.0) +
-        hours;
-    _pref.setDouble('hours' + inputType.name, totalHours);
-  }
-
   void setGoalOfInput(InputType inputType, double hours) {
     _pref.setDouble('goals' + inputType.name, hours);
   }
 
-  void resetAllHours() {
-    _pref.setDouble("hoursReading", 0);
-    _pref.setDouble("hoursListening", 0);
-    _pref.setDouble("hoursAnki", 0);
+
+  void testPopulate() async {
+    final rand = Random();
+    InputType inputType;
+    for(int i = 0; i < 2000; i++) {
+      for(int j = 0; j < 10; j++) {
+        switch(rand.nextInt(2)){
+          case 0:
+            inputType = InputType.Reading;
+            break;
+          case 1:
+            inputType = InputType.Listening;
+            break;
+          case 2:
+            inputType = InputType.Anki;
+            break;
+        }
+        final inputEntry = InputEntry(dateTime: daysAgo(i), duration: 1.0, inputType: inputType, description: "yeetem");
+        insertInputEntry(inputEntry);
+        print(inputEntry);
+        await new Future.delayed(const Duration(milliseconds: 100));
+      }
+    }
   }
 }
