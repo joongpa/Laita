@@ -1,16 +1,30 @@
-# miatracker
+mia immersion tracker todo
 
-A new Flutter application.
+- Convert decimals to hh:mm format
+- Statistics page
+    - streaks for meeting daily goals
+    - percentage of days meeting daily goals
+    - Lifetime summaries
+    - Graphical representation of input hours
+    - Show calendar to navigate
+- Change hours and minutes sliders to be vertical for better ergonomics
+- Log page
+    - confirm delete log entry
+    - undo delete log entry
+- Allow user to add their own categories
+    - Specify whether category is hours-based or quantity-based
+- Firebase support
+- Goal page
+    - Current goals should be displayed rather than just an empty text field
+- Database
+    - Another table should store the stats for each day, such as
+    goals, hours, and whether the goal was met or not
+- Settings page
+    - User should be able to specify days when he is not immersing
+- First time user landing page
+    
+BUGS
+- Log screen does not immediately update with date changes
+- Not achieving 60fps, optimize!!!!!!
+- Slight jitter in numbers when changing time interval of statistics page
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
