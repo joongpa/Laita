@@ -5,8 +5,7 @@ mia immersion tracker todo
     - percentage of days meeting daily goals
     - Lifetime summaries
     - Graphical representation of input hours
-    - Show calendar to navigate
-- Change hours and minutes sliders to be vertical for better ergonomics
+- Move hours and minutes sliders to the bottom for better ergonomics
 - Log page
     - confirm delete log entry
     - undo delete log entry
@@ -18,8 +17,6 @@ mia immersion tracker todo
 - Database
     - Another table should store the stats for each day, such as
     goals, hours, and whether the goal was met or not
-- Settings page
-    - User should be able to specify days when he is not immersing
 - First time user landing page
     
 BUGS
