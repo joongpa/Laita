@@ -53,8 +53,8 @@ String getDate(DateTime date, {bool showDay, bool showYear, bool showMonth}) {
 
 
 int daysBetween(DateTime d1, DateTime d2) {
-  d1 = DateTime(d1.year, d1.month, d1.day);
-  d2 = DateTime(d2.year, d2.month, d2.day);
+  d1 = DateTime.utc(d1.year, d1.month, d1.day);
+  d2 = DateTime.utc(d2.year, d2.month, d2.day);
   return d1.difference(d2).inDays.abs();
 }
 

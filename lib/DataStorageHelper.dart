@@ -110,7 +110,7 @@ class DataStorageHelper {
     final start1 = DateFormat("yyyy-MM-dd").format(startDate);
     final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? startDate);
     final db = await database;
-    final result = await db.query(inputEntries, columns: ['SUM($duration)'], where: '$date >= ? AND $date <= ? AND ${this.inputType} = ?', whereArgs: [start1, end1, inputType.name]);
+    final result = await db.query(inputEntries, columns: ['SUM($duration)'], where: '$date >= ? AND $date < ? AND ${this.inputType} = ?', whereArgs: [start1, end1, inputType.name]);
     return result[0]['SUM($duration)'] ?? 0;
   }
 
@@ -120,8 +120,8 @@ class DataStorageHelper {
     final db = await database;
     var result;
     if(inputType != null)
-      result = await db.query(inputEntries, where: '$date >= ? AND $date <= ? AND ${this.inputType} = ?', whereArgs: [start1, end1, inputType.name]);
-    else result = await db.query(inputEntries, where: '$date >= ? AND $date <= ?', whereArgs: [start1, end1]);
+      result = await db.query(inputEntries, where: '$date >= ? AND $date < ? AND ${this.inputType} = ?', whereArgs: [start1, end1, inputType.name]);
+    else result = await db.query(inputEntries, where: '$date >= ? AND $date < ?', whereArgs: [start1, end1]);
     return result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList();
   }
 
@@ -135,21 +135,21 @@ class DataStorageHelper {
 
 
   void testPopulate() async {
-    final rand = Random();
-    InputType inputType;
+    //final rand = Random();
+    InputType inputType = InputType.Reading;
     for(int i = 0; i < 200; i++) {
       for(int j = 0; j < 10; j++) {
-        switch(rand.nextInt(3)){
-          case 0:
-            inputType = InputType.Reading;
-            break;
-          case 1:
-            inputType = InputType.Listening;
-            break;
-          case 2:
-            inputType = InputType.Anki;
-            break;
-        }
+//        switch(rand.nextInt(3)){
+//          case 0:
+//            inputType = InputType.Reading;
+//            break;
+//          case 1:
+//            inputType = InputType.Listening;
+//            break;
+//          case 2:
+//            inputType = InputType.Anki;
+//            break;
+//        }
         final inputEntry = InputEntry(dateTime: daysAgo(i), duration: 1.0, inputType: inputType, description: "yeetem");
         insertInputEntry(inputEntry);
         print(inputEntry);

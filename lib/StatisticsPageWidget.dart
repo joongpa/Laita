@@ -27,7 +27,7 @@ class StatisticsPageWidget extends StatelessWidget {
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  text: UsefulShit.convertToTime((snapshot.data) / (daysBetween(startDate, endDate) + 1)),
+                  text: UsefulShit.convertToTime((snapshot.data) / (daysBetween(startDate, endDate))),
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 30,

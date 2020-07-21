@@ -45,7 +45,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
         else shownDate = '2nd Half of ${displayDates[selectedIndex].year}';
     }
     final tempStartDate = displayDates[selectedIndex];
-    final tempEndDate = daysAgo(1, _getNewStartingDate(true, tempStartDate));
+    final tempEndDate = _getNewStartingDate(true, tempStartDate);
     final graphEndDate = daysAgo(-_selectionToTimeFrame(), tempStartDate);
 
     return ListView(
@@ -233,8 +233,8 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                   StatisticsPageWidget(
                     inputType: InputType.Reading,
                     startDate: tempStartDate,
-                    endDate: tempEndDate.isBefore(DateTime.now())
-                        ? tempEndDate
+                    endDate: graphEndDate.isBefore(DateTime.now())
+                        ? graphEndDate
                         : DateTime.now(),
                   ),
                 ],
@@ -253,8 +253,8 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                   StatisticsPageWidget(
                     inputType: InputType.Listening,
                     startDate: tempStartDate,
-                    endDate: tempEndDate.isBefore(DateTime.now())
-                        ? tempEndDate
+                    endDate: graphEndDate.isBefore(DateTime.now())
+                        ? graphEndDate
                         : DateTime.now(),
                   ),
                 ],
@@ -273,8 +273,8 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                   StatisticsPageWidget(
                     inputType: InputType.Anki,
                     startDate: tempStartDate,
-                    endDate: tempEndDate.isBefore(DateTime.now())
-                        ? tempEndDate
+                    endDate: graphEndDate.isBefore(DateTime.now())
+                        ? graphEndDate
                         : DateTime.now(),
                   ),
                 ],

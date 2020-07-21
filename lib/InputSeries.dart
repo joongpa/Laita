@@ -38,9 +38,6 @@ class InputChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
-
     return FutureBuilder<List<InputEntry>>(
         future: DataStorageHelper()
             .getInputEntriesFor(startDate, endDate),
@@ -85,7 +82,7 @@ class InputChart extends StatelessWidget {
               barGroupingType: charts.BarGroupingType.stacked,
               primaryMeasureAxis: charts.NumericAxisSpec(
                 tickFormatterSpec: customTickFormatter,
-                tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredMinTickCount: 5, desiredMaxTickCount: 15, dataIsInWholeNumbers: true),
+                tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredMinTickCount: 12, desiredMaxTickCount: 12, dataIsInWholeNumbers: true),
               ),
             );
           } else
@@ -104,6 +101,7 @@ class InputChart extends StatelessWidget {
           (i) =>
               InputSeries(day: getDay(daysAgo(-i, startDate).weekday), hours: 0));
         break;
+
       case 1:
         final length = 5;
         tempList = List<InputSeries>.generate(
@@ -119,21 +117,25 @@ class InputChart extends StatelessWidget {
         }
         return tempList;
         break;
+
       case 0:
-        tempList = List<InputSeries>.generate( 6,
+        tempList = List<InputSeries>.generate(6,
                 (i) =>
                 InputSeries(day: getMonth(monthsAgo(-i, startDate).month), hours: 0));
+
         for (final inputEntry in list) {
           final tempDate = inputEntry.dateTime;
           for (int i = 0; i < tempList.length; i++) {
-            final monthStart = monthsAgo(-i * 7, startDate);
-            final monthEnd = monthsAgo((-i-1) * 7, startDate);
-            if (tempDate.isAfter(monthStart) && tempDate.isBefore(monthEnd)) {
+            final monthStart = monthsAgo(-i, startDate);
+            final monthEnd = monthsAgo(-(i+1), startDate);
+
+            if ((tempDate.isAtSameMomentAs(monthStart) || tempDate.isAfter(monthStart)) && tempDate.isBefore(monthEnd)) {
               final monthLength = daysBetween(monthStart, monthEnd);
-              tempList[i].add(2 * inputEntry.duration / monthLength);
+              tempList[i].add(2 * inputEntry.duration / (monthLength));
             }
           }
         }
+
         return tempList;
         break;
     }
