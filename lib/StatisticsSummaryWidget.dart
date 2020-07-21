@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
-
-import 'InputLog.dart';
+import 'InputSeries.dart';
 import 'Map.dart';
 import 'StatisticsPageWidget.dart';
 
@@ -16,6 +15,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
   List<bool> _selections = [false, false, true];
   int selectedIndex = 2;
   List<bool> _choiceBoxValues = [true, true, true];
+  List<Color> _choiceBoxColors = [Colors.blue, Colors.green, Colors.orange];
   List<DateTime> displayDates = List<DateTime>(3);
   String shownDate;
 
@@ -79,6 +79,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Checkbox(
+                          activeColor: _choiceBoxColors[0],
                           value: _choiceBoxValues[0],
                           onChanged: (bool) {
                             setState(() {
@@ -93,6 +94,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Checkbox(
+                          activeColor: _choiceBoxColors[1],
                           value: _choiceBoxValues[1],
                           onChanged: (bool) {
                             setState(() {
@@ -107,6 +109,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Checkbox(
+                          activeColor: _choiceBoxColors[2],
                           value: _choiceBoxValues[2],
                           onChanged: (bool) {
                             setState(() {
@@ -120,9 +123,15 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                   ],
                 )),
                 Container(
-                  height: 200,
+                  height: 250,
                   width: 450,
-                  decoration: BoxDecoration(color: Colors.grey),
+                  child: InputChart(
+                    startDate: tempStartDate,
+                    endDate: tempEndDate,
+                    choiceArray: _choiceBoxValues,
+                    colorArray: _choiceBoxColors,
+                  ),
+                  //decoration: BoxDecoration(color: Colors.grey),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

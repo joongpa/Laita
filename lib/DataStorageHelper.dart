@@ -114,6 +114,17 @@ class DataStorageHelper {
     return result[0]['SUM($duration)'] ?? 0;
   }
 
+  Future<List<InputEntry>> getInputEntriesFor(DateTime startDate, DateTime endDate, {InputType inputType}) async {
+    final start1 = DateFormat("yyyy-MM-dd").format(startDate);
+    final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? startDate);
+    final db = await database;
+    var result;
+    if(inputType != null)
+      result = await db.query(inputEntries, where: '$date >= ? AND $date <= ? AND ${this.inputType} = ?', whereArgs: [start1, end1, inputType.name]);
+    else result = await db.query(inputEntries, where: '$date >= ? AND $date <= ?', whereArgs: [start1, end1]);
+    return result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList();
+  }
+
   double getGoalOfInput(InputType inputType) {
     return _pref.get('goals' + inputType.name) ?? 0;
   }
