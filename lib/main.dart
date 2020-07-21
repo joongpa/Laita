@@ -108,10 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: IndexedStack(
           index: selectedIndex,
           children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            ListView(
               children: <Widget>[
                 GlobalProgressWidget(InputType.Reading),
                 GlobalProgressWidget(InputType.Listening),

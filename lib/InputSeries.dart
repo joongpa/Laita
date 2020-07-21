@@ -48,13 +48,13 @@ class InputChart extends StatelessWidget {
 
             List<charts.Series<InputSeries, String>> series = [];
 
-            if(choiceArray[0])
+            if(choiceArray[2])
               series.add(charts.Series(
-                id: "Reading",
-                data: tempList1,
+                id: "Anki",
+                data: tempList3,
                 domainFn: (InputSeries series, _) => series.day,
                 measureFn: (InputSeries series, _) => series.hours,
-                colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[0]),
+                colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[2]),
               ));
 
             if(choiceArray[1])
@@ -66,19 +66,20 @@ class InputChart extends StatelessWidget {
                 colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[1]),
               ));
 
-            if(choiceArray[2])
+            if(choiceArray[0])
               series.add(charts.Series(
-                id: "Anki",
-                data: tempList3,
+                id: "Reading",
+                data: tempList1,
                 domainFn: (InputSeries series, _) => series.day,
                 measureFn: (InputSeries series, _) => series.hours,
-                colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[2]),
+                colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[0]),
               ));
 
 
             return charts.BarChart(
               series,
               animate: true,
+              barGroupingType: charts.BarGroupingType.stacked,
               primaryMeasureAxis: charts.NumericAxisSpec(
                 tickFormatterSpec: customTickFormatter,
                 tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredMinTickCount: 5, desiredMaxTickCount: 10, desiredTickCount: 5, dataIsInWholeNumbers: true),
