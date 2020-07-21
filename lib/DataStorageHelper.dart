@@ -137,9 +137,9 @@ class DataStorageHelper {
   void testPopulate() async {
     final rand = Random();
     InputType inputType;
-    for(int i = 0; i < 2000; i++) {
+    for(int i = 0; i < 200; i++) {
       for(int j = 0; j < 10; j++) {
-        switch(rand.nextInt(2)){
+        switch(rand.nextInt(3)){
           case 0:
             inputType = InputType.Reading;
             break;

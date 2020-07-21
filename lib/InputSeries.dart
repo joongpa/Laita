@@ -20,7 +20,7 @@ class InputSeries {
 
 class InputChart extends StatelessWidget {
   final customTickFormatter =
-  charts.BasicNumericTickFormatterSpec((num value) => '${UsefulShit.convertToTime(value/4)}');
+  charts.BasicNumericTickFormatterSpec((num value) => '${UsefulShit.convertToTime(value/2)}');
   final DateTime startDate;
   final DateTime endDate;
   final List<bool> choiceArray;
@@ -39,7 +39,9 @@ class InputChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return FutureBuilder(
+
+
+    return FutureBuilder<List<InputEntry>>(
         future: DataStorageHelper()
             .getInputEntriesFor(startDate, endDate),
         builder: (context, snapshot) {
@@ -77,14 +79,13 @@ class InputChart extends StatelessWidget {
                 colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[0]),
               ));
 
-
             return charts.BarChart(
               series,
               animate: false,
               barGroupingType: charts.BarGroupingType.stacked,
               primaryMeasureAxis: charts.NumericAxisSpec(
                 tickFormatterSpec: customTickFormatter,
-                tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredMinTickCount: 5, desiredMaxTickCount: 10, desiredTickCount: 5, dataIsInWholeNumbers: true),
+                tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredMinTickCount: 5, desiredMaxTickCount: 15, dataIsInWholeNumbers: true),
               ),
             );
           } else
@@ -99,20 +100,20 @@ class InputChart extends StatelessWidget {
     switch(timeFrame){
       case 2:
         tempList = List<InputSeries>.generate(
-          daysBetween(startDate, endDate) + 1,
+          7,
           (i) =>
               InputSeries(day: getDay(daysAgo(-i, startDate).weekday), hours: 0));
         break;
       case 1:
+        final length = 5;
         tempList = List<InputSeries>.generate(
-            (daysBetween(startDate, endDate) + 1) ~/ 7,
-                (i) =>
-                InputSeries(day: '${getDate(daysAgo(-i * 7, startDate), showYear: false)}-${getDate(daysAgo((-i-1) * 7 + 1, startDate), showYear: false, showMonth: false)}', hours: 0));
+            length,
+            (i) => InputSeries(day: '${getDate(daysAgo(-i * 7, startDate), showYear: false)}-${getDate(daysAgo((-i-1) * 7 + 1, startDate), showYear: false, showMonth: (i == length - 1))}', hours: 0));
         for (final inputEntry in list) {
           final tempDate = inputEntry.dateTime;
-          for (int i = 0; i <= tempList.length; i ++) {
+          for (int i = 0; i < tempList.length; i ++) {
             if (tempDate.isAfter(daysAgo(-i * 7, startDate)) && tempDate.isBefore(daysAgo((-i-1) * 7, startDate))) {
-              tempList[i].add(4 * inputEntry.duration / 7);
+              tempList[i].add(2 * inputEntry.duration / 6);
             }
           }
         }
@@ -124,12 +125,12 @@ class InputChart extends StatelessWidget {
                 InputSeries(day: getMonth(monthsAgo(-i, startDate).month), hours: 0));
         for (final inputEntry in list) {
           final tempDate = inputEntry.dateTime;
-          for (int i = 0; i <= tempList.length; i++) {
+          for (int i = 0; i < tempList.length; i++) {
             final monthStart = monthsAgo(-i * 7, startDate);
             final monthEnd = monthsAgo((-i-1) * 7, startDate);
             if (tempDate.isAfter(monthStart) && tempDate.isBefore(monthEnd)) {
               final monthLength = daysBetween(monthStart, monthEnd);
-              tempList[i].add(4 * inputEntry.duration / monthLength);
+              tempList[i].add(2 * inputEntry.duration / monthLength);
             }
           }
         }
@@ -139,12 +140,13 @@ class InputChart extends StatelessWidget {
 
     for (final inputEntry in list) {
       final tempDate = inputEntry.dateTime;
-      for (int i = 0; i <= daysBetween(startDate, endDate); i++) {
+      for (int i = 0; i < tempList.length; i++) {
         if (sameDay(daysAgo(-i, startDate), tempDate)) {
-          tempList[i].add(4 * inputEntry.duration);
+          tempList[i].add(2 * inputEntry.duration);
         }
       }
     }
+
     return tempList;
   }
 }

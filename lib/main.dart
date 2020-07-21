@@ -89,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
         .addObserver(LifecycleEventHandler(resumeCallBack: () async {
       InputHoursUpdater.ihu.resumeUpdate();
     }));
+    //DataStorageHelper().testPopulate();
   }
 
   @override
