@@ -20,16 +20,18 @@ class InputSeries {
 
 class InputChart extends StatelessWidget {
   final customTickFormatter =
-  charts.BasicNumericTickFormatterSpec((num value) => '${UsefulShit.convertToTime(value/2)}');
+  charts.BasicNumericTickFormatterSpec((num value) => '${UsefulShit.convertToTime(value/4)}');
   final DateTime startDate;
   final DateTime endDate;
   final List<bool> choiceArray;
   final List<Color> colorArray;
+  final int timeFrame;
 
   InputChart({
     @required this.startDate,
     @required this.endDate,
     @required this.choiceArray,
+    @required this.timeFrame,
     this.colorArray
   });
 
@@ -78,7 +80,7 @@ class InputChart extends StatelessWidget {
 
             return charts.BarChart(
               series,
-              animate: true,
+              animate: false,
               barGroupingType: charts.BarGroupingType.stacked,
               primaryMeasureAxis: charts.NumericAxisSpec(
                 tickFormatterSpec: customTickFormatter,
@@ -92,15 +94,54 @@ class InputChart extends StatelessWidget {
 
   List<InputSeries> _formatData(List<InputEntry> list) {
 
-    List<InputSeries> tempList = List<InputSeries>.generate(
-        daysBetween(startDate, endDate) + 1,
-        (i) =>
-            InputSeries(day: getDay(daysAgo(-i, startDate).weekday), hours: 0));
+    List<InputSeries> tempList;
+
+    switch(timeFrame){
+      case 2:
+        tempList = List<InputSeries>.generate(
+          daysBetween(startDate, endDate) + 1,
+          (i) =>
+              InputSeries(day: getDay(daysAgo(-i, startDate).weekday), hours: 0));
+        break;
+      case 1:
+        tempList = List<InputSeries>.generate(
+            (daysBetween(startDate, endDate) + 1) ~/ 7,
+                (i) =>
+                InputSeries(day: '${getDate(daysAgo(-i * 7, startDate), showYear: false)}-${getDate(daysAgo((-i-1) * 7 + 1, startDate), showYear: false, showMonth: false)}', hours: 0));
+        for (final inputEntry in list) {
+          final tempDate = inputEntry.dateTime;
+          for (int i = 0; i <= tempList.length; i ++) {
+            if (tempDate.isAfter(daysAgo(-i * 7, startDate)) && tempDate.isBefore(daysAgo((-i-1) * 7, startDate))) {
+              tempList[i].add(4 * inputEntry.duration / 7);
+            }
+          }
+        }
+        return tempList;
+        break;
+      case 0:
+        tempList = List<InputSeries>.generate( 6,
+                (i) =>
+                InputSeries(day: getMonth(monthsAgo(-i, startDate).month), hours: 0));
+        for (final inputEntry in list) {
+          final tempDate = inputEntry.dateTime;
+          for (int i = 0; i <= tempList.length; i++) {
+            final monthStart = monthsAgo(-i * 7, startDate);
+            final monthEnd = monthsAgo((-i-1) * 7, startDate);
+            if (tempDate.isAfter(monthStart) && tempDate.isBefore(monthEnd)) {
+              final monthLength = daysBetween(monthStart, monthEnd);
+              tempList[i].add(4 * inputEntry.duration / monthLength);
+            }
+          }
+        }
+        return tempList;
+        break;
+    }
+
     for (final inputEntry in list) {
-      final tempDate = DateTime.parse(inputEntry.date);
+      final tempDate = inputEntry.dateTime;
       for (int i = 0; i <= daysBetween(startDate, endDate); i++) {
         if (sameDay(daysAgo(-i, startDate), tempDate)) {
-          tempList[i].add(2 * inputEntry.duration);
+          tempList[i].add(4 * inputEntry.duration);
         }
       }
     }

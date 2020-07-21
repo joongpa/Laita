@@ -46,6 +46,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
     }
     final tempStartDate = displayDates[selectedIndex];
     final tempEndDate = daysAgo(1, _getNewStartingDate(true, tempStartDate));
+    final graphEndDate = daysAgo(-_selectionToTimeFrame(), tempStartDate);
 
     return ListView(
       children: <Widget>[
@@ -127,9 +128,10 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                   width: 450,
                   child: InputChart(
                     startDate: tempStartDate,
-                    endDate: tempEndDate,
+                    endDate: graphEndDate,
                     choiceArray: _choiceBoxValues,
                     colorArray: _choiceBoxColors,
+                    timeFrame: selectedIndex,
                   ),
                   //decoration: BoxDecoration(color: Colors.grey),
                 ),
@@ -285,13 +287,9 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
   }
 
   int _selectionToTimeFrame() {
-    int i = 0;
-    for (; i < _selections.length; i++) {
-      if (_selections[i]) break;
-    }
-    switch (i) {
+    switch (selectedIndex) {
       case 0:
-        return 365;
+        return 183;
         break;
       case 1:
         return 35;

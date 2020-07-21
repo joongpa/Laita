@@ -1,8 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
+
+
 enum InputType {
   Reading, Listening, Anki
+}
+
+extension InputTypeExtension on InputType {
+  String get name => describeEnum(this);
 }
 
 String getMonth(int month) {
@@ -37,18 +43,14 @@ String getDay(int weekday) {
   return days[weekday];
 }
 
-String getDate(DateTime date) {
-  int year = date.year;
+String getDate(DateTime date, {bool showDay, bool showYear, bool showMonth}) {
+  String year = (showYear ?? true) ? ', ${date.year}' : '';
   int month = date.month;
-  int day = date.day;
+  String day = (showDay ?? true) ? '${date.day}' : '';
 
-  return '${getMonth(month)} $day, $year';
+  return '${(showMonth ?? true) ? getMonth(month) : ''} $day$year'.trim();
 }
 
-
-extension InputTypeExtension on InputType {
-  String get name => describeEnum(this);
-}
 
 int daysBetween(DateTime d1, DateTime d2) {
   d1 = DateTime(d1.year, d1.month, d1.day);
