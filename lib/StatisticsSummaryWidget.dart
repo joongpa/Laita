@@ -45,7 +45,6 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
         else shownDate = '2nd Half of ${displayDates[selectedIndex].year}';
     }
     final tempStartDate = displayDates[selectedIndex];
-    final tempEndDate = _getNewStartingDate(true, tempStartDate);
     final graphEndDate = daysAgo(-_selectionToTimeFrame(), tempStartDate);
 
     return ListView(
@@ -235,7 +234,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                     startDate: tempStartDate,
                     endDate: graphEndDate.isBefore(DateTime.now())
                         ? graphEndDate
-                        : DateTime.now(),
+                        : daysAgo(-1,DateTime.now()),
                   ),
                 ],
               ),
@@ -255,7 +254,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                     startDate: tempStartDate,
                     endDate: graphEndDate.isBefore(DateTime.now())
                         ? graphEndDate
-                        : DateTime.now(),
+                        : daysAgo(-1,DateTime.now()),
                   ),
                 ],
               ),
@@ -275,7 +274,7 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                     startDate: tempStartDate,
                     endDate: graphEndDate.isBefore(DateTime.now())
                         ? graphEndDate
-                        : DateTime.now(),
+                        : daysAgo(-1,DateTime.now()),
                   ),
                 ],
               ),

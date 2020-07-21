@@ -108,7 +108,7 @@ class DataStorageHelper {
 
   Future<double> getTotalHoursInput(InputType inputType, DateTime startDate, [DateTime endDate]) async {
     final start1 = DateFormat("yyyy-MM-dd").format(startDate);
-    final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? startDate);
+    final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? daysAgo(-1,startDate));
     final db = await database;
     final result = await db.query(inputEntries, columns: ['SUM($duration)'], where: '$date >= ? AND $date < ? AND ${this.inputType} = ?', whereArgs: [start1, end1, inputType.name]);
     return result[0]['SUM($duration)'] ?? 0;
@@ -116,7 +116,7 @@ class DataStorageHelper {
 
   Future<List<InputEntry>> getInputEntriesFor(DateTime startDate, DateTime endDate, {InputType inputType}) async {
     final start1 = DateFormat("yyyy-MM-dd").format(startDate);
-    final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? startDate);
+    final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? daysAgo(-1,startDate));
     final db = await database;
     var result;
     if(inputType != null)
