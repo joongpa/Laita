@@ -108,6 +108,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: IndexedStack(
           index: selectedIndex,
           children: <Widget>[
+//            ReorderableListView(
+//              onReorder: ,
+//              children: List.generate(DataStorageHelper().categoryNames.length + 1, (index) {
+//                if(index == DataStorageHelper().categoryNames.length) return SizedBox(height: 200);
+//                else return GlobalProgressWidget(DataStorageHelper().categories[index]);
+//              }),
+//            ),
             ListView.builder(
               itemCount: DataStorageHelper().categoryNames.length + 1,
               itemBuilder: (context, index) {
@@ -156,4 +163,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  _onReorder(int index1, int index2) {
+
+  }
+
 }

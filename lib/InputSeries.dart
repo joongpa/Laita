@@ -28,7 +28,7 @@ class InputChart extends StatelessWidget {
   final List<bool> choiceArray;
   final List<Color> colorArray;
   final int timeFrame;
-  double _maxValue = 0;
+  final List<double> _maxValue = [0];
 
   InputChart({
     @required this.startDate,
@@ -46,14 +46,14 @@ class InputChart extends StatelessWidget {
             .getInputEntriesFor(startDate, endDate),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            _maxValue = 0;
+            _maxValue[0] = 0;
             List<charts.Series<InputSeries, String>> series = [];
 
-            for(int i = 0; i < choiceArray.length; i++) {
+            for(int i = choiceArray.length-1; i >= 0; i--) {
               if (choiceArray[i]) {
                 List<InputSeries> tempList = _formatData(
-                    snapshot.data.where((inputEntry) => inputEntry.inputType ==
-                        DataStorageHelper().categories[i]).toList());
+                    snapshot.data.where((inputEntry) => inputEntry.inputType == DataStorageHelper().categories[i]).toList());
+
                 series.add(charts.Series(
                   id: DataStorageHelper().categoryNames[i],
                   data: tempList,
@@ -64,7 +64,6 @@ class InputChart extends StatelessWidget {
                 ));
               }
             }
-            //print(series[0].data.length);
 
             return charts.BarChart(
               series,
@@ -72,7 +71,7 @@ class InputChart extends StatelessWidget {
               barGroupingType: charts.BarGroupingType.stacked,
               primaryMeasureAxis: charts.NumericAxisSpec(
                 tickFormatterSpec: customTickFormatter,
-                tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredTickCount: 5, dataIsInWholeNumbers: true),
+                tickProviderSpec: charts.BasicNumericTickProviderSpec(/*desiredTickCount: getTicksFromMaxValue(),*/ dataIsInWholeNumbers: true),
               ),
             );
           } else
@@ -105,7 +104,7 @@ class InputChart extends StatelessWidget {
             }
           }
         }
-        _maxValue = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
+        _maxValue[0] = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
         return tempList;
         break;
 
@@ -126,11 +125,10 @@ class InputChart extends StatelessWidget {
             }
           }
         }
-        _maxValue = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
+        _maxValue[0] = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
         return tempList;
         break;
     }
-
     for (final inputEntry in list) {
       final tempDate = inputEntry.dateTime;
       for (int i = 0; i < tempList.length; i++) {
@@ -139,22 +137,21 @@ class InputChart extends StatelessWidget {
         }
       }
     }
-    _maxValue = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
-
+    _maxValue[0] = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
     return tempList;
   }
 
-//  int getTicksFromMaxValue(List<List<InputSeries>> entryList) {
+//  int getTicksFromMaxValue(List<charts.Series<InputSeries, String>> entryList) {
 //    List<double> doubleList= [0,0,0];
 //
 //    for(int i = 0; i < entryList.length; i++) {
-//      if(entryList[i].isNotEmpty) {
+//      if(entryList[i].) {
 //        for(int j = 0; j < entryList[j].length; j++){
 //          doubleList[i] += entryList[j][i].hours;
 //        }
 //      }
 //    }
-//    _maxValue = math.max(_maxValue, doubleList.reduce(math.max));
-//    return math.max(5, _maxValue.ceil() + 1);
+//    _maxValue[0] = math.max(_maxValue[0], doubleList.reduce(math.max));
+//    return math.max(5, _maxValue[0].ceil() + 1);
 //  }
 }

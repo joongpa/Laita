@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
 
@@ -14,7 +15,7 @@ class DrawerMenu extends StatelessWidget {
             text: 'Goals',
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).push(MaterialPageRoute(
+              Navigator.of(context).push(CupertinoPageRoute(
                   builder: (BuildContext context) => GoalsPageWidget()));
             },
           ),
