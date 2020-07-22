@@ -8,7 +8,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'InputHoursUpdater.dart';
 
 class GlobalProgressWidget extends StatefulWidget {
-  final InputType inputType;
+  final Category inputType;
 
   GlobalProgressWidget(this.inputType);
 
@@ -107,7 +107,7 @@ class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
     if(num < 0 || dom < 0) return 0.0;
     if(num == null) num = 0;
     if(dom == null) dom = 0;
-    if(dom == 0.0) return 1.0;
+    if(dom == 0.0) return 0.0;
     return (num > dom) ? 1.0 : num/dom;
   }
 

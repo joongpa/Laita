@@ -1,14 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
+class Category {
+  final String name;
 
-
-enum InputType {
-  Reading, Listening, Anki
-}
-
-extension InputTypeExtension on InputType {
-  String get name => describeEnum(this);
+  Category({@required this.name});
 }
 
 String getMonth(int month) {

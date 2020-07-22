@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:miatracker/DataStorageHelper.dart';
 
 import 'Map.dart';
 
@@ -9,7 +10,7 @@ class InputEntry {
   String date;
   String time;
   String description;
-  InputType inputType;
+  Category inputType;
   double duration;
 
   InputEntry({this.id, this.dateTime, this.description, this.inputType, this.duration}) {
@@ -32,7 +33,7 @@ class InputEntry {
     date: map['date'],
     time: map['time'],
     description: map['description'],
-    inputType: _stringToEnum(map['inputType']),
+    inputType: DataStorageHelper().getCategory(map['inputType']),
     duration: map['duration']
   );
 
@@ -44,15 +45,15 @@ class InputEntry {
     "duration": duration
   };
 
-  static InputType _stringToEnum(String string) {
-    switch(string) {
-      case "Reading":
-        return InputType.Reading;
-      case "Listening":
-        return InputType.Listening;
-      case "Anki":
-        return InputType.Anki;
-    }
-    return null;
-  }
+//  static InputType _stringToEnum(String string) {
+//    switch(string) {
+//      case "Reading":
+//        return InputType.Reading;
+//      case "Listening":
+//        return InputType.Listening;
+//      case "Anki":
+//        return InputType.Anki;
+//    }
+//    return null;
+//  }
 }

@@ -6,7 +6,7 @@ import 'package:miatracker/InputEntry.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import 'Map.dart';
+import 'Map.dart' as constants;
 
 class AddHours extends StatefulWidget {
   @override
@@ -178,18 +178,11 @@ class _AddHoursState extends State<AddHours> {
       );
 
   // ignore: missing_return
-  InputType numToInput() {
+  constants.Category numToInput() {
     int i = 0;
     for(; i < _selections.length; i++) {
       if(_selections[i]) break;
     }
-    switch(i) {
-      case 0:
-        return InputType.Reading;
-      case 1:
-        return InputType.Listening;
-      case 2:
-        return InputType.Anki;
-    }
+    return DataStorageHelper().categories[i];
   }
 }

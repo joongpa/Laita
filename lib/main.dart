@@ -89,7 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
         .addObserver(LifecycleEventHandler(resumeCallBack: () async {
       InputHoursUpdater.ihu.resumeUpdate();
     }));
-   //DataStorageHelper().testPopulate();
   }
 
   @override
@@ -109,12 +108,12 @@ class _MyHomePageState extends State<MyHomePage> {
         child: IndexedStack(
           index: selectedIndex,
           children: <Widget>[
-            ListView(
-              children: <Widget>[
-                GlobalProgressWidget(InputType.Reading),
-                GlobalProgressWidget(InputType.Listening),
-                GlobalProgressWidget(InputType.Anki),
-              ],
+            ListView.builder(
+              itemCount: DataStorageHelper().categoryNames.length + 1,
+              itemBuilder: (context, index) {
+                if(index == DataStorageHelper().categoryNames.length) return SizedBox(height: 200);
+                else return GlobalProgressWidget(DataStorageHelper().categories[index]);
+              }
             ),
             StatisticsSummaryWidget(),
             MultiInputLog(),

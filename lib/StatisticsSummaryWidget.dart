@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
+import 'DataStorageHelper.dart';
 import 'InputSeries.dart';
 import 'Map.dart';
 import 'StatisticsPageWidget.dart';
@@ -14,8 +15,8 @@ class StatisticsSummaryWidget extends StatefulWidget {
 class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
   List<bool> _selections = [false, false, true];
   int selectedIndex = 2;
-  List<bool> _choiceBoxValues = [true, true, true];
-  List<Color> _choiceBoxColors = [Colors.blue, Colors.green, Colors.orange];
+  List<bool> _choiceBoxValues = List.generate(DataStorageHelper().categoryNames.length, (i) => true);
+  List<Color> _choiceBoxColors = [Colors.blue, Colors.blueGrey, Colors.green, Colors.orange, Colors.red, Colors.yellow];
   List<DateTime> displayDates = List<DateTime>(3);
   String shownDate;
 
@@ -74,53 +75,23 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
                   runSpacing: -20,
                   spacing: 0,
                   alignment: WrapAlignment.center,
-                  children: <Widget>[
+                  children: List.generate(_choiceBoxValues.length, (i) =>
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Checkbox(
-                          activeColor: _choiceBoxColors[0],
-                          value: _choiceBoxValues[0],
+                          activeColor: _choiceBoxColors[i],
+                          value: _choiceBoxValues[i],
                           onChanged: (bool) {
                             setState(() {
-                              _choiceBoxValues[0] = bool;
+                              _choiceBoxValues[i] = bool;
                             });
                           },
                         ),
-                        Text(InputType.Reading.name),
+                        Text(DataStorageHelper().categoryNames[i]),
                       ],
                     ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Checkbox(
-                          activeColor: _choiceBoxColors[1],
-                          value: _choiceBoxValues[1],
-                          onChanged: (bool) {
-                            setState(() {
-                              _choiceBoxValues[1] = bool;
-                            });
-                          },
-                        ),
-                        Text(InputType.Listening.name),
-                      ],
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Checkbox(
-                          activeColor: _choiceBoxColors[2],
-                          value: _choiceBoxValues[2],
-                          onChanged: (bool) {
-                            setState(() {
-                              _choiceBoxValues[2] = bool;
-                            });
-                          },
-                        ),
-                        Text(InputType.Anki.name),
-                      ],
-                    ),
-                  ],
+                  ),
                 )),
                 Container(
                   height: 250,
@@ -216,70 +187,33 @@ class _StatisticsSummaryWidgetState extends State<StatisticsSummaryWidget> {
           ),
         ),
         SizedBox(height: 15),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              child: Column(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 25,
+            runSpacing: 20,
+            children: List.generate(DataStorageHelper().categoryNames.length, (index) {
+              return Column(
                 children: <Widget>[
                   Text(
-                    "Reading",
+                    DataStorageHelper().categoryNames[index],
                     style: TextStyle(
                       fontSize: 18,
                     ),
                   ),
                   SizedBox(height: 10),
                   StatisticsPageWidget(
-                    inputType: InputType.Reading,
+                    inputType: DataStorageHelper().categories[index],
                     startDate: tempStartDate,
                     endDate: graphEndDate.isBefore(DateTime.now())
                         ? graphEndDate
                         : daysAgo(-1,DateTime.now()),
                   ),
                 ],
-              ),
-            ),
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  Text(
-                    "Listening",
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  StatisticsPageWidget(
-                    inputType: InputType.Listening,
-                    startDate: tempStartDate,
-                    endDate: graphEndDate.isBefore(DateTime.now())
-                        ? graphEndDate
-                        : daysAgo(-1,DateTime.now()),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  Text(
-                    "Anki",
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  StatisticsPageWidget(
-                    inputType: InputType.Anki,
-                    startDate: tempStartDate,
-                    endDate: graphEndDate.isBefore(DateTime.now())
-                        ? graphEndDate
-                        : daysAgo(-1,DateTime.now()),
-                  ),
-                ],
-              ),
-            ),
-          ],
+              );
+            }),
+          ),
         ),
       ],
     );

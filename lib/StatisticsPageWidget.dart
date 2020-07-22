@@ -6,7 +6,7 @@ import 'package:miatracker/InputLog.dart';
 import 'package:miatracker/Map.dart';
 
 class StatisticsPageWidget extends StatelessWidget {
-  final InputType inputType;
+  final Category inputType;
   final DateTime startDate;
   final DateTime endDate;
 

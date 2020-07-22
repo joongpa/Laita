@@ -1,6 +1,3 @@
-import 'dart:math';
-
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/InputEntry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -84,7 +81,7 @@ class DataStorageHelper {
     return result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList();
   }
 
-  Future<double> calculateInputToday(InputType inputType) async{
+  Future<double> calculateInputToday(Category inputType) async{
     return getTotalHoursInput(inputType, DateTime.now());
   }
 
@@ -106,7 +103,7 @@ class DataStorageHelper {
     db.rawDelete('DELETE FROM $inputEntries');
   }
 
-  Future<double> getTotalHoursInput(InputType inputType, DateTime startDate, [DateTime endDate]) async {
+  Future<double> getTotalHoursInput(Category inputType, DateTime startDate, [DateTime endDate]) async {
     final start1 = DateFormat("yyyy-MM-dd").format(startDate);
     final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? daysAgo(-1,startDate));
     final db = await database;
@@ -114,7 +111,7 @@ class DataStorageHelper {
     return result[0]['SUM($duration)'] ?? 0;
   }
 
-  Future<List<InputEntry>> getInputEntriesFor(DateTime startDate, DateTime endDate, {InputType inputType}) async {
+  Future<List<InputEntry>> getInputEntriesFor(DateTime startDate, DateTime endDate, {Category inputType}) async {
     final start1 = DateFormat("yyyy-MM-dd").format(startDate);
     final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? daysAgo(-1,startDate));
     final db = await database;
@@ -125,18 +122,64 @@ class DataStorageHelper {
     return result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList();
   }
 
-  double getGoalOfInput(InputType inputType) {
+  double getGoalOfInput(Category inputType) {
     return _pref.get('goals' + inputType.name) ?? 0;
   }
 
-  void setGoalOfInput(InputType inputType, double hours) {
+  void setGoalOfInput(Category inputType, double hours) {
     _pref.setDouble('goals' + inputType.name, hours);
+  }
+
+  Category getCategory(String name) {
+    for(final category in allCategories) {
+      if(category.name == name) return category;
+    }
+    return null;
+  }
+
+  void removeCategory(String name) {
+    final tempList = categoryNames;
+    tempList.remove(name);
+    _pref.setStringList('categories', tempList);
+  }
+
+  List<Category> get categories {
+    return categoryNames.map<Category>((c) => Category(name: c)).toList();
+  }
+
+  List<String> get categoryNames {
+    return _pref.getStringList("categories") ?? [];
+  }
+
+  List<Category> get allCategories {
+    return allCategoryNames.map<Category>((c) => Category(name: c)).toList();
+  }
+
+  List<String> get allCategoryNames {
+    return _pref.getStringList('allCategories') ?? [];
+  }
+
+
+  bool addCategory(String category) {
+    if(!categoryNames.contains(category)) {
+      final tempList = categoryNames;
+      tempList.add(category);
+      _pref.setStringList("categories", tempList);
+
+      if(!allCategoryNames.contains(category)) {
+        final allTempList = allCategoryNames;
+        allTempList.add(category);
+        _pref.setStringList("allCategories", allTempList);
+      }
+      return true;
+    }
+    return false;
   }
 
 
   void testPopulate() async {
     //final rand = Random();
-    InputType inputType = InputType.Reading;
+    Category inputType = categories[0];
     for(int i = 0; i < 200; i++) {
       for(int j = 0; j < 10; j++) {
 //        switch(rand.nextInt(3)){
@@ -156,5 +199,9 @@ class DataStorageHelper {
         await new Future.delayed(const Duration(milliseconds: 100));
       }
     }
+  }
+
+  void clearSharePreferences() {
+    _pref.clear();
   }
 }

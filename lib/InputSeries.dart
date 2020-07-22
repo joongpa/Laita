@@ -49,42 +49,22 @@ class InputChart extends StatelessWidget {
             _maxValue = 0;
             List<charts.Series<InputSeries, String>> series = [];
 
-            if(choiceArray[2]) {
-              List<InputSeries> tempList3 = _formatData(
-                  snapshot.data.where((inputEntry) => inputEntry.inputType ==
-                      InputType.Anki).toList());
-              series.add(charts.Series(
-                id: "Anki",
-                data: tempList3,
-                domainFn: (InputSeries series, _) => series.day,
-                measureFn: (InputSeries series, _) => series.hours,
-                colorFn: (_, __) =>
-                    charts.ColorUtil.fromDartColor(colorArray[2]),
-              ));
+            for(int i = 0; i < choiceArray.length; i++) {
+              if (choiceArray[i]) {
+                List<InputSeries> tempList = _formatData(
+                    snapshot.data.where((inputEntry) => inputEntry.inputType ==
+                        DataStorageHelper().categories[i]).toList());
+                series.add(charts.Series(
+                  id: DataStorageHelper().categoryNames[i],
+                  data: tempList,
+                  domainFn: (InputSeries series, _) => series.day,
+                  measureFn: (InputSeries series, _) => series.hours,
+                  colorFn: (_, __) =>
+                      charts.ColorUtil.fromDartColor(colorArray[i]),
+                ));
+              }
             }
-
-            if(choiceArray[1]){
-              List<InputSeries> tempList2 = _formatData(snapshot.data.where((inputEntry) => inputEntry.inputType == InputType.Listening).toList());
-              series.add(charts.Series(
-                id: "Listening",
-                data: tempList2,
-                domainFn: (InputSeries series, _) => series.day,
-                measureFn: (InputSeries series, _) => series.hours,
-                colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[1]),
-              ));
-            }
-
-
-            if(choiceArray[0]) {
-              List<InputSeries> tempList1 = _formatData(snapshot.data.where((inputEntry) => inputEntry.inputType == InputType.Reading).toList());
-              series.add(charts.Series(
-                id: "Reading",
-                data: tempList1,
-                domainFn: (InputSeries series, _) => series.day,
-                measureFn: (InputSeries series, _) => series.hours,
-                colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[0]),
-              ));
-            }
+            //print(series[0].data.length);
 
             return charts.BarChart(
               series,
