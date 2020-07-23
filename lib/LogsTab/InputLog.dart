@@ -7,31 +7,11 @@ import 'package:miatracker/Models/InputHoursUpdater.dart';
 import '../Models/InputEntry.dart';
 import '../Map.dart';
 
-class InputLog extends StatefulWidget {
+class InputLog extends StatelessWidget {
+  final durationFormat = NumberFormat("0.0");
   final DateTime dateTime;
 
-  InputLog({@required this.dateTime});
-
-  @override
-  _InputLogState createState() => _InputLogState();
-}
-
-class _InputLogState extends State<InputLog> {
-  List<InputEntry> inputList;
-
-  NumberFormat durationFormat = NumberFormat("0.0");
-
-  @override
-  void initState() {
-    super.initState();
-    inputList = List<InputEntry>();
-    _updateList();
-    InputHoursUpdater.ihu.updateStream$.listen((data) {
-      if(sameDay(DateTime.now(), widget.dateTime)) {
-        _updateList();
-      }
-    });
-  }
+  InputLog({this.dateTime});
 
   @override
   Widget build(BuildContext context) {
@@ -39,72 +19,44 @@ class _InputLogState extends State<InputLog> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Expanded(
-          child: ListView.builder(
-            itemCount: inputList.length,
-            itemBuilder: (context, index) {
-              if(sameDay(DateTime.now(), widget.dateTime)) {
-                return Dismissible(
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    alignment: AlignmentDirectional.centerEnd,
-                    color: Colors.red,
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
+          child: StreamBuilder<List<InputEntry>>(
+            stream: InputHoursUpdater.ihu.dbChangesStream$,
+            builder: (context, snapshot) {
+              if(!snapshot.hasData) return Container();
+
+              final List<InputEntry> inputEntries = Filter.filterEntries(snapshot.data, startDate: dateTime, endDate: daysAgo(-1, dateTime));
+
+              return ListView.builder(
+                itemCount: inputEntries.length,
+                itemBuilder: (context, index) {
+                  return Dismissible(
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      alignment: AlignmentDirectional.centerEnd,
+                      color: Colors.red,
+                      child: const Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  key: UniqueKey(),
-                  onDismissed: (dis) => _dismissedCallback(index),
-                  child: Card(
-                      child: ListTile(
-                        subtitle: Text(inputList[index].description),
-                        leading: Text(inputList[index].inputType.name),
-                        title: Text(
-                            '${convertToTime(inputList[index].duration)}'),
-                        trailing: Text(inputList[index].time),
-                      )),
-                );
-              }
-              return Card(
-                  child: ListTile(
-                    subtitle: Text(inputList[index].description),
-                    leading: Text(inputList[index].inputType.name),
-                    title: Text(
-                        '${convertToTime(inputList[index].duration)}'),
-                    trailing: Text(inputList[index].time),
-                  ));
-            },
+                    key: UniqueKey(),
+                    onDismissed: (dis) => DataStorageHelper().deleteInputEntry(inputEntries[index].id),
+                    child: Card(
+                        child: ListTile(
+                          subtitle: Text(inputEntries[index].description),
+                          leading: Text(inputEntries[index].inputType.name),
+                          title: Text(
+                              '${convertToTime(inputEntries[index].duration)}'),
+                          trailing: Text(inputEntries[index].time),
+                        )),
+                  );
+                }
+              );
+            }
           ),
         ),
       ],
     );
-  }
-
-
-  void _delete(InputEntry inputEntry) async {
-    int result = await DataStorageHelper().deleteInputEntry(inputEntry.id);
-    if (result != 0) {
-      InputHoursUpdater.ihu.update();
-    }
-  }
-
-  void _dismissedCallback(index) {
-    _delete(inputList[index]);
-    setState(() {
-      inputList.removeAt(index);
-    });
-  }
-
-  void _updateList() {
-    final Future<List<InputEntry>> futureList =
-        DataStorageHelper().getInputEntriesOnDay(widget.dateTime);
-    futureList.then((list) {
-      if(mounted) {
-        setState(() {
-          inputList = list;
-        });
-      }
-    });
   }
 }

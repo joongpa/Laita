@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/DataStorageHelper.dart';
+import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
 
 import '../Models/InputEntry.dart';
@@ -42,17 +43,17 @@ class InputChart extends StatelessWidget {
       stream: TimeFrameModel().timeFrameStream$,
       builder: (context, snapshot) {
         final data = snapshot.data ?? [DateTime.now(), DateTime.now()];
-        return FutureBuilder<List<InputEntry>>(
-            future: DataStorageHelper()
-                .getInputEntriesFor(data[0], data[1]),
+        return StreamBuilder<List<InputEntry>>(
+            stream: InputHoursUpdater.ihu.dbChangesStream$,
             builder: (context, snapshot2) {
               if (snapshot2.hasData) {
+                final dataList = Filter.filterEntries(snapshot2.data, startDate: data[0], endDate: data[1]);
                 List<charts.Series<InputSeries, String>> series = [];
 
                 for(int i = choiceArray.length-1; i >= 0; i--) {
                   if (choiceArray[i]) {
                     inputSeriesList[i] = _formatData(
-                        snapshot2.data.where((inputEntry) => inputEntry.inputType == DataStorageHelper().categories[i]).toList(), data);
+                        dataList.where((inputEntry) => inputEntry.inputType == DataStorageHelper().categories[i]).toList(), data);
 
                     series.add(charts.Series(
                       id: DataStorageHelper().categoryNames[i],

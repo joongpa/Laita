@@ -24,7 +24,7 @@ class StatisticsPageWidget extends StatelessWidget {
             stream: InputHoursUpdater.ihu.dbChangesStream$,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                final hours = Filter.getTotalInput(snapshot.data, this.inputType, startDate: stream.data[0], endDate: stream.data[1]);
+                final hours = Filter.getTotalInput(snapshot.data, category: this.inputType, startDate: stream.data[0], endDate: stream.data[1]);
                 String value = convertToTime(hours / countedDays);
                 return _getWidget(value);
               }

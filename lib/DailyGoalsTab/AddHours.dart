@@ -163,9 +163,7 @@ class _AddHoursState extends State<AddHours> {
   _buttonAction() {
     double totalTime = hours + minutes/60;
     InputEntry entry = InputEntry.now(description: description, inputType: numToInput(), duration: totalTime);
-    DataStorageHelper().insertInputEntry(entry).then((thing) {
-      InputHoursUpdater.ihu.update();
-    });
+    DataStorageHelper().insertInputEntry(entry);
     Navigator.pop(context);
   }
 

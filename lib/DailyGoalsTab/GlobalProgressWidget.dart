@@ -34,7 +34,7 @@ class GlobalProgressWidget extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           convertToTime(value),
-                          style: TextStyle(fontSize: 30.0),
+                          style: TextStyle(fontSize: 25.0),
                         ),
                         const Divider(
                           height: 2,

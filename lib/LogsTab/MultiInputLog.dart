@@ -10,13 +10,16 @@ class MultiInputLog extends StatefulWidget {
 }
 
 class _MultiInputLogState extends State<MultiInputLog> {
-  final controller = PageController(initialPage: 0);
+  PageController controller;
   int page = 0;
-  final daysBackViewable = 14;
+  final DateTime startingDatePage = DateTime(2020, 7, 1);
+  int itemCount = 0;
 
   @override
   void initState() {
     super.initState();
+    itemCount = daysBetween(startingDatePage, DateTime.now()) + 1;
+    controller = PageController(initialPage: itemCount);
     controller.addListener(() {
       if (controller.page.round() != page) {
         setState(() {
@@ -24,12 +27,15 @@ class _MultiInputLogState extends State<MultiInputLog> {
         });
       }
     });
+
+    InputHoursUpdater.ihu.updateStream$.listen((data) {
+      setState(() {});
+    });
   }
 
-
-  int debugInt = 0;
   @override
   Widget build(BuildContext context) {
+    itemCount = daysBetween(startingDatePage, DateTime.now()) + 1;
     return StreamBuilder(
       stream: InputHoursUpdater.ihu.updateStream$,
       builder: (context, snapshot) {
@@ -40,9 +46,9 @@ class _MultiInputLogState extends State<MultiInputLog> {
                   physics: NeverScrollableScrollPhysics(),
                   controller: controller,
                   scrollDirection: Axis.horizontal,
-                  itemCount: daysBackViewable,
+                  itemCount: itemCount,
                   itemBuilder: (context, page) {
-                    return InputLog(dateTime: daysAgo(page));
+                    return InputLog(dateTime: daysAgo(-page, startingDatePage));
                   }
               ),
             ),
@@ -68,10 +74,10 @@ class _MultiInputLogState extends State<MultiInputLog> {
                 children: <Widget>[
                   Expanded(
                     child: FlatButton(
-                      onPressed: page == daysBackViewable - 1
+                      onPressed: page == 0
                           ? null
                           : () {
-                        controller.jumpToPage(controller.page.round() + 1);
+                        controller.jumpToPage(controller.page.round() - 1);
                       },
                       child: const Icon(
                         Icons.chevron_left,
@@ -81,7 +87,7 @@ class _MultiInputLogState extends State<MultiInputLog> {
                   ),
                   Expanded(
                     child: Text(
-                      getDate(daysAgo(page)),
+                      getDate(daysAgo(-page, startingDatePage)),
                       //getDate(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -91,10 +97,10 @@ class _MultiInputLogState extends State<MultiInputLog> {
                   ),
                   Expanded(
                     child: FlatButton(
-                      onPressed: page == 0
+                      onPressed: page == daysBetween(startingDatePage, DateTime.now())
                           ? null
                           : () {
-                        controller.jumpToPage(controller.page.round() - 1);
+                        controller.jumpToPage(controller.page.round() + 1);
                       },
                       child: const Icon(
                         Icons.chevron_right,

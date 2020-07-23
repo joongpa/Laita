@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../Map.dart';
@@ -14,10 +15,6 @@ class InputHoursUpdater {
   BehaviorSubject<List<InputEntry>> _dbChanges = BehaviorSubject.seeded([]);
   Stream get dbChangesStream$ => _dbChanges.stream;
 
-  void update() {
-    _update.add(0.0);
-  }
-
   void addEntry(List<InputEntry> data) {
     _dbChanges.add(data);
   }
@@ -29,16 +26,20 @@ class InputHoursUpdater {
 
 class Filter {
 
-  static double getTotalInput(List<InputEntry> entries, Category category, {DateTime startDate, DateTime endDate}) {
-
-    startDate ??= DateTime.now();
-    endDate ??= daysAgo(-1, DateTime.now());
-
+  static double getTotalInput(List<InputEntry> entries, {Category category, DateTime startDate, DateTime endDate}) {
+    final tempList = filterEntries(entries, category: category, startDate: startDate, endDate: endDate);
     double sum = 0;
-    final tempList = entries.where((inputEntry) => (inputEntry.inputType == category) && inputEntry.dateTime.isAfter(startDate) && inputEntry.dateTime.isBefore(endDate)).toList();
+
     for(final item in tempList) {
       sum += item.duration;
     }
     return sum;
+  }
+
+  static List<InputEntry> filterEntries(List<InputEntry> entries, {Category category, DateTime startDate, DateTime endDate}) {
+    startDate ??= DateTime.now();
+    endDate ??= daysAgo(-1, DateTime.now());
+    final tempList = entries.where((inputEntry) => ((category != null) ? (inputEntry.inputType == category) : true) && (inputEntry.dateTime.isAtSameMomentAs(startDate) || inputEntry.dateTime.isAfter(startDate)) && inputEntry.dateTime.isBefore(endDate)).toList();
+    return tempList;
   }
 }
