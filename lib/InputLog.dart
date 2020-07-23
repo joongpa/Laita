@@ -49,7 +49,7 @@ class _InputLogState extends State<InputLog> {
                     padding: EdgeInsets.symmetric(horizontal: 8),
                     alignment: AlignmentDirectional.centerEnd,
                     color: Colors.red,
-                    child: Icon(
+                    child: const Icon(
                       Icons.delete,
                       color: Colors.white,
                     ),
@@ -178,7 +178,7 @@ class _MultiInputLogState extends State<MultiInputLog> {
                           : () {
                         controller.jumpToPage(controller.page.round() + 1);
                       },
-                      child: Icon(
+                      child: const Icon(
                         Icons.chevron_left,
                         size: 40,
                       ),
@@ -201,7 +201,7 @@ class _MultiInputLogState extends State<MultiInputLog> {
                           : () {
                         controller.jumpToPage(controller.page.round() - 1);
                       },
-                      child: Icon(
+                      child: const Icon(
                         Icons.chevron_right,
                         size: 40,
                       ),

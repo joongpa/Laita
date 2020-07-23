@@ -1,12 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/DataStorageHelper.dart';
 import 'package:miatracker/InputEntry.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
-
-import 'Map.dart' as constants;
+import '../Map.dart' as constants;
 
 class AddHours extends StatefulWidget {
   @override

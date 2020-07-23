@@ -1,18 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:miatracker/AddHours.dart';
+import 'package:miatracker/DailyGoalsTab/AddHours.dart';
+import 'package:miatracker/DailyGoalsTab/ProgressListWidget.dart';
 import 'package:miatracker/DataStorageHelper.dart';
 import 'package:miatracker/DrawerMenu.dart';
-import 'package:miatracker/GlobalProgressWidget.dart';
+import 'package:miatracker/DailyGoalsTab/GlobalProgressWidget.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/InputHoursUpdater.dart';
 import 'package:miatracker/Lifecycle.dart';
-import 'package:miatracker/Map.dart';
-import 'package:miatracker/StatisticsPageWidget.dart';
+import 'package:miatracker/StatsTab/DateTraverser.dart';
+import 'package:miatracker/StatsTab/TimeFrameModel.dart';
 
 import 'InputLog.dart';
-import 'StatisticsSummaryWidget.dart';
+import 'StatsTab/StatisticsSummaryWidget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -115,13 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
 //                else return GlobalProgressWidget(DataStorageHelper().categories[index]);
 //              }),
 //            ),
-            ListView.builder(
-              itemCount: DataStorageHelper().categoryNames.length + 1,
-              itemBuilder: (context, index) {
-                if(index == DataStorageHelper().categoryNames.length) return SizedBox(height: 200);
-                else return GlobalProgressWidget(DataStorageHelper().categories[index]);
-              }
-            ),
+            ProgressListWidget(),
             StatisticsSummaryWidget(),
             MultiInputLog(),
           ],
@@ -152,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: Visibility(
         visible: visible,
         child: FloatingActionButton(
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
           onPressed: () {
             Navigator.push(
               context,

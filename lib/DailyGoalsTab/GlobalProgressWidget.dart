@@ -1,33 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/DataStorageHelper.dart';
-import 'package:miatracker/Lifecycle.dart';
 import 'package:miatracker/Map.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
-import 'InputHoursUpdater.dart';
-
-class GlobalProgressWidget extends StatefulWidget {
+class GlobalProgressWidget extends StatelessWidget {
   final Category inputType;
-
-  GlobalProgressWidget(this.inputType);
-
-  @override
-  _GlobalProgressWidgetState createState() => _GlobalProgressWidgetState();
-}
-
-class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
+  final double value;
   final f = new NumberFormat('0.0');
 
-  double value = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    InputHoursUpdater.ihu.updateStream$.listen((data) {
-      _updateProgress();
-    });
-  }
+  GlobalProgressWidget(this.inputType, this.value);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +20,7 @@ class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
           child: Column(
             children: <Widget>[
               Text(
-                widget.inputType.name,
+                inputType.name,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
@@ -62,7 +44,7 @@ class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
                           endIndent: 0,
                         ),
                         Text(
-                          UsefulShit.convertToTime(DataStorageHelper().getGoalOfInput(widget.inputType) ?? 0.0),
+                          UsefulShit.convertToTime(DataStorageHelper().getGoalOfInput(inputType) ?? 0.0),
                           style: TextStyle(
                             fontSize: 20.0,
                             color: Colors.grey,
@@ -71,14 +53,14 @@ class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
                       ],
                     ),
                   ),
-                  Text(
+                  const Text(
                     "  Hrs",
                     style: TextStyle(
                       fontSize: 15.0,
                       color: Colors.grey,
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 17,
                   ),
                   Expanded(
@@ -87,9 +69,9 @@ class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
                       padding: const EdgeInsets.all(0.0),
                       child: LinearPercentIndicator(
                         lineHeight: 20.0,
-                        percent: _getPercent(value, DataStorageHelper().getGoalOfInput(widget.inputType)),
+                        percent: _getPercent(value, DataStorageHelper().getGoalOfInput(inputType)),
                         linearStrokeCap: LinearStrokeCap.roundAll,
-                        progressColor: _getPercent(value, DataStorageHelper().getGoalOfInput(widget.inputType)) == 1.0
+                        progressColor: _getPercent(value, DataStorageHelper().getGoalOfInput(inputType)) == 1.0
                             ? Colors.green
                             : Colors.blue,
                         backgroundColor: Color.fromRGBO(237, 237, 237, 1),
@@ -109,13 +91,5 @@ class _GlobalProgressWidgetState extends State<GlobalProgressWidget> {
     if(dom == null) dom = 0;
     if(dom == 0.0) return 0.0;
     return (num > dom) ? 1.0 : num/dom;
-  }
-
-  _updateProgress() {
-    DataStorageHelper().calculateInputToday(widget.inputType).then((data) {
-      setState(() {
-        value = data;
-      });
-    });
   }
 }

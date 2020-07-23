@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:miatracker/InputEntry.dart';
+import 'package:miatracker/InputHoursUpdater.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -28,6 +29,7 @@ class DataStorageHelper {
   init() async {
     _database = await initDb();
     _pref = await SharedPreferences.getInstance();
+    InputHoursUpdater.ihu.addEntry(await getInputEntries());
   }
 
   Future<Database> get database async {
@@ -64,38 +66,44 @@ class DataStorageHelper {
     final db = await database;
 
     var result = await db.query('$inputEntries');
-    return result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList();
-  }
-
-  Future<int> insertInputEntry(InputEntry inputEntry) async {
-    final db = await database;
-
-    int result = await db.insert("$inputEntries", inputEntry.toMap());
-    return result;
+    return result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList() ?? [];
   }
 
   Future<List<InputEntry>> getInputEntriesOnDay(DateTime dateTime) async {
-    String compare = DateFormat('yyyy-MM-dd').format(dateTime);
-    final db = await database;
-    var result = await db.query(inputEntries, where: '${this.date} = ?', whereArgs: [compare]);
-    return result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList();
+    return getInputEntriesFor(dateTime, daysAgo(-1, dateTime)) ?? [];
   }
 
   Future<double> calculateInputToday(Category inputType) async{
     return getTotalHoursInput(inputType, DateTime.now());
   }
 
+  Future<int> insertInputEntry(InputEntry inputEntry) async {
+    final db = await database;
+
+    await db.insert("$inputEntries", inputEntry.toMap()).then((data) async {
+      InputHoursUpdater.ihu.addEntry(await getInputEntries());
+      return data;
+    });
+    return 0;
+  }
+
   Future<int> updateInputEntry(InputEntry inputEntry) async {
     final db = await database;
 
-    int result = await db.update("$inputEntries", inputEntry.toMap(), where: '$id = ?', whereArgs: [inputEntry.id]);
-    return result;
+    await db.update("$inputEntries", inputEntry.toMap(), where: '$id = ?', whereArgs: [inputEntry.id]).then((data) async {
+      InputHoursUpdater.ihu.addEntry(await getInputEntries());
+      return data;
+    });
+    return 0;
   }
 
   Future<int> deleteInputEntry(int id) async {
     final db = await database;
-    int result = await db.delete(inputEntries, where: '${this.id} = ?', whereArgs: [id]);
-    return result;
+    await db.delete(inputEntries, where: '${this.id} = ?', whereArgs: [id]).then((data) async {
+      InputHoursUpdater.ihu.addEntry(await getInputEntries());
+      return data;
+    });
+    return 0;
   }
 
   void deleteAllInputEntries() async {
@@ -108,6 +116,7 @@ class DataStorageHelper {
     final end1 = DateFormat("yyyy-MM-dd").format(endDate ?? daysAgo(-1,startDate));
     final db = await database;
     final result = await db.query(inputEntries, columns: ['SUM($duration)'], where: '$date >= ? AND $date < ? AND ${this.inputType} = ?', whereArgs: [start1, end1, inputType.name]);
+
     return result[0]['SUM($duration)'] ?? 0;
   }
 

@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/DataStorageHelper.dart';
-import 'package:miatracker/InputHoursUpdater.dart';
-import 'package:miatracker/InputLog.dart';
 import 'package:miatracker/Map.dart';
 
 class StatisticsPageWidget extends StatelessWidget {
