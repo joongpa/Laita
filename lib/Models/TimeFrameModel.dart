@@ -24,6 +24,7 @@ extension TimeSpanExtension on TimeSpan {
 class TimeFrameModel {
   static final TimeFrameModel _model = TimeFrameModel._();
   TimeSpan _selectedTimeSpan = TimeSpan.Week;
+  DateTime realMonth;
   Map<TimeSpan, DateTime> _displayDates = Map<TimeSpan, DateTime>();
   BehaviorSubject<List<DateTime>> _timeFrame;
   Stream get timeFrameStream$ => _timeFrame.stream;
@@ -65,21 +66,29 @@ class TimeFrameModel {
     _timeFrame.add([_displayDates[_selectedTimeSpan], daysAgo(-_selectedTimeSpan.value, _displayDates[_selectedTimeSpan])]);
   }
 
-  DateTime getNearestSunday(
-      {@required bool isForward, @required DateTime dateTime}) {
-    for (int i = 1; i <= 7; i++) {
+  DateTime _getNearestSunday(
+      {@required bool isForward, @required DateTime dateTime, bool includeToday}) {
+    includeToday ??= false;
+    for (int i = includeToday ? 0 : 1; i <= 7; i++) {
       final testDay = daysAgo(isForward ? -i : i, dateTime);
       if (testDay.weekday == DateTime.sunday) return testDay;
     }
     return DateTime.now();
   }
 
-  DateTime monthsAgo(int months, DateTime dateTime) {
-    if (dateTime.day != 1 && months > 0) months = 0;
-    return DateTime(dateTime.year, dateTime.month - months, 1);
+  DateTime _monthsAgo(int months, DateTime dateTime, {bool monthStartsOnSunday = false}) {
+    if (dateTime.day != 1 && months > 0 && !monthStartsOnSunday) months = 0;
+
+    realMonth = monthsAgo(months, realMonth);
+
+    if(monthStartsOnSunday) {
+      return _getNearestSunday(isForward: false,
+          dateTime: realMonth, includeToday: true);
+    }
+    else return realMonth;
   }
 
-  DateTime halfYearsAgo(int years, DateTime dateTime) {
+  DateTime _halfYearsAgo(int years, DateTime dateTime) {
     for (int i = 1; i <= 6; i++) {
       final testDay = monthsAgo(years * 6, dateTime);
       if (testDay.month == DateTime.january || testDay.month == DateTime.july)
@@ -88,21 +97,21 @@ class TimeFrameModel {
     return DateTime.now();
   }
 
+  // ignore: missing_return
   DateTime getNewStartingDate(bool forward, DateTime dateTime, {TimeSpan timeSpan}) {
     timeSpan ??= _selectedTimeSpan;
 
     switch (timeSpan) {
       case TimeSpan.HalfYear:
-        return halfYearsAgo(forward ? -1 : 1, dateTime);
+        return _halfYearsAgo(forward ? -1 : 1, dateTime);
         break;
       case TimeSpan.Month:
-        return monthsAgo(forward ? -1 : 1, dateTime);
+        return _monthsAgo(forward ? -1 : 1, dateTime, monthStartsOnSunday: true);
         break;
       case TimeSpan.Week:
-        return getNearestSunday(isForward: forward, dateTime: dateTime);
+        return _getNearestSunday(isForward: forward, dateTime: dateTime);
         break;
     }
-    return DateTime.now();
   }
 
 

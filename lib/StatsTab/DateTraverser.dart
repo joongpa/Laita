@@ -70,7 +70,7 @@ class DateTraverser extends StatelessWidget {
         shownDate = 'Week of ' + getDate(dates[0]);
         break;
       case TimeSpan.Month:
-        shownDate = getDate(dates[0], showDay: false);
+        shownDate = getDate(daysAgo(-7, dates[0]), showDay: false);
         break;
       case TimeSpan.HalfYear:
         if(dates[0].month == 1) shownDate = '1st Half of ${dates[0].year}';

@@ -47,13 +47,13 @@ String getDay(int weekday) {
   return days[weekday];
 }
 
-String getDate(DateTime date, {bool showDay, bool showYear, bool showMonth}) {
+String getDate(DateTime date, {bool showDay = true, bool showYear = true, bool showMonth = true}) {
   String year = '';
-  year = (showYear ?? true) ? ', ${date.year}' : '';
-  if((showMonth ?? true) && (showYear ?? true) && !(showDay ?? true))
+  year = (showYear) ? ', ${date.year}' : '';
+  if((showMonth) && (showYear) && !(showDay))
     year = date.year.toString();
   int month = date.month;
-  String day = (showDay ?? true) ? '${date.day}' : '';
+  String day = (showDay) ? '${date.day}' : '';
 
   return '${(showMonth ?? true) ? getMonth(month) + ' ' : ''}$day$year'.trim();
 }
@@ -69,6 +69,10 @@ bool sameDay(DateTime date, DateTime date2) {
   return (date.year == date2.year) && (date.month == date2.month) && (date.day == date2.day);
 }
 
+bool sameMonth(DateTime date, DateTime date2) {
+  return (date.year == date2.year) && (date.month == date2.month);
+}
+
 DateTime daysAgo(int days, [DateTime dateTime]) {
   dateTime = dateTime ?? DateTime.now();
   return DateTime(dateTime.year, dateTime.month, dateTime.day - days);
@@ -76,6 +80,7 @@ DateTime daysAgo(int days, [DateTime dateTime]) {
 
 DateTime monthsAgo(int months, [DateTime dateTime]) {
   dateTime = dateTime ?? DateTime.now();
+  if (dateTime.day != 1 && months > 0) months = 0;
   return DateTime(dateTime.year, dateTime.month - months, 1);
 }
 

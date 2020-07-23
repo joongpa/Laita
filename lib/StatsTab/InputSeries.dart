@@ -1,7 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:charts_flutter/flutter.dart' as charts;
-
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/DataStorageHelper.dart';
@@ -23,18 +21,20 @@ class InputSeries {
 
 class InputChart extends StatelessWidget {
   final customTickFormatter =
-  charts.BasicNumericTickFormatterSpec((num value) => '${UsefulShit.convertToTime(value/4)}');
+  charts.BasicNumericTickFormatterSpec((num value) {
+    final isHalfHour = (value/4) % 1 != 0;
+    return isHalfHour ? '' : '${UsefulShit.convertToTime(value/4)}';
+  });
 
   final List<bool> choiceArray;
   final List<Color> colorArray;
 
-  final List<double> _maxValue = [0];
+  List<List<InputSeries>> inputSeriesList = List<List<InputSeries>>(DataStorageHelper().categoryNames.length);
 
   InputChart({
     @required this.choiceArray,
     this.colorArray
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -47,17 +47,16 @@ class InputChart extends StatelessWidget {
                 .getInputEntriesFor(data[0], data[1]),
             builder: (context, snapshot2) {
               if (snapshot2.hasData) {
-                _maxValue[0] = 0;
                 List<charts.Series<InputSeries, String>> series = [];
 
                 for(int i = choiceArray.length-1; i >= 0; i--) {
                   if (choiceArray[i]) {
-                    List<InputSeries> tempList = _formatData(
+                    inputSeriesList[i] = _formatData(
                         snapshot2.data.where((inputEntry) => inputEntry.inputType == DataStorageHelper().categories[i]).toList(), data);
 
                     series.add(charts.Series(
                       id: DataStorageHelper().categoryNames[i],
-                      data: tempList,
+                      data: inputSeriesList[i],
                       domainFn: (InputSeries series, _) => series.day,
                       measureFn: (InputSeries series, _) => series.hours,
                       colorFn: (_, __) =>
@@ -71,7 +70,7 @@ class InputChart extends StatelessWidget {
                   barGroupingType: charts.BarGroupingType.stacked,
                   primaryMeasureAxis: charts.NumericAxisSpec(
                     tickFormatterSpec: customTickFormatter,
-                    tickProviderSpec: charts.BasicNumericTickProviderSpec(/*desiredTickCount: getTicksFromMaxValue(),*/ dataIsInWholeNumbers: true),
+                    tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredTickCount: getTicksFromMaxValue(inputSeriesList), dataIsInWholeNumbers: true),
                   ),
                 );
               } else
@@ -96,7 +95,12 @@ class InputChart extends StatelessWidget {
         final length = 5;
         tempList = List<InputSeries>.generate(
             length,
-            (i) => InputSeries(day: '${getDate(daysAgo(-i * 7, data[0]), showYear: false)}-${getDate(daysAgo((-i-1) * 7 + 1, data[0]), showYear: false, showMonth: (i == length - 1))}', hours: 0));
+            (i) {
+              final date1 = daysAgo(-i * 7, data[0]);
+              final date2 = daysAgo((-i-1) * 7 + 1, data[0]);
+              bool showSecondMonth = !sameMonth(date1, date2);
+              return InputSeries(day: '${getDate(date1, showYear: false)}-${getDate(date2, showYear: false, showMonth: showSecondMonth)}', hours: 0);
+            });
         for (final inputEntry in list) {
           final tempDate = inputEntry.dateTime;
           for (int i = 0; i < tempList.length; i ++) {
@@ -105,7 +109,7 @@ class InputChart extends StatelessWidget {
             }
           }
         }
-        //_maxValue[0] = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
+
         return tempList;
         break;
 
@@ -125,7 +129,7 @@ class InputChart extends StatelessWidget {
             }
           }
         }
-        //_maxValue[0] = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
+
         return tempList;
         break;
     }
@@ -137,21 +141,29 @@ class InputChart extends StatelessWidget {
         }
       }
     }
-    //_maxValue[0] = tempList.map<double>((i) => i.hours/4).toList().reduce(math.max);
+
     return tempList;
   }
 
-//  int getTicksFromMaxValue(List<charts.Series<InputSeries, String>> entryList) {
-//    List<double> doubleList= [0,0,0];
-//
-//    for(int i = 0; i < entryList.length; i++) {
-//      if(entryList[i].) {
-//        for(int j = 0; j < entryList[j].length; j++){
-//          doubleList[i] += entryList[j][i].hours;
-//        }
-//      }
-//    }
-//    _maxValue[0] = math.max(_maxValue[0], doubleList.reduce(math.max));
-//    return math.max(5, _maxValue[0].ceil() + 1);
-//  }
+  int getTicksFromMaxValue(List<List<InputSeries>> entryList) {
+    int timeInterval = 1;
+
+    for(int i = 0; i < entryList.length; i++) {
+      if(entryList[0] != null) {
+        timeInterval = entryList[0].length;
+        break;
+      }
+    }
+
+    List<double> doubleList= List.generate(timeInterval, (i) => 0);
+
+    for(int i = 0; i < timeInterval; i++) {
+      for(int j = 0; j < entryList.length; j++){
+        if(entryList[j] != null)
+          doubleList[i] += entryList[j][i].hours;
+      }
+    }
+    double result = doubleList.reduce(math.max);
+    return math.max(5, (result/2).ceil() + 1);
+  }
 }
