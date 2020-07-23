@@ -2,14 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/DailyGoalsTab/AddHours.dart';
 import 'package:miatracker/DailyGoalsTab/ProgressListWidget.dart';
-import 'package:miatracker/DataStorageHelper.dart';
+import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/DrawerMenu.dart';
 import 'package:miatracker/DailyGoalsTab/GlobalProgressWidget.dart';
 import 'package:flutter/services.dart';
-import 'package:miatracker/InputHoursUpdater.dart';
-import 'package:miatracker/Lifecycle.dart';
+import 'package:miatracker/Models/InputHoursUpdater.dart';
+import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/StatsTab/DateTraverser.dart';
-import 'package:miatracker/StatsTab/TimeFrameModel.dart';
+import 'package:miatracker/Models/TimeFrameModel.dart';
 
 import 'InputLog.dart';
 import 'StatsTab/StatisticsSummaryWidget.dart';

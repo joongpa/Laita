@@ -48,11 +48,14 @@ String getDay(int weekday) {
 }
 
 String getDate(DateTime date, {bool showDay, bool showYear, bool showMonth}) {
-  String year = (showYear ?? true) ? ', ${date.year}' : '';
+  String year = '';
+  year = (showYear ?? true) ? ', ${date.year}' : '';
+  if((showMonth ?? true) && (showYear ?? true) && !(showDay ?? true))
+    year = date.year.toString();
   int month = date.month;
   String day = (showDay ?? true) ? '${date.day}' : '';
 
-  return '${(showMonth ?? true) ? getMonth(month) : ''} $day$year'.trim();
+  return '${(showMonth ?? true) ? getMonth(month) + ' ' : ''}$day$year'.trim();
 }
 
 

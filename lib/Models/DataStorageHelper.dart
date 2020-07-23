@@ -1,11 +1,11 @@
 import 'package:intl/intl.dart';
-import 'package:miatracker/InputEntry.dart';
-import 'package:miatracker/InputHoursUpdater.dart';
+import 'package:miatracker/Models/InputEntry.dart';
+import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-import 'Map.dart';
+import '../Map.dart';
 
 class DataStorageHelper {
   DataStorageHelper._();

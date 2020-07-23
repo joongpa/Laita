@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:miatracker/InputHoursUpdater.dart';
+import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Map.dart';
 
-import '../DataStorageHelper.dart';
-import '../InputEntry.dart';
+import '../Models/DataStorageHelper.dart';
+import '../Models/InputEntry.dart';
 import 'GlobalProgressWidget.dart';
 
 class ProgressListWidget extends StatelessWidget {

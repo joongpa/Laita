@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
-import 'package:miatracker/DataStorageHelper.dart';
+import 'package:miatracker/Models/DataStorageHelper.dart';
 
-import 'Map.dart';
+import '../Map.dart';
 
 class InputEntry {
   int id;

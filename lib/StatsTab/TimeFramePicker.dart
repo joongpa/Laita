@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'TimeFrameModel.dart';
+import '../Models/TimeFrameModel.dart';
 
 class TimeFramePicker extends StatefulWidget {
   @override

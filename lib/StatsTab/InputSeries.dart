@@ -4,10 +4,10 @@ import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:miatracker/DataStorageHelper.dart';
-import 'package:miatracker/StatsTab/TimeFrameModel.dart';
+import 'package:miatracker/Models/DataStorageHelper.dart';
+import 'package:miatracker/Models/TimeFrameModel.dart';
 
-import '../InputEntry.dart';
+import '../Models/InputEntry.dart';
 import '../Map.dart';
 
 class InputSeries {

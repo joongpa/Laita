@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:miatracker/DataStorageHelper.dart';
-import 'package:miatracker/InputEntry.dart';
-import 'package:miatracker/InputHoursUpdater.dart';
+import 'package:miatracker/Models/DataStorageHelper.dart';
+import 'package:miatracker/Models/InputEntry.dart';
+import 'package:miatracker/Models/InputHoursUpdater.dart';
 import '../Map.dart' as constants;
 
 class AddHours extends StatefulWidget {

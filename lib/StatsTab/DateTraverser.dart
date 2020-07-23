@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Map.dart';
 
-import 'TimeFrameModel.dart';
+import '../Models/TimeFrameModel.dart';
 
 class DateTraverser extends StatelessWidget {
   @override

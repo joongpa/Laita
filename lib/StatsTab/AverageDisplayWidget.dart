@@ -1,9 +1,9 @@
 
 
 import 'package:flutter/material.dart';
-import 'package:miatracker/StatsTab/TimeFrameModel.dart';
+import 'package:miatracker/Models/TimeFrameModel.dart';
 
-import '../DataStorageHelper.dart';
+import '../Models/DataStorageHelper.dart';
 import '../Map.dart';
 import 'StatisticsPageWidget.dart';
 
