@@ -61,7 +61,7 @@ class _InputLogState extends State<InputLog> {
                         subtitle: Text(inputList[index].description),
                         leading: Text(inputList[index].inputType.name),
                         title: Text(
-                            '${UsefulShit.convertToTime(inputList[index].duration)}'),
+                            '${convertToTime(inputList[index].duration)}'),
                         trailing: Text(inputList[index].time),
                       )),
                 );
@@ -71,7 +71,7 @@ class _InputLogState extends State<InputLog> {
                     subtitle: Text(inputList[index].description),
                     leading: Text(inputList[index].inputType.name),
                     title: Text(
-                        '${UsefulShit.convertToTime(inputList[index].duration)}'),
+                        '${convertToTime(inputList[index].duration)}'),
                     trailing: Text(inputList[index].time),
                   ));
             },

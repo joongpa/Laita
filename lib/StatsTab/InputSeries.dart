@@ -23,7 +23,7 @@ class InputChart extends StatelessWidget {
   final customTickFormatter =
   charts.BasicNumericTickFormatterSpec((num value) {
     final isHalfHour = (value/4) % 1 != 0;
-    return isHalfHour ? '' : '${UsefulShit.convertToTime(value/4)}';
+    return isHalfHour ? '' : '${convertToTime(value/4)}';
   });
 
   final List<bool> choiceArray;

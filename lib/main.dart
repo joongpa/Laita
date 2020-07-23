@@ -7,6 +7,7 @@ import 'package:miatracker/DrawerMenu.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
+import 'package:miatracker/Models/TimeFrameModel.dart';
 
 import 'LogsTab/MultiInputLog.dart';
 import 'StatsTab/StatisticsSummaryWidget.dart';

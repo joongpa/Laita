@@ -16,48 +16,47 @@ class Category {
 }
 
 String getMonth(int month) {
-  Map<int,String> months = {
-    1:'Jan',
-    2:'Feb',
-    3:'Mar',
-    4:'Apr',
-    5:'May',
-    6:'Jun',
-    7:'Jul',
-    8:'Aug',
-    9:'Sep',
-    10:'Oct',
-    11:'Nov',
-    12:'Dec',
+  Map<int, String> months = {
+    1: 'Jan',
+    2: 'Feb',
+    3: 'Mar',
+    4: 'Apr',
+    5: 'May',
+    6: 'Jun',
+    7: 'Jul',
+    8: 'Aug',
+    9: 'Sep',
+    10: 'Oct',
+    11: 'Nov',
+    12: 'Dec',
   };
 
   return months[month];
 }
 
 String getDay(int weekday) {
-  Map<int,String> days = {
-    1:'Mon',
-    2:'Tue',
-    3:'Wed',
-    4:'Thurs',
-    5:'Fri',
-    6:'Sat',
-    7:'Sun',
+  Map<int, String> days = {
+    1: 'Mon',
+    2: 'Tue',
+    3: 'Wed',
+    4: 'Thurs',
+    5: 'Fri',
+    6: 'Sat',
+    7: 'Sun',
   };
   return days[weekday];
 }
 
-String getDate(DateTime date, {bool showDay = true, bool showYear = true, bool showMonth = true}) {
+String getDate(DateTime date,
+    {bool showDay = true, bool showYear = true, bool showMonth = true}) {
   String year = '';
   year = (showYear) ? ', ${date.year}' : '';
-  if((showMonth) && (showYear) && !(showDay))
-    year = date.year.toString();
+  if ((showMonth) && (showYear) && !(showDay)) year = date.year.toString();
   int month = date.month;
   String day = (showDay) ? '${date.day}' : '';
 
   return '${(showMonth ?? true) ? getMonth(month) + ' ' : ''}$day$year'.trim();
 }
-
 
 int daysBetween(DateTime d1, DateTime d2) {
   d1 = DateTime.utc(d1.year, d1.month, d1.day);
@@ -66,7 +65,9 @@ int daysBetween(DateTime d1, DateTime d2) {
 }
 
 bool sameDay(DateTime date, DateTime date2) {
-  return (date.year == date2.year) && (date.month == date2.month) && (date.day == date2.day);
+  return (date.year == date2.year) &&
+      (date.month == date2.month) &&
+      (date.day == date2.day);
 }
 
 bool sameMonth(DateTime date, DateTime date2) {
@@ -85,16 +86,15 @@ DateTime monthsAgo(int months, [DateTime dateTime]) {
 }
 
 class UsefulShit {
-
   UsefulShit._();
 
   static final doubleDecimalFormat = NumberFormat("0.00");
   static final leadingZeroFormat = NumberFormat("00");
+}
 
-  static String convertToTime(double time) {
-    int hours = time.floor();
-    int minutes = ((time % 1) * 60).round();
+String convertToTime(double time) {
+  int hours = time.floor();
+  int minutes = ((time % 1) * 60).round();
 
-    return '$hours:${leadingZeroFormat.format(minutes)}';
-  }
+  return '$hours:${NumberFormat("00").format(minutes)}';
 }
