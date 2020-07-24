@@ -1,19 +1,17 @@
 MIA Input Tracker Todo List (Not in any particular order of importance)
 
 - Code refactoring
-    - Use themes
+    - Use themes (and dark mode)
     
 - Statistics page
     - streaks for meeting daily goals
     - percentage of days meeting daily goals
     - Lifetime summaries
- - Allow user to add their own categories
-    - Specify whether category is hours-based or quantity-based
-- DARK MODE!!!!
+- Specify whether category is hours-based or quantity-based
 - Move hours and minutes sliders to the bottom for better ergonomics
+- Allow user to specify date that something was done
 - Log page
-    - confirm delete log entry
-    - undo delete log entry
+    - Calendar for navigation
 - Firebase support
 - Goal page
     - Current goals should be displayed rather than just an empty text field
