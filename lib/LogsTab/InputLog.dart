@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:miatracker/LogsTab/ConfirmDialog.dart';
 import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 
@@ -41,7 +42,12 @@ class InputLog extends StatelessWidget {
                       ),
                     ),
                     key: UniqueKey(),
-                    onDismissed: (dis) => DataStorageHelper().deleteInputEntry(inputEntries[index].id),
+                    confirmDismiss: (disDirection) async {
+                      return await asyncConfirmDialog(context);
+                    },
+                    onDismissed: (dis) {
+                      DataStorageHelper().deleteInputEntry(inputEntries[index].id);
+                    },
                     child: Card(
                         child: ListTile(
                           subtitle: Text(inputEntries[index].description),
@@ -60,3 +66,5 @@ class InputLog extends StatelessWidget {
     );
   }
 }
+
+
