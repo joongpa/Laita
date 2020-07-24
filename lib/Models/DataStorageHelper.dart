@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../Map.dart';
+import 'Entry.dart';
 
 class DataStorageHelper {
   DataStorageHelper._();
@@ -23,11 +25,16 @@ class DataStorageHelper {
   final inputType = "inputType";
   final duration = "duration";
 
+  final goalEntries = 'goalEntries';
+  final amount = "duration";
+
   Database _database;
+  Database _goalsDatabase;
   SharedPreferences _pref;
 
   init() async {
     _database = await initDb();
+    _goalsDatabase = await initGoalsDb();
     _pref = await SharedPreferences.getInstance();
     InputHoursUpdater.ihu.addEntry(await getInputEntries());
   }
@@ -36,6 +43,12 @@ class DataStorageHelper {
     if (_database != null) return _database;
     _database = await initDb();
     return _database;
+  }
+
+  Future<Database> get goalsDatabase async {
+    if(_goalsDatabase != null) return _goalsDatabase;
+    _goalsDatabase = await initGoalsDb();
+    return _goalsDatabase;
   }
 
   Future<Database> initDb() async {
@@ -62,48 +75,65 @@ class DataStorageHelper {
     );
   }
 
+  Future<Database> initGoalsDb() async {
+    var databasePath = await getDatabasesPath();
+    String path = join(databasePath, 'GoalEntries.db');
+
+    return await openDatabase(
+        path,
+        version: 1,
+        onCreate: (Database db, int version) async {
+          await db.execute(
+              '''
+            CREATE TABLE $goalEntries(
+              $id INTEGER PRIMARY KEY AUTOINCREMENT,
+              $date TEXT,
+              $time TEXT,
+              $inputType TEXT,
+              $duration REAL
+            )
+          '''
+          );
+        }
+    );
+  }
+
   Future<List<InputEntry>> getInputEntries() async {
     final db = await database;
 
-    var result = await db.query('$inputEntries');
+    var result = await db.query(inputEntries);
     return result.map<InputEntry>((c) => InputEntry.fromMap(c)).toList() ?? [];
-  }
-
-  Future<List<InputEntry>> getInputEntriesOnDay(DateTime dateTime) async {
-    return getInputEntriesFor(dateTime, daysAgo(-1, dateTime)) ?? [];
-  }
-
-  Future<double> calculateInputToday(Category inputType) async{
-    return getTotalHoursInput(inputType, DateTime.now());
   }
 
   Future<int> insertInputEntry(InputEntry inputEntry) async {
     final db = await database;
 
-    await db.insert("$inputEntries", inputEntry.toMap()).then((data) async {
+    await db.insert(inputEntries, inputEntry.toMap()).then((data) async {
       InputHoursUpdater.ihu.addEntry(await getInputEntries());
       return data;
     });
     return 0;
   }
 
-  Future<int> updateInputEntry(InputEntry inputEntry) async {
-    final db = await database;
-
-    await db.update("$inputEntries", inputEntry.toMap(), where: '$id = ?', whereArgs: [inputEntry.id]).then((data) async {
-      InputHoursUpdater.ihu.addEntry(await getInputEntries());
-      return data;
-    });
-    return 0;
-  }
-
-  Future<int> deleteInputEntry(int id) async {
-    final db = await database;
-    await db.delete(inputEntries, where: '${this.id} = ?', whereArgs: [id]).then((data) async {
-      InputHoursUpdater.ihu.addEntry(await getInputEntries());
-      return data;
-    });
-    return 0;
+  Future<int> deleteEntry(Entry entry) async {
+    int id = entry.id;
+    if(entry is InputEntry) {
+      final db = await database;
+      await db.delete(inputEntries, where: '${this.id} = ?', whereArgs: [id])
+          .then((data) async {
+        InputHoursUpdater.ihu.addEntry(await getInputEntries());
+        return data;
+      });
+      return 0;
+    } else {
+      final db = await goalsDatabase;
+      await db.delete(goalEntries, where: '${this.id} = ?', whereArgs: [id]).then((data) async {
+        InputHoursUpdater.ihu.addGoalEntry(await getGoalHistory());
+        _setPrefsGoal(entry.inputType, await getLastGoalEntry(entry.inputType));
+        return data;
+      });
+      return 0;
+    }
   }
 
   void deleteAllInputEntries() async {
@@ -135,8 +165,35 @@ class DataStorageHelper {
     return _pref.get('goals' + inputType.name) ?? 0;
   }
 
-  void setGoalOfInput(Category inputType, double hours) {
+  Future<double> getLastGoalEntry(Category inputType) async {
+    final db = await goalsDatabase;
+
+    final result = await db.query(goalEntries, where: '${this.inputType} = ?', whereArgs: [inputType.name], orderBy: '$id DESC', limit: 1);
+    if(result.length == 0) return 0.0;
+    return result.map<double>((i) => i['$amount']).first ?? 0.0;
+  }
+
+  Future<int> setGoalOfInput(Category inputType, double hours) async{
+    _setPrefsGoal(inputType, hours);
+
+    final db = await goalsDatabase;
+
+    final goalEntry = GoalEntry.now(inputType: inputType, amount: hours);
+    db.insert(goalEntries, goalEntry.toMap()).then((data) async {
+      InputHoursUpdater.ihu.addGoalEntry(await getGoalHistory());
+      return data;
+    });
+    return 0;
+  }
+
+  void _setPrefsGoal(Category inputType, double hours) {
     _pref.setDouble('goals' + inputType.name, hours);
+  }
+
+  Future<List<GoalEntry>> getGoalHistory() async {
+    final db = await goalsDatabase;
+    final result = await db.query(goalEntries);
+    return result.map<GoalEntry>((i) => GoalEntry.fromMap(i)).toList() ?? [];
   }
 
   Category getCategory(String name) {
@@ -202,7 +259,7 @@ class DataStorageHelper {
 //            inputType = InputType.Anki;
 //            break;
 //        }
-        final inputEntry = InputEntry(dateTime: daysAgo(i), duration: 1.0, inputType: inputType, description: "yeetem");
+        final inputEntry = InputEntry(dateTime: daysAgo(i), amount: 1.0, inputType: inputType, description: "yeetem");
         insertInputEntry(inputEntry);
         print(inputEntry);
         await new Future.delayed(const Duration(milliseconds: 100));

@@ -24,7 +24,7 @@ class ProgressListWidget extends StatelessWidget {
 
               for(final inputEntries in todayEntries) {
                 if(inputEntries.inputType == DataStorageHelper().categories[index])
-                  value += inputEntries.duration;
+                  value += inputEntries.amount;
               }
               return GlobalProgressWidget(DataStorageHelper().categories[index], value);
             }

@@ -2,30 +2,19 @@ import 'package:intl/intl.dart';
 import 'package:miatracker/Models/DataStorageHelper.dart';
 
 import '../Map.dart';
+import 'Entry.dart';
 
-class InputEntry {
-  int id;
-  DateTime dateTime;
-  String date;
-  String time;
+class InputEntry extends Entry{
   String description;
-  Category inputType;
-  double duration;
 
-  InputEntry({this.id, this.dateTime, this.description, this.inputType, this.duration}) {
-    date = DateFormat("yyyy-MM-dd").format(dateTime);
-    time = DateFormat("HH:mm").format(dateTime);
-  }
+  InputEntry({id, dateTime, this.description, inputType, amount}) :
+        super(id: id, dateTime: dateTime, inputType: inputType, amount: amount);
 
-  InputEntry.now({this.id, this.description, this.inputType, this.duration}) {
-    dateTime = DateTime.now();
-    date = DateFormat("yyyy-MM-dd").format(dateTime);
-    time = DateFormat("HH:mm").format(dateTime);
-  }
+  InputEntry.now({id, this.description, inputType, amount}) :
+        super.now(id: id, inputType: inputType, amount: amount);
 
-  InputEntry.explicitTime({this.id, this.date, this.time, this.description, this.inputType, this.duration}) {
-    dateTime = DateTime.parse('$date $time');
-  }
+  InputEntry.explicitTime({id, date, time, this.description, inputType, amount}) :
+        super.explicitTime(id: id, date: date, time: time, inputType: inputType, amount: amount);
 
   factory InputEntry.fromMap(Map<String,dynamic> map) => InputEntry.explicitTime(
     id: map['id'],
@@ -33,26 +22,15 @@ class InputEntry {
     time: map['time'],
     description: map['description'],
     inputType: DataStorageHelper().getCategory(map['inputType']),
-    duration: map['duration']
+    amount: map['duration']
   );
 
+  @override
   Map<String,dynamic> toMap() => {
     "date": date,
     "time": time,
     "description": description,
     "inputType": inputType.name,
-    "duration": duration
+    "duration": amount
   };
-
-//  static InputType _stringToEnum(String string) {
-//    switch(string) {
-//      case "Reading":
-//        return InputType.Reading;
-//      case "Listening":
-//        return InputType.Listening;
-//      case "Anki":
-//        return InputType.Anki;
-//    }
-//    return null;
-//  }
 }

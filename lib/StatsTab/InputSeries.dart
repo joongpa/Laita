@@ -106,7 +106,7 @@ class InputChart extends StatelessWidget {
           final tempDate = inputEntry.dateTime;
           for (int i = 0; i < tempList.length; i ++) {
             if (tempDate.isAfter(daysAgo(-i * 7, data[0])) && tempDate.isBefore(daysAgo((-i-1) * 7, data[0]))) {
-              tempList[i].add(4 * inputEntry.duration / 6);
+              tempList[i].add(4 * inputEntry.amount / 6);
             }
           }
         }
@@ -126,7 +126,7 @@ class InputChart extends StatelessWidget {
 
             if ((tempDate.isAtSameMomentAs(monthStart) || tempDate.isAfter(monthStart)) && tempDate.isBefore(monthEnd)) {
               final monthLength = daysBetween(monthStart, monthEnd);
-              tempList[i].add(4 * inputEntry.duration / (monthLength));
+              tempList[i].add(4 * inputEntry.amount / (monthLength));
             }
           }
         }
@@ -138,7 +138,7 @@ class InputChart extends StatelessWidget {
       final tempDate = inputEntry.dateTime;
       for (int i = 0; i < tempList.length; i++) {
         if (sameDay(daysAgo(-i, data[0]), tempDate)) {
-          tempList[i].add(4 * inputEntry.duration);
+          tempList[i].add(4 * inputEntry.amount);
         }
       }
     }
