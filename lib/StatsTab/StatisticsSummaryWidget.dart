@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
+import 'package:miatracker/StatsTab/AccuracyDisplayWidget.dart';
 import 'package:miatracker/StatsTab/AverageDisplayWidget.dart';
 import 'package:miatracker/StatsTab/FullGraphWidget.dart';
+import 'package:miatracker/StatsTab/SingleAccuracyWidget.dart';
 import 'package:miatracker/StatsTab/TimeFramePicker.dart';
 import 'DateTraverser.dart';
 
@@ -47,6 +50,11 @@ class StatisticsSummaryWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: AverageDisplayWidget(),
+            ),
+            const SizedBox(height: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25.0),
+              child: AccuracyDisplayWidget(),
             ),
           ],
         );

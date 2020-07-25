@@ -46,7 +46,7 @@ class DateTraverser extends StatelessWidget {
               ),
               Expanded(
                 child: FlatButton(
-                  onPressed: data[1].isBefore(daysAgo(0))
+                  onPressed: data[1].isBefore(daysAgo(-1, daysAgo(0)))
                       ? () {
                     TimeFrameModel().shiftTimeFrameFuture();
                   } : null,

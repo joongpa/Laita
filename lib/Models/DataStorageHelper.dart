@@ -37,6 +37,7 @@ class DataStorageHelper {
     _goalsDatabase = await initGoalsDb();
     _pref = await SharedPreferences.getInstance();
     InputHoursUpdater.ihu.addEntry(await getInputEntries());
+    InputHoursUpdater.ihu.addGoalEntry(await getGoalHistory());
   }
 
   Future<Database> get database async {

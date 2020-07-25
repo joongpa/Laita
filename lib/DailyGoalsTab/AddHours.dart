@@ -4,6 +4,7 @@ import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import '../Map.dart' as constants;
+import 'DatePicker.dart';
 
 class AddHours extends StatefulWidget {
   @override
@@ -12,12 +13,19 @@ class AddHours extends StatefulWidget {
 
 class _AddHoursState extends State<AddHours> {
   NumberFormat f = NumberFormat("#");
+  DateTime dateTime;
   double hours = 0.0;
   double minutes = 0.0;
   String description = "";
   bool buttonDisabled = true;
 
   List<bool> _selections = [true, false, false];
+
+  @override
+  void initState(){
+    super.initState();
+    dateTime = DateTime.now();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +44,19 @@ class _AddHoursState extends State<AddHours> {
                 ),
                 onChanged: (s) {
                   description = s;
+                },
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              DatePicker(
+                selectedDate: dateTime,
+                onChanged: (dt) {
+                  setState((){
+                    final duration = Duration(hours: DateTime.now().hour, minutes: DateTime.now().minute);
+                    dateTime = dt;
+                    dateTime.add(duration);
+                  });
                 },
               ),
               SizedBox(
@@ -162,7 +183,7 @@ class _AddHoursState extends State<AddHours> {
 
   _buttonAction() {
     double totalTime = hours + minutes/60;
-    InputEntry entry = InputEntry.now(description: description, inputType: numToInput(), amount: totalTime);
+    InputEntry entry = InputEntry(description: description, dateTime: dateTime, inputType: numToInput(), amount: totalTime);
     DataStorageHelper().insertInputEntry(entry);
     Navigator.pop(context);
   }

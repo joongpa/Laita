@@ -88,6 +88,7 @@ DateTime monthsAgo(int months, [DateTime dateTime]) {
 class UsefulShit {
   UsefulShit._();
 
+  static final singleDecimalFormat = NumberFormat("0.0");
   static final doubleDecimalFormat = NumberFormat("0.00");
   static final leadingZeroFormat = NumberFormat("00");
 }
