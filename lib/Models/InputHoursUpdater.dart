@@ -65,30 +65,41 @@ class Filter {
     return totalsPerDay;
   }
 
+
+  //currently iterates through entire list for each day
+  //instead, it should go to first instance of goal entry before given time-frame
   static List<double> goalsPerDay(List<GoalEntry> entries, {@required Category category, @required DateTime startDate, @required DateTime endDate}) {
     final List<double> totalsPerDay = List.generate(daysBetween(startDate, endDate), (i) => 0.0);
     entries = filterEntries(entries, category: category);
+    entries.sort();
 
     int index = 0;
-    for(final goalEntry in entries) {
-      int daysAfterGoal = 0;
-      bool noGoalEntry = filterEntries(entries, category: category, startDate: daysAgo(-1, goalEntry.dateTime), endDate: daysAgo(-2, goalEntry.dateTime)).length == 0;
-      while(noGoalEntry) {
-        if(daysAgo(-daysAfterGoal, goalEntry.dateTime).isBefore(startDate)) {
-          noGoalEntry = filterEntries(entries, category: category, startDate: daysAgo(-daysAfterGoal - 1, goalEntry.dateTime), endDate: daysAgo(-daysAfterGoal - 2, goalEntry.dateTime)).length == 0;
-          daysAfterGoal++;
+
+    if(entries[0].dateTime.isAfter(startDate))
+      index = daysBetween(entries[0].dateTime, startDate);
+
+    for(int i = 0; i < entries.length; i++) {
+      final goalEntry = entries[i];
+
+      if(i < entries.length - 1) {
+        if(sameDay(goalEntry.dateTime, entries[i+1].dateTime)) {
           continue;
         }
-        if(index == totalsPerDay.length) break;
+      }
 
+      int daysAfterGoal = 0;
+      bool noGoalEntry = true;
 
-        noGoalEntry = filterEntries(entries, category: category, startDate: daysAgo(-daysAfterGoal - 1, goalEntry.dateTime), endDate: daysAgo(-daysAfterGoal - 2, goalEntry.dateTime)).length == 0;
-        totalsPerDay[index] = goalEntry.amount;
+      while(noGoalEntry && index < totalsPerDay.length) {
+        if(!daysAgo(-daysAfterGoal, goalEntry.dateTime).isBefore(startDate)) {
+          totalsPerDay[index] = goalEntry.amount;
+          index++;
+        }
         daysAfterGoal++;
-        index++;
+        noGoalEntry = filterEntries(entries, category: category, startDate: daysAgo(-daysAfterGoal, goalEntry.dateTime), endDate: daysAgo(-daysAfterGoal - 1, goalEntry.dateTime)).length == 0;
       }
     }
-    print('goals: $totalsPerDay');
+    //print('goals: $totalsPerDay');
     return totalsPerDay;
   }
 }

@@ -53,9 +53,11 @@ class _AddHoursState extends State<AddHours> {
                 selectedDate: dateTime,
                 onChanged: (dt) {
                   setState((){
-                    final duration = Duration(hours: DateTime.now().hour, minutes: DateTime.now().minute);
                     dateTime = dt;
-                    dateTime.add(duration);
+                    if(constants.sameDay(dt, DateTime.now())){
+                      final duration = Duration(hours: DateTime.now().hour, minutes: DateTime.now().minute);
+                      dateTime.add(duration);
+                    }
                   });
                 },
               ),

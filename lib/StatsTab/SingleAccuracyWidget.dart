@@ -33,6 +33,7 @@ class SingleAccuracyWidget extends StatelessWidget {
 
                 final goals = Filter.goalsPerDay(goalSnapshot.data, category: this.inputType, startDate: stream.data[0], endDate: realEndDate);
 
+
                 return StreamBuilder<List<InputEntry>>(
                   stream: InputHoursUpdater.ihu.dbChangesStream$,
                   builder: (context, snapshot) {
