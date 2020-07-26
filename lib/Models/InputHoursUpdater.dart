@@ -99,7 +99,6 @@ class Filter {
         noGoalEntry = filterEntries(entries, category: category, startDate: daysAgo(-daysAfterGoal, goalEntry.dateTime), endDate: daysAgo(-daysAfterGoal - 1, goalEntry.dateTime)).length == 0;
       }
     }
-    //print('goals: $totalsPerDay');
     return totalsPerDay;
   }
 }

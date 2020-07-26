@@ -165,6 +165,13 @@ class InputChart extends StatelessWidget {
       }
     }
     double result = doubleList.reduce(math.max);
-    return math.max(5, (result/2).ceil() + 1);
+    int ticks = (result/2).ceil() + 1;
+
+    if(ticks >= 17)
+      ticks = ((ticks-1)/2).round() + 1;
+    else if(ticks % 2 == 0)
+      ticks++;
+
+    return math.max(5, ticks);
   }
 }
