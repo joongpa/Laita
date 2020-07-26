@@ -2,6 +2,7 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
 
 - Code refactoring
     - Use themes (and dark mode)
+    - Use Provider to remove the nested StreamBuilders
     
 - Statistics page
     - streaks for meeting daily goals
