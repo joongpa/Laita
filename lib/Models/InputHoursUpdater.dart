@@ -61,7 +61,6 @@ class Filter {
     for(int i = 0; i < totalsPerDay.length; i++) {
       totalsPerDay[i] = getTotalInput(entries, category: category, startDate: daysAgo(-i, startDate), endDate: daysAgo(-i - 1, startDate));
     }
-
     return totalsPerDay;
   }
 

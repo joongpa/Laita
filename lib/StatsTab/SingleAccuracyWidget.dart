@@ -35,7 +35,10 @@ class SingleAccuracyWidget extends StatelessWidget {
     int failCount = 0;
 
     for(int i = 0; i < goals.length; i++) {
-      if(goals[i] == 0 && hours[i] == 0) continue;
+      if(goals[i] == 0 && hours[i] == 0) {
+        failCount++;
+        continue;
+      }
       passCount += (hours[i] >= goals[i]) ? 1 : 0;
       failCount += (hours[i] < goals[i]) ? 1 : 0;
     }

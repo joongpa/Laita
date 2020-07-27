@@ -89,7 +89,7 @@ class GlobalProgressWidget extends StatelessWidget {
     if(num < 0 || dom < 0) return 0.0;
     if(num == null) num = 0;
     if(dom == null) dom = 0;
-    if(dom == 0.0) return 0.0;
+    if(dom == 0.0 && num == 0.0) return 0.0;
     return (num > dom) ? 1.0 : num/dom;
   }
 }
