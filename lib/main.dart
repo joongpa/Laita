@@ -8,8 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'package:provider/provider.dart';
 
 import 'LogsTab/MultiInputLog.dart';
+import 'Models/GoalEntry.dart';
+import 'Models/InputEntry.dart';
 import 'StatsTab/StatisticsSummaryWidget.dart';
 
 void main() async {
@@ -26,13 +29,23 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
 
-    return MaterialApp(
-      title: 'MIA Tracker',
-      theme: ThemeData(
+    return MultiProvider(
+      providers: [
+        StreamProvider<List<InputEntry>>.value(
+            value: InputHoursUpdater.ihu.dbChangesStream$
+        ),
+        StreamProvider<List<GoalEntry>>.value(
+            value: InputHoursUpdater.ihu.goalDbChangesStream$
+        ),
+      ],
+      child: MaterialApp(
+        title: 'MIA Tracker',
+        theme: ThemeData(
 
-        primarySwatch: Colors.blue,
+          primarySwatch: Colors.blue,
+        ),
+        home: MyHomePage(title: 'Immersion Tracker'),
       ),
-      home: MyHomePage(title: 'Immersion Tracker'),
     );
   }
 }

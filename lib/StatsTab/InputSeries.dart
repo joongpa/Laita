@@ -30,7 +30,7 @@ class InputChart extends StatelessWidget {
   final List<bool> choiceArray;
   final List<Color> colorArray;
 
-  List<List<InputSeries>> inputSeriesList = List<List<InputSeries>>(DataStorageHelper().categoryNames.length);
+  final List<List<InputSeries>> inputSeriesList = List<List<InputSeries>>(DataStorageHelper().categoryNames.length);
 
   InputChart({
     @required this.choiceArray,

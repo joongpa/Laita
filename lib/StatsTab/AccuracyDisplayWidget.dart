@@ -17,19 +17,8 @@ class AccuracyDisplayWidget extends StatelessWidget {
       runSpacing: 20,
       children:
       List.generate(DataStorageHelper().categoryNames.length, (index) {
-        return Column(
-          children: <Widget>[
-            Text(
-              DataStorageHelper().categoryNames[index],
-              style: TextStyle(
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 10),
-            SingleAccuracyWidget(
-              inputType: DataStorageHelper().categories[index],
-            ),
-          ],
+        return SingleAccuracyWidget(
+          inputType: DataStorageHelper().categories[index],
         );
       }),
     );

@@ -34,6 +34,12 @@ class _MultiInputLogState extends State<MultiInputLog> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     itemCount = daysBetween(startingDatePage, DateTime.now()) + 1;
     return StreamBuilder(
