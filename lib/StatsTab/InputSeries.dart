@@ -50,7 +50,7 @@ class InputChart extends StatelessWidget {
                 final dataList = Filter.filterEntries(snapshot2.data, startDate: data[0], endDate: data[1]);
                 List<charts.Series<InputSeries, String>> series = [];
 
-                for(int i = choiceArray.length-1; i >= 0; i--) {
+                for(int i = DataStorageHelper().categoryNames.length-1; i >= 0; i--) {
                   if (choiceArray[i]) {
                     inputSeriesList[i] = _formatData(
                         dataList.where((inputEntry) => inputEntry.inputType == DataStorageHelper().categories[i]).toList(), data);

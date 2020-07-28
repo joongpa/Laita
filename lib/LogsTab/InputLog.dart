@@ -87,7 +87,7 @@ class InputLog extends StatelessWidget {
             ),
             key: UniqueKey(),
             confirmDismiss: (disDirection) async {
-              return await asyncConfirmDialog(context);
+              return await asyncConfirmDialog(context, title: "Confirm Delete", description: 'Delete entry? This action cannot be undone');
             },
             onDismissed: (dis) {
               DataStorageHelper()

@@ -19,11 +19,14 @@ class _AddHoursState extends State<AddHours> {
   String description = "";
   bool buttonDisabled = true;
 
-  List<bool> _selections = [true, false, false];
+  List<bool> _selections;
+  int _selectedIndex = 0;
 
   @override
   void initState(){
     super.initState();
+    _selections = List.generate(DataStorageHelper().categoryNames.length, (index) => false);
+    _selections[0] = true;
     dateTime = DateTime.now();
   }
 
@@ -64,29 +67,29 @@ class _AddHoursState extends State<AddHours> {
               SizedBox(
                 height: 20,
               ),
-              ToggleButtons(
-                children: <Widget>[
-                  choiceButton("Reading"),
-                  choiceButton("Listening"),
-                  choiceButton("   Anki   ")
-                ],
-                borderRadius: BorderRadius.circular(10),
-                selectedColor: Colors.white,
-                fillColor: Colors.red,
-                isSelected: _selections,
-                onPressed: (int index) {
-                  setState(() {
-                    for (int buttonIndex = 0;
-                        buttonIndex < _selections.length;
-                        buttonIndex++) {
-                      if (buttonIndex == index) {
-                        _selections[buttonIndex] = true;
-                      } else {
-                        _selections[buttonIndex] = false;
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ToggleButtons(
+                  children: List.generate(_selections.length, (index) => choiceButton(DataStorageHelper().categoryNames[index])),
+                  borderRadius: BorderRadius.circular(10),
+                  selectedColor: Colors.white,
+                  fillColor: Colors.red,
+                  isSelected: _selections,
+                  onPressed: (int index) {
+                    setState(() {
+                      for (int buttonIndex = 0;
+                          buttonIndex < _selections.length;
+                          buttonIndex++) {
+                        if (buttonIndex == index) {
+                          _selections[buttonIndex] = true;
+                          _selectedIndex = index;
+                        } else {
+                          _selections[buttonIndex] = false;
+                        }
                       }
-                    }
-                  });
-                },
+                    });
+                  },
+                ),
               ),
               SizedBox(
                 height: 20,
@@ -185,7 +188,7 @@ class _AddHoursState extends State<AddHours> {
 
   _buttonAction() {
     double totalTime = hours + minutes/60;
-    InputEntry entry = InputEntry(description: description, dateTime: dateTime, inputType: numToInput(), amount: totalTime);
+    InputEntry entry = InputEntry(description: description, dateTime: dateTime, inputType: DataStorageHelper().categories[_selectedIndex], amount: totalTime);
     DataStorageHelper().insertInputEntry(entry);
     Navigator.pop(context);
   }
@@ -194,13 +197,4 @@ class _AddHoursState extends State<AddHours> {
         padding: EdgeInsets.all(10.0),
         child: Text(text),
       );
-
-  // ignore: missing_return
-  constants.Category numToInput() {
-    int i = 0;
-    for(; i < _selections.length; i++) {
-      if(_selections[i]) break;
-    }
-    return DataStorageHelper().categories[i];
-  }
 }

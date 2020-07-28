@@ -42,6 +42,7 @@ class SingleAccuracyWidget extends StatelessWidget {
       passCount += (hours[i] >= goals[i]) ? 1 : 0;
       failCount += (hours[i] < goals[i]) ? 1 : 0;
     }
+
     if(passCount + failCount == 0) return _getWidget("0");
     String value = (100 * passCount.toDouble() / (passCount + failCount)).round().toString();
     return _getWidget(value);

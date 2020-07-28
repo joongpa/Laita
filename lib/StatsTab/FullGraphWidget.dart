@@ -13,7 +13,7 @@ class FullGraphWidget extends StatefulWidget {
 
 class _FullGraphWidgetState extends State<FullGraphWidget> {
   List<bool> _choiceBoxValues =
-      List.generate(DataStorageHelper().categoryNames.length, (i) => true);
+      List.generate(8, (i) => true);
 
   List<Color> _choiceBoxColors = [
     Colors.blue,
@@ -21,7 +21,9 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
     Colors.green,
     Colors.orange,
     Colors.red,
-    Colors.yellow
+    Colors.yellow,
+    Colors.deepPurple,
+    Colors.pink
   ];
 
   @override
@@ -33,7 +35,7 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
         spacing: 0,
         alignment: WrapAlignment.center,
         children: List.generate(
-          _choiceBoxValues.length,
+          DataStorageHelper().categoryNames.length,
           (i) => Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[

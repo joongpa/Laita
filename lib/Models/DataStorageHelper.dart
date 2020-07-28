@@ -208,6 +208,7 @@ class DataStorageHelper {
     final tempList = categoryNames;
     tempList.remove(name);
     _pref.setStringList('categories', tempList);
+    InputHoursUpdater.ihu.resumeUpdate();
   }
 
   List<Category> get categories {
@@ -238,6 +239,7 @@ class DataStorageHelper {
         allTempList.add(category);
         _pref.setStringList("allCategories", allTempList);
       }
+      InputHoursUpdater.ihu.resumeUpdate();
       return true;
     }
     return false;

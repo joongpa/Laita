@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/DailyGoalsTab/AddHours.dart';
+import 'package:miatracker/DailyGoalsTab/CompositeProgressWidget.dart';
 import 'package:miatracker/DailyGoalsTab/ProgressListWidget.dart';
 import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/DrawerMenu.dart';
@@ -84,7 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
         .addObserver(LifecycleEventHandler(resumeCallBack: () async {
       InputHoursUpdater.ihu.resumeUpdate();
     }));
-    //DataStorageHelper().testPopulate();
   }
 
   @override
@@ -111,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
 //                else return GlobalProgressWidget(DataStorageHelper().categories[index]);
 //              }),
 //            ),
-            ProgressListWidget(),
+            CompositeProgressWidget(),
             StatisticsSummaryWidget(),
             MultiInputLog(),
           ],
