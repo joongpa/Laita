@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
+import 'package:miatracker/auth.dart';
 
 class DrawerMenu extends StatelessWidget {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -20,7 +24,9 @@ class DrawerMenu extends StatelessWidget {
             },
           ),
           Divider(),
-          _createDrawerItem(icon: Icons.contacts,text: "Log in",)
+          _createDrawerItem(icon: Icons.contacts,text: "Log out", onTap: () {
+            AuthService().signOut();
+          })
         ],
       ),
     );

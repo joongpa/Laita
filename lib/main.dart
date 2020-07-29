@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/DailyGoalsTab/AddHours.dart';
@@ -9,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'package:miatracker/auth.dart';
+import 'package:miatracker/signInPage.dart';
 import 'package:provider/provider.dart';
 
 import 'LogsTab/MultiInputLog.dart';
@@ -32,6 +35,12 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        StreamProvider<bool>.value(
+          value: AuthService().loading
+        ),
+        StreamProvider<FirebaseUser>.value(
+          value: FirebaseAuth.instance.onAuthStateChanged
+        ),
         StreamProvider<List<InputEntry>>.value(
             value: InputHoursUpdater.ihu.dbChangesStream$
         ),
@@ -45,7 +54,7 @@ class MyApp extends StatelessWidget {
 
           primarySwatch: Colors.blue,
         ),
-        home: MyHomePage(title: 'Immersion Tracker'),
+        home: SignInPage(),
       ),
     );
   }

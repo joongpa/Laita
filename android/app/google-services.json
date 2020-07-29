@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "190811854407",
+    "firebase_url": "https://inputtracker.firebaseio.com",
+    "project_id": "inputtracker",
+    "storage_bucket": "inputtracker.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190811854407:android:5958761c78982b3f4d4362",
+        "android_client_info": {
+          "package_name": "com.example.miatracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "190811854407-6p4d340huq10nmi8396tjt330fop6tft.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAs0rp7xDOcUQPGOK3uU7ruqNLuogCgKk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "190811854407-6p4d340huq10nmi8396tjt330fop6tft.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
