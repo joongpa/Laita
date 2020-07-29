@@ -14,6 +14,7 @@ class GlobalProgressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.all(8.0),
       child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Column(

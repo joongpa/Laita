@@ -23,24 +23,21 @@ class CompositeProgressWidget extends StatelessWidget {
     return StreamBuilder<Object>(
       stream: InputHoursUpdater.ihu.updateStream$,
       builder: (context, snapshot) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-          child: ListView.builder(
-              itemCount: DataStorageHelper().categoryNames.length + 1,
-              itemBuilder: (context, index) {
-                double value = 0.0;
-                if (index == DataStorageHelper().categoryNames.length)
-                  return SizedBox(height: 100);
+        return ListView.builder(
+            itemCount: DataStorageHelper().categoryNames.length + 1,
+            itemBuilder: (context, index) {
+              double value = 0.0;
+              if (index == DataStorageHelper().categoryNames.length)
+                return SizedBox(height: 100);
 
-                for (final inputEntries in todayEntries) {
-                  if (inputEntries.inputType ==
-                      DataStorageHelper().categories[index])
-                    value += inputEntries.amount;
-                }
-                return GlobalProgressWidget(
-                    DataStorageHelper().categories[index], value);
-              }),
-        );
+              for (final inputEntries in todayEntries) {
+                if (inputEntries.inputType ==
+                    DataStorageHelper().categories[index])
+                  value += inputEntries.amount;
+              }
+              return GlobalProgressWidget(
+                  DataStorageHelper().categories[index], value);
+            });
       }
     );
   }
