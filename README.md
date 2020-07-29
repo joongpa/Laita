@@ -2,7 +2,6 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
 
 - Code refactoring
     - Use themes (and dark mode)
-    - Use Provider to remove the nested StreamBuilders
     
 - Statistics page
     - streaks for meeting daily goals
@@ -17,8 +16,6 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
     - Current goals should be displayed rather than just an empty text field
 - Settings Page
     - Allow user to give each category a color (for graphs and other widgets)
-- Database
-    - Another table should store the stats for each day, such as
-    goals, hours, and whether the goal was met or not
 - First time user landing page
    
+- Figure out how to optimize code (Adding any more features causes noticeable lag)
