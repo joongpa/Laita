@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
-import 'package:miatracker/auth.dart';
+import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
 
 class DrawerMenu extends StatelessWidget {
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -25,7 +25,7 @@ class DrawerMenu extends StatelessWidget {
           ),
           Divider(),
           _createDrawerItem(icon: Icons.contacts,text: "Log out", onTap: () {
-            AuthService().signOut();
+            AuthService.instance.signOut();
           })
         ],
       ),

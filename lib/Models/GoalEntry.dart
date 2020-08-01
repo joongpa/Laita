@@ -6,28 +6,24 @@ import '../Map.dart';
 
 class GoalEntry extends Entry{
 
-  GoalEntry({id, dateTime, inputType, amount}) :
-      super(id: id, dateTime: dateTime, inputType: inputType, amount: amount);
+  GoalEntry({docID, dateTime, inputType, amount}) :
+      super(docID: docID, dateTime: dateTime, inputType: inputType, amount: amount);
 
-  GoalEntry.now({id, inputType, amount}) :
-        super.now(id: id, inputType: inputType, amount: amount);
+  GoalEntry.now({docID, inputType, amount}) :
+        super.now(docID: docID, inputType: inputType, amount: amount);
 
-  GoalEntry.explicitTime({id, date, time, inputType, amount}) :
-        super.explicitTime(id: id, date: date, time: time, inputType: inputType, amount: amount);
-
-  factory GoalEntry.fromMap(Map<String,dynamic> map) => GoalEntry.explicitTime(
-      id: map['id'],
-      date: map['date'],
-      time: map['time'],
-      inputType: DataStorageHelper().getCategory(map['inputType']),
+  factory GoalEntry.fromMap(Map<String,dynamic> map, [String docID]) => GoalEntry(
+      docID: docID,
+      dateTime: map['dateTime'],
+      inputType: map['inputType'],
       amount: map['duration']
   );
 
   @override
   Map<String,dynamic> toMap() => {
-    "date": date,
-    "time": time,
-    "inputType": inputType.name,
+    "docID": docID,
+    "dateTime": dateTime,
+    "inputType": inputType,
     "duration": amount
   };
 }

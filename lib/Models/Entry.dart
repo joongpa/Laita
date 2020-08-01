@@ -4,26 +4,19 @@ import 'package:miatracker/Models/DataStorageHelper.dart';
 import '../Map.dart';
 
 abstract class Entry implements Comparable<Entry>{
-  int id;
+  String docID;
   DateTime dateTime;
-  String date;
-  String time;
-  Category inputType;
+  String inputType;
   double amount;
 
-  Entry({this.id, this.dateTime, this.inputType, this.amount}) {
-    date = DateFormat("yyyy-MM-dd").format(dateTime);
-    time = DateFormat("HH:mm").format(dateTime);
-  }
+  Entry({this.docID, this.dateTime, this.inputType, this.amount});
 
-  Entry.now({this.id, this.inputType, this.amount}) {
+  Entry.now({this.docID, this.inputType, this.amount}) {
     dateTime = DateTime.now();
-    date = DateFormat("yyyy-MM-dd").format(dateTime);
-    time = DateFormat("HH:mm").format(dateTime);
   }
 
-  Entry.explicitTime({this.id, this.date, this.time, this.inputType, this.amount}) {
-    dateTime = DateTime.parse('$date $time');
+  String get time {
+    return DateFormat.jm().format(this.dateTime);
   }
 
   Map<String,dynamic> toMap();

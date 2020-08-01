@@ -22,11 +22,7 @@ class AuthService {
       }
     });
   }
-  static final AuthService _authService = AuthService._();
-
-  factory AuthService() {
-    return _authService;
-  }
+  static final AuthService instance = AuthService._();
 
   Future<FirebaseUser> googleSignIn() async {
     loading.add(true);

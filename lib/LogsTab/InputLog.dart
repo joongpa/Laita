@@ -53,7 +53,7 @@ class InputLog extends StatelessWidget {
                   child: ListTile(
                     subtitle: Text(subtitleText),
                     leading: Text(
-                      entry.inputType.name,
+                      entry.inputType,
                       style: TextStyle(
                         color: Color.fromRGBO(140, 140, 140, 1),
                       ),
@@ -97,7 +97,7 @@ class InputLog extends StatelessWidget {
                 child: ListTile(
                   subtitle: Text(subtitleText),
                   leading: Text(
-                    entry.inputType.name,
+                    entry.inputType,
                   ),
                   title: Text('${convertToTime(entry.amount)}'),
                   trailing: Text(entry.time),

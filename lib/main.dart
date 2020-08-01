@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
-import 'package:miatracker/auth.dart';
+import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
 import 'package:miatracker/signInPage.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         StreamProvider<bool>.value(
-          value: AuthService().loading
+          value: AuthService.instance.loading
         ),
         StreamProvider<FirebaseUser>.value(
           value: FirebaseAuth.instance.onAuthStateChanged

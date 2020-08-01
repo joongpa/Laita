@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/Models/DataStorageHelper.dart';
 
@@ -7,30 +8,26 @@ import 'Entry.dart';
 class InputEntry extends Entry{
   String description;
 
-  InputEntry({id, dateTime, this.description, inputType, amount}) :
-        super(id: id, dateTime: dateTime, inputType: inputType, amount: amount);
+  InputEntry({docID, dateTime, this.description, inputType, amount}) :
+        super(docID: docID, dateTime: dateTime, inputType: inputType, amount: amount);
 
-  InputEntry.now({id, this.description, inputType, amount}) :
-        super.now(id: id, inputType: inputType, amount: amount);
+  InputEntry.now({docID, this.description, inputType, amount}) :
+        super.now(docID: docID, inputType: inputType, amount: amount);
 
-  InputEntry.explicitTime({id, date, time, this.description, inputType, amount}) :
-        super.explicitTime(id: id, date: date, time: time, inputType: inputType, amount: amount);
-
-  factory InputEntry.fromMap(Map<String,dynamic> map) => InputEntry.explicitTime(
-    id: map['id'],
-    date: map['date'],
-    time: map['time'],
+  factory InputEntry.fromMap(Map<String,dynamic> map, [String docID]) => InputEntry(
+    docID: docID,
+    dateTime: map['dateTime'],
     description: map['description'],
-    inputType: DataStorageHelper().getCategory(map['inputType']),
+    inputType: map['inputType'],
     amount: map['duration']
   );
 
   @override
   Map<String,dynamic> toMap() => {
-    "date": date,
-    "time": time,
+    "docID": docID,
+    "dateTime": dateTime,
     "description": description,
-    "inputType": inputType.name,
+    "inputType": inputType,
     "duration": amount
   };
 }

@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:miatracker/auth.dart';
+import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
 import 'package:miatracker/main.dart';
 import 'package:provider/provider.dart';
 
@@ -40,13 +40,13 @@ class SignInPage extends StatelessWidget {
                 RaisedButton(
                     child: Text("Sign In With Google"),
                     onPressed: () {
-                      AuthService().googleSignIn();
+                      AuthService.instance.googleSignIn();
                     }
                 ),
                 RaisedButton(
                     child: Text("Sign In Anonymously"),
                     onPressed: () {
-                      AuthService().signInAnonymously();
+                      AuthService.instance.signInAnonymously();
                     }
                 )
               ],
