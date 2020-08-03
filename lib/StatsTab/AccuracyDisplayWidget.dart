@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/StatsTab/SingleAccuracyWidget.dart';
+import 'package:provider/provider.dart';
 
 import '../Models/DataStorageHelper.dart';
 import '../Map.dart';
@@ -11,14 +13,16 @@ class AccuracyDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var categories = Provider.of<List<Category>>(context) ?? [];
+
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 25,
       runSpacing: 20,
       children:
-      List.generate(DataStorageHelper().categoryNames.length, (index) {
+      List.generate(categories.length, (index) {
         return SingleAccuracyWidget(
-          inputType: DataStorageHelper().categories[index],
+          inputType: categories[index],
         );
       }),
     );

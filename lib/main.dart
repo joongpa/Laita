@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/DailyGoalsTab/AddHours.dart';
 import 'package:miatracker/DailyGoalsTab/CompositeProgressWidget.dart';
 import 'package:miatracker/DailyGoalsTab/ProgressListWidget.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/DrawerMenu.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
-import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'Models/category.dart';
 import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
 import 'package:miatracker/signInPage.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +20,7 @@ import 'StatsTab/StatisticsSummaryWidget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DataStorageHelper().init();
+
   runApp(MyApp());
 }
 
@@ -40,12 +39,6 @@ class MyApp extends StatelessWidget {
         ),
         StreamProvider<FirebaseUser>.value(
           value: FirebaseAuth.instance.onAuthStateChanged
-        ),
-        StreamProvider<List<InputEntry>>.value(
-            value: InputHoursUpdater.ihu.dbChangesStream$
-        ),
-        StreamProvider<List<GoalEntry>>.value(
-            value: InputHoursUpdater.ihu.goalDbChangesStream$
         ),
       ],
       child: MaterialApp(
@@ -98,6 +91,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var user = Provider.of<FirebaseUser>(context);
+    var categories = Provider.of<List<Category>>(context);
     //DataStorageHelper().deleteAllInputEntries();
     //DataStorageHelper().resetAllHours();
 
@@ -120,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
 //                else return GlobalProgressWidget(DataStorageHelper().categories[index]);
 //              }),
 //            ),
-            CompositeProgressWidget(),
+            ProgressListWidget(),
             StatisticsSummaryWidget(),
             MultiInputLog(),
           ],
@@ -155,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AddHours()),
+              MaterialPageRoute(builder: (context) => AddHours(user, categories)),
             );
           },
         ),

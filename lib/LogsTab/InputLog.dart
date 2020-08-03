@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
+import 'package:miatracker/Models/database.dart';
 import 'package:provider/provider.dart';
 
 import '../Models/InputEntry.dart';
@@ -19,8 +21,9 @@ class InputLog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final providedGoalEntries = Provider.of<List<GoalEntry>>(context);
-    final providedInputEntries = Provider.of<List<InputEntry>>(context);
+    final user = Provider.of<FirebaseUser>(context);
+    final providedGoalEntries = Provider.of<List<GoalEntry>>(context) ?? [];
+    final providedInputEntries = Provider.of<List<InputEntry>>(context) ?? [];
 
     if(providedInputEntries == null || providedGoalEntries == null)
       return Container();
@@ -90,8 +93,7 @@ class InputLog extends StatelessWidget {
               return await asyncConfirmDialog(context, title: "Confirm Delete", description: 'Delete entry? This action cannot be undone');
             },
             onDismissed: (dis) {
-              DataStorageHelper()
-                  .deleteEntry(compiled[index]);
+              DatabaseService.instance.deleteInputEntry(user, entry);
             },
             child: Card(
                 child: ListTile(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'package:miatracker/Models/category.dart';
+import 'package:provider/provider.dart';
 
 import '../Models/DataStorageHelper.dart';
 import 'InputSeries.dart';
@@ -28,6 +30,7 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var categories = Provider.of<List<Category>>(context) ?? [];
     return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
       Flexible(
           child: Wrap(
@@ -35,7 +38,7 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
         spacing: 0,
         alignment: WrapAlignment.center,
         children: List.generate(
-          DataStorageHelper().categoryNames.length,
+          categories.length,
           (i) => Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -48,7 +51,7 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
                   });
                 },
               ),
-              Text(DataStorageHelper().categoryNames[i]),
+              Text(categories[i].name),
             ],
           ),
         ),

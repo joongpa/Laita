@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
 
+import 'category.dart';
 import '../Map.dart';
 import 'Entry.dart';
 import 'GoalEntry.dart';
@@ -39,8 +40,10 @@ class InputHoursUpdater {
 class Filter {
   static double getTotalInput(List<InputEntry> entries,
       {Category category, DateTime startDate, DateTime endDate}) {
+
     final tempList = filterEntries(entries,
         category: category, startDate: startDate, endDate: endDate);
+
     double sum = 0;
 
     for (final item in tempList) {
@@ -51,22 +54,23 @@ class Filter {
 
   static List<Entry> filterEntries(List<Entry> entries,
       {Category category, DateTime startDate, DateTime endDate}) {
-    if (startDate == null && endDate == null)
+    if (startDate == null && endDate == null) {
       return entries
           .where((inputEntry) =>
-              ((category != null) ? (inputEntry.inputType == category) : true))
+      ((category != null) ? (inputEntry.inputType == category.name) : true))
           .toList();
-
-    startDate ??= DateTime.now();
-    endDate ??= daysAgo(-1, DateTime.now());
-    final tempList = entries
-        .where((inputEntry) =>
-            ((category != null) ? (inputEntry.inputType == category) : true) &&
-            (inputEntry.dateTime.isAtSameMomentAs(startDate) ||
-                inputEntry.dateTime.isAfter(startDate)) &&
-            inputEntry.dateTime.isBefore(endDate))
-        .toList();
-    return tempList;
+    } else {
+      startDate ??= DateTime.now();
+      endDate ??= daysAgo(-1, DateTime.now());
+      final tempList = entries
+          .where((inputEntry) =>
+      ((category != null) ? (inputEntry.inputType == category.name) : true) &&
+          (inputEntry.dateTime.isAtSameMomentAs(startDate) ||
+              inputEntry.dateTime.isAfter(startDate)) &&
+          inputEntry.dateTime.isBefore(endDate))
+          .toList();
+      return tempList;
+    }
   }
 
   static List<double> totalInputPerDay(List<InputEntry> entries,

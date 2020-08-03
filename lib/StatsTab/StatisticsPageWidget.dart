@@ -7,6 +7,9 @@ import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
 import 'dart:math' as math;
 
+import 'package:miatracker/Models/category.dart';
+import 'package:provider/provider.dart';
+
 class StatisticsPageWidget extends StatelessWidget {
   final Category inputType;
 
@@ -15,22 +18,16 @@ class StatisticsPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var inputEntries = Provider.of<List<InputEntry>>(context) ?? [];
+
     return StreamBuilder(
       stream: TimeFrameModel().timeFrameStream$,
       builder: (context, stream) {
         if (stream.hasData) {
           final countedDays = math.min(TimeFrameModel().selectedTimeSpan.value, daysBetween(stream.data[0], DateTime.now()) + 1);
-          return StreamBuilder<List<InputEntry>>(
-            stream: InputHoursUpdater.ihu.dbChangesStream$,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final hours = Filter.getTotalInput(snapshot.data, category: this.inputType, startDate: stream.data[0], endDate: stream.data[1]);
-                String value = convertToTime(hours / countedDays);
-                return _getWidget(value);
-              }
-              else return _getWidget("0:00");
-            },
-          );
+          final hours = Filter.getTotalInput(inputEntries, category: this.inputType, startDate: stream.data[0], endDate: stream.data[1]);
+          String value = convertToTime(hours / countedDays);
+          return _getWidget(value);
         } else return _getWidget("0:00");
       }
     );

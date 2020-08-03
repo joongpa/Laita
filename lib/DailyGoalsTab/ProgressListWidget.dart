@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Map.dart';
+import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/database.dart';
 import 'package:provider/provider.dart';
 
 import '../Models/DataStorageHelper.dart';
@@ -10,24 +13,15 @@ import 'GlobalProgressWidget.dart';
 class ProgressListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final providedInputEntries = Provider.of<List<InputEntry>>(context);
-
-    if(providedInputEntries == null)
-      return Container();
-
-    final todayEntries = providedInputEntries.where((inputEntry) => sameDay(DateTime.now(), inputEntry.dateTime)).toList();
+    var categories = Provider.of<List<Category>>(context) ?? [];
+    var inputEntries = Provider.of<List<InputEntry>>(context) ?? [];
 
     return ListView.builder(
-        itemCount: DataStorageHelper().categoryNames.length + 1,
+        itemCount: categories.length + 1,
         itemBuilder: (context, index) {
-          double value = 0.0;
-          if(index == DataStorageHelper().categoryNames.length) return SizedBox(height: 100);
-
-          for(final inputEntries in todayEntries) {
-            if(inputEntries.inputType == DataStorageHelper().categories[index])
-              value += inputEntries.amount;
-          }
-          return GlobalProgressWidget(DataStorageHelper().categories[index], value);
+          if(index == categories.length) return SizedBox(height: 100);
+          double value = Filter.getTotalInput(inputEntries, category: categories[index], startDate: daysAgo(0, DateTime.now()), endDate: daysAgo(-1, DateTime.now()));
+          return GlobalProgressWidget(categories[index], value);
         }
     );
   }

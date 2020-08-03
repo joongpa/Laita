@@ -1,8 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
+
 import 'package:miatracker/Map.dart';
+import 'package:miatracker/Models/GoalEntry.dart';
+import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/database.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
 
 class GlobalProgressWidget extends StatelessWidget {
   final Category inputType;
@@ -13,75 +19,84 @@ class GlobalProgressWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(8.0),
-      child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            children: <Widget>[
-              Text(
-                inputType.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                ),
-              ),
-              Row(
+    var user = Provider.of<FirebaseUser>(context);
+
+    return StreamBuilder<GoalEntry>(
+      stream: DatabaseService.instance.lastGoalEntry(user, inputType),
+      builder: (context, snapshot) {
+        final goalValue = (snapshot.hasData) ? snapshot.data.amount : 0.0;
+
+        return Card(
+          margin: EdgeInsets.all(8.0),
+          child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
                 children: <Widget>[
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      children: <Widget>[
-                        Text(
-                          convertToTime(value),
-                          style: TextStyle(fontSize: 25.0),
+                  Text(
+                    inputType.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          children: <Widget>[
+                            Text(
+                              convertToTime(value),
+                              style: TextStyle(fontSize: 25.0),
+                            ),
+                            const Divider(
+                              height: 2,
+                              thickness: 2,
+                              color: Colors.grey,
+                              indent: 0,
+                              endIndent: 0,
+                            ),
+                            Text(
+                              convertToTime(goalValue),
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
-                        const Divider(
-                          height: 2,
-                          thickness: 2,
+                      ),
+                      const Text(
+                        "  hrs",
+                        style: TextStyle(
+                          fontSize: 15.0,
                           color: Colors.grey,
-                          indent: 0,
-                          endIndent: 0,
                         ),
-                        Text(
-                          convertToTime(DataStorageHelper().getGoalOfInput(inputType) ?? 0.0),
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.grey,
+                      ),
+                      const SizedBox(
+                        width: 17,
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Padding(
+                          padding: const EdgeInsets.all(0.0),
+                          child: LinearPercentIndicator(
+                            lineHeight: 20.0,
+                            percent: _getPercent(value, goalValue),
+                            linearStrokeCap: LinearStrokeCap.roundAll,
+                            progressColor: _getPercent(value, goalValue) == 1.0
+                                ? Colors.green
+                                : Colors.blue,
+                            backgroundColor: Color.fromRGBO(237, 237, 237, 1),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const Text(
-                    "  hrs",
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 17,
-                  ),
-                  Expanded(
-                    flex: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(0.0),
-                      child: LinearPercentIndicator(
-                        lineHeight: 20.0,
-                        percent: _getPercent(value, DataStorageHelper().getGoalOfInput(inputType)),
-                        linearStrokeCap: LinearStrokeCap.roundAll,
-                        progressColor: _getPercent(value, DataStorageHelper().getGoalOfInput(inputType)) == 1.0
-                            ? Colors.green
-                            : Colors.blue,
-                        backgroundColor: Color.fromRGBO(237, 237, 237, 1),
                       ),
-                    ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          )),
+              )),
+        );
+      }
     );
   }
 

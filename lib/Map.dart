@@ -1,20 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
-class Category {
-  final String name;
-
-  Category({@required this.name});
-
-  @override
-  bool operator ==(covariant Category o) {
-    return name == o.name;
-  }
-
-  @override
-  int get hashCode => name.hashCode;
-}
-
 String getMonth(int month) {
   Map<int, String> months = {
     1: 'Jan',

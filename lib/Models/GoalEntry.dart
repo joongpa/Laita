@@ -14,7 +14,7 @@ class GoalEntry extends Entry{
 
   factory GoalEntry.fromMap(Map<String,dynamic> map, [String docID]) => GoalEntry(
       docID: docID,
-      dateTime: map['dateTime'],
+      dateTime: map['dateTime'].toDate(),
       inputType: map['inputType'],
       amount: map['duration']
   );

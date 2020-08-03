@@ -2,13 +2,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
+import 'Models/category.dart';
 import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
+import 'package:provider/provider.dart';
 
 class DrawerMenu extends StatelessWidget {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
+    var user = Provider.of<FirebaseUser>(context);
+    var categories = Provider.of<List<Category>>(context);
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -19,14 +24,29 @@ class DrawerMenu extends StatelessWidget {
             text: 'Goals',
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).push(CupertinoPageRoute(
-                  builder: (BuildContext context) => GoalsPageWidget()));
+              Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (context) {
+                    return MultiProvider(
+                      providers: [
+                        StreamProvider<FirebaseUser>.value(
+                            value: FirebaseAuth.instance.onAuthStateChanged),
+                      ],
+                      child: GoalsPageWidget(),
+                    );
+                  },
+                ),
+              );
             },
           ),
           Divider(),
-          _createDrawerItem(icon: Icons.contacts,text: "Log out", onTap: () {
-            AuthService.instance.signOut();
-          })
+          _createDrawerItem(
+            icon: Icons.contacts,
+            text: "Log out",
+            onTap: () {
+              AuthService.instance.signOut();
+            },
+          )
         ],
       ),
     );

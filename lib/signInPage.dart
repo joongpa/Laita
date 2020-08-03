@@ -1,5 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:miatracker/Models/database.dart';
+import 'Models/GoalEntry.dart';
+import 'Models/InputEntry.dart';
+import 'Models/category.dart';
 import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
 import 'package:miatracker/main.dart';
 import 'package:provider/provider.dart';
@@ -54,6 +58,18 @@ class SignInPage extends StatelessWidget {
           ),
         ),
       );
-    } else return MyHomePage(title: "Immersion Tracker",);
+    } else return MultiProvider(
+        providers: [
+          StreamProvider<List<InputEntry>>.value(
+              value: DatabaseService.instance.inputEntriesStream(user)
+          ),
+          StreamProvider<List<GoalEntry>>.value(
+              value: DatabaseService.instance.goalEntriesStream(user)
+          ),
+          StreamProvider<List<Category>>.value(
+              value: DatabaseService.instance.categoriesStream(user)
+          )
+        ],
+        child: MyHomePage(title: "Immersion Tracker",));
   }
 }

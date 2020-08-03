@@ -16,7 +16,7 @@ class InputEntry extends Entry{
 
   factory InputEntry.fromMap(Map<String,dynamic> map, [String docID]) => InputEntry(
     docID: docID,
-    dateTime: map['dateTime'],
+    dateTime: map['dateTime'].toDate(),
     description: map['description'],
     inputType: map['inputType'],
     amount: map['duration']

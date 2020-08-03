@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
-
+import 'package:provider/provider.dart';
+import '../Models/category.dart' as cat;
 import '../Models/InputEntry.dart';
 import '../Map.dart';
 
@@ -30,7 +31,7 @@ class InputChart extends StatelessWidget {
   final List<bool> choiceArray;
   final List<Color> colorArray;
 
-  final List<List<InputSeries>> inputSeriesList = List<List<InputSeries>>(DataStorageHelper().categoryNames.length);
+  final List<List<InputSeries>> inputSeriesList = List<List<InputSeries>>(8);
 
   InputChart({
     @required this.choiceArray,
@@ -39,44 +40,39 @@ class InputChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var categories = Provider.of<List<cat.Category>>(context) ?? [];
+    var inputEntries = Provider.of<List<InputEntry>>(context) ?? [];
+
     return StreamBuilder(
       stream: TimeFrameModel().timeFrameStream$,
       builder: (context, snapshot) {
         final data = snapshot.data ?? [DateTime.now(), DateTime.now()];
-        return StreamBuilder<List<InputEntry>>(
-            stream: InputHoursUpdater.ihu.dbChangesStream$,
-            builder: (context, snapshot2) {
-              if (snapshot2.hasData) {
-                final dataList = Filter.filterEntries(snapshot2.data, startDate: data[0], endDate: data[1]);
-                List<charts.Series<InputSeries, String>> series = [];
+        final dataList = Filter.filterEntries(inputEntries, startDate: data[0], endDate: data[1]);
+        List<charts.Series<InputSeries, String>> series = [];
 
-                for(int i = DataStorageHelper().categoryNames.length-1; i >= 0; i--) {
-                  if (choiceArray[i]) {
-                    inputSeriesList[i] = _formatData(
-                        dataList.where((inputEntry) => inputEntry.inputType == DataStorageHelper().categories[i]).toList(), data);
+        for(int i = categories.length-1; i >= 0; i--) {
+          if (choiceArray[i]) {
+            inputSeriesList[i] = _formatData(
+                dataList.where((inputEntry) => inputEntry.inputType == categories[i].name).toList(), data);
 
-                    series.add(charts.Series(
-                      id: DataStorageHelper().categoryNames[i],
-                      data: inputSeriesList[i],
-                      domainFn: (InputSeries series, _) => series.day,
-                      measureFn: (InputSeries series, _) => series.hours,
-                      colorFn: (_, __) =>
-                          charts.ColorUtil.fromDartColor(colorArray[i]),
-                    ));
-                  }
-                }
-                return charts.BarChart(
-                  series,
-                  animate: false,
-                  barGroupingType: charts.BarGroupingType.stacked,
-                  primaryMeasureAxis: charts.NumericAxisSpec(
-                    tickFormatterSpec: customTickFormatter,
-                    tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredTickCount: getTicksFromMaxValue(inputSeriesList), dataIsInWholeNumbers: true),
-                  ),
-                );
-              } else
-                return Container();
-            });
+            series.add(charts.Series(
+              id: categories[i].name,
+              data: inputSeriesList[i],
+              domainFn: (InputSeries series, _) => series.day,
+              measureFn: (InputSeries series, _) => series.hours,
+              colorFn: (_, __) => charts.ColorUtil.fromDartColor(colorArray[i]))
+            );
+          }
+        }
+        return charts.BarChart(
+          series,
+          animate: false,
+          barGroupingType: charts.BarGroupingType.stacked,
+          primaryMeasureAxis: charts.NumericAxisSpec(
+            tickFormatterSpec: customTickFormatter,
+            tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredTickCount: getTicksFromMaxValue(inputSeriesList), dataIsInWholeNumbers: true),
+          ),
+        );
       }
     );
   }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../Map.dart';
 import 'GoalEntry.dart';
 import 'InputEntry.dart';
 import 'category.dart';
@@ -13,24 +14,57 @@ class DatabaseService {
 
   static final DatabaseService instance = DatabaseService._();
 
-  Stream<List<InputEntry>> inputEntriesStream(FirebaseUser user) {
+  Stream<List<InputEntry>> inputEntriesStream(FirebaseUser user, {Category category, DateTime startDate, DateTime endDate}) {
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_inputEntries);
+    
+    if(startDate == null && endDate == null && category == null) {
+      return ref.snapshots().map((list) =>
+          list.documents.map((doc) => InputEntry.fromMap(doc.data, doc.documentID)).toList());
+    } else if(startDate == null && endDate == null) {
+      return ref.where('category', isEqualTo: category.name).snapshots().map((list) =>
+          list.documents.map((doc) => InputEntry.fromMap(doc.data, doc.documentID)).toList());
+    }
+    startDate ??= DateTime.now();
+    endDate ??= daysAgo(-1, DateTime.now());
 
-    return ref.snapshots().map((list) =>
+    return ref.where('category', isEqualTo: category.name)
+       .where('dateTime', isGreaterThanOrEqualTo: startDate)
+       .where('dateTime', isLessThan: endDate).snapshots().map((list) =>
         list.documents.map((doc) => InputEntry.fromMap(doc.data, doc.documentID)).toList());
+    
   }
 
-  Stream<List<GoalEntry>> goalEntriesStream(FirebaseUser user) {
+  Stream<List<GoalEntry>> goalEntriesStream(FirebaseUser user, {Category category, DateTime startDate, DateTime endDate}) {
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_goalEntries);
 
-    return ref.snapshots().map((list) =>
+    if(startDate == null && endDate == null && category == null) {
+      return ref.snapshots().map((list) =>
+          list.documents.map((doc) => GoalEntry.fromMap(doc.data, doc.documentID)).toList());
+    } else if(startDate == null && endDate == null) {
+      return ref.where('category', isEqualTo: category.name).snapshots().map((list) =>
+          list.documents.map((doc) => GoalEntry.fromMap(doc.data, doc.documentID)).toList());
+    }
+    startDate ??= DateTime.now();
+    endDate ??= daysAgo(-1, DateTime.now());
+
+    return ref.where('category', isEqualTo: category.name)
+        .where('dateTime', isGreaterThanOrEqualTo: startDate)
+        .where('dateTime', isLessThan: endDate).snapshots().map((list) =>
         list.documents.map((doc) => GoalEntry.fromMap(doc.data, doc.documentID)).toList());
+
+  }
+
+  Stream<GoalEntry> lastGoalEntry(FirebaseUser user, Category category) {
+    var ref = Firestore.instance.collection('users').document(user.uid).collection(_goalEntries);
+
+    return ref.where('inputType',isEqualTo: category.name).orderBy('dateTime', descending: true).limit(1).snapshots().map((list) =>
+        list.documents.map((doc) => GoalEntry.fromMap(doc.data, doc.documentID)).first);
   }
 
   Stream<List<Category>> categoriesStream(FirebaseUser user) {
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_categories);
 
-    return ref.snapshots().map((list) =>
+    return ref.orderBy('dateTime').snapshots().map((list) =>
         list.documents.map((doc) => Category.fromMap(doc.data, doc.documentID)).toList());
   }
 
@@ -57,7 +91,8 @@ class DatabaseService {
 
   Future<bool> addCategory(FirebaseUser user, Category category) async {
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_categories);
-    if(await ref.where(category.name).snapshots().isEmpty) {
+    bool noDupes = await ref.where('name', isEqualTo: category.name).snapshots().isEmpty;
+    if(true) {
       try {
         await ref.add(category.toMap());
         return true;

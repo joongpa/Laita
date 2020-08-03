@@ -1,12 +1,22 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
+import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/database.dart';
+import 'package:provider/provider.dart';
 import '../Map.dart' as constants;
 import 'DatePicker.dart';
 
 class AddHours extends StatefulWidget {
+
+  final FirebaseUser user;
+  final List<Category> categories;
+
+  AddHours(this.user, this.categories);
+
   @override
   _AddHoursState createState() => _AddHoursState();
 }
@@ -25,7 +35,7 @@ class _AddHoursState extends State<AddHours> {
   @override
   void initState(){
     super.initState();
-    _selections = List.generate(DataStorageHelper().categoryNames.length, (index) => false);
+    _selections = List.generate(8, (index) => false);
     _selections[0] = true;
     dateTime = DateTime.now();
   }
@@ -67,14 +77,15 @@ class _AddHoursState extends State<AddHours> {
               SizedBox(
                 height: 20,
               ),
-              SingleChildScrollView(
+              if(widget.categories.length != 0)
+                SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: ToggleButtons(
-                  children: List.generate(_selections.length, (index) => choiceButton(DataStorageHelper().categoryNames[index])),
+                  children: List.generate(widget.categories.length, (index) => choiceButton(widget.categories[index].name)),
                   borderRadius: BorderRadius.circular(10),
                   selectedColor: Colors.white,
                   fillColor: Colors.red,
-                  isSelected: _selections,
+                  isSelected: _selections.sublist(0, widget.categories.length),
                   onPressed: (int index) {
                     setState(() {
                       for (int buttonIndex = 0;
@@ -167,7 +178,7 @@ class _AddHoursState extends State<AddHours> {
               SizedBox(
                 height: 20,
               ),
-              _submitButton(),
+              _submitButton(widget.user, widget.categories),
             ],
           ),
         ),
@@ -175,21 +186,21 @@ class _AddHoursState extends State<AddHours> {
     );
   }
 
-  Widget _submitButton() => RaisedButton(
+  Widget _submitButton(FirebaseUser user, List<Category> categories) => RaisedButton(
         child: Text(
           "Done",
           style: TextStyle(
             color: Colors.white,
           ),
         ),
-        onPressed: buttonDisabled ? null : _buttonAction,
+        onPressed: buttonDisabled ? null : () => _buttonAction(user, categories),
         color: Colors.lightBlue,
       );
 
-  _buttonAction() {
+  _buttonAction(FirebaseUser user, List<Category> categories) {
     double totalTime = hours + minutes/60;
-    InputEntry entry = InputEntry(description: description, dateTime: dateTime, inputType: DataStorageHelper().categories[_selectedIndex], amount: totalTime);
-    DataStorageHelper().insertInputEntry(entry);
+    InputEntry entry = InputEntry(description: description, dateTime: dateTime, inputType: categories[_selectedIndex].name, amount: totalTime);
+    DatabaseService.instance.addInputEntry(user, entry);
     Navigator.pop(context);
   }
 

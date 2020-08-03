@@ -15,7 +15,7 @@ class _MultiInputLogState extends State<MultiInputLog> {
   @override
   void initState() {
     super.initState();
-    shownDate = DateTime.now();
+    shownDate = daysAgo(0);
   }
 
   @override
