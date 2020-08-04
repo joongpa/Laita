@@ -14,6 +14,7 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
 - Goal page
     - Current goals should be displayed rather than just an empty text field
 - Settings Page
+    - Allow user to choose between keeping or deleting log data when removing a category
     - Allow user to give each category a color (for graphs and other widgets)
 - First time user landing page
    
