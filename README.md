@@ -9,6 +9,7 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
     - streaks for meeting daily goals
     - Lifetime summaries
 - Add page
+    - User should be able to tap category to add an entry directly without having to select in the add screen
     - Sliders kinda suck, there should be something else that's faster and more comfortable
     - Move hours and minutes sliders to the bottom for better ergonomics in the add screen
 - Goal page
