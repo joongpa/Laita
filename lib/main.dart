@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
 import 'Models/category.dart';
-import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
+import 'Models/auth.dart';
 import 'package:miatracker/signInPage.dart';
 import 'package:provider/provider.dart';
 

@@ -4,7 +4,7 @@ import 'package:miatracker/Models/database.dart';
 import 'Models/GoalEntry.dart';
 import 'Models/InputEntry.dart';
 import 'Models/category.dart';
-import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
+import 'Models/auth.dart';
 import 'package:miatracker/main.dart';
 import 'package:provider/provider.dart';
 
