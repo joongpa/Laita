@@ -90,7 +90,7 @@ class TimeFrameModel {
 
   DateTime _halfYearsAgo(int years, DateTime dateTime) {
     for (int i = 1; i <= 6; i++) {
-      final testDay = monthsAgo(years * 6, dateTime);
+      final testDay = monthsAgo(years * i, dateTime, true);
       if (testDay.month == DateTime.january || testDay.month == DateTime.july)
         return testDay;
     }
@@ -113,6 +113,4 @@ class TimeFrameModel {
         break;
     }
   }
-
-
 }

@@ -91,8 +91,9 @@ class DatabaseService {
 
   Future<bool> addCategory(FirebaseUser user, Category category) async {
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_categories);
-    bool noDupes = await ref.where('name', isEqualTo: category.name).snapshots().isEmpty;
-    if(true) {
+    int size;
+    await ref.where('name', isEqualTo: category.name).getDocuments().then((value) => size = value.documents.length);
+    if(size == 0) {
       try {
         await ref.add(category.toMap());
         return true;

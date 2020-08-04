@@ -7,6 +7,7 @@ import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
+import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:provider/provider.dart';
 
@@ -22,10 +23,11 @@ class InputLog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<FirebaseUser>(context);
+    final categories = Provider.of<List<Category>>(context);
     final providedGoalEntries = Provider.of<List<GoalEntry>>(context) ?? [];
     final providedInputEntries = Provider.of<List<InputEntry>>(context) ?? [];
 
-    if(providedInputEntries == null || providedGoalEntries == null)
+    if(providedInputEntries == null || providedGoalEntries == null || categories == null)
       return Container();
 
     final goalEntries = Filter.filterEntries(providedGoalEntries,
@@ -62,7 +64,7 @@ class InputLog extends StatelessWidget {
                       ),
                     ),
                     title: Text(
-                      '$goalText${convertToTime(entry.amount)}',
+                      '$goalText${convertToDisplay(entry.amount, inputTypeFromCategory(entry, categories))}',
                       style: TextStyle(
                         color: Color.fromRGBO(140, 140, 140, 1),
                       ),
@@ -101,10 +103,19 @@ class InputLog extends StatelessWidget {
                   leading: Text(
                     entry.inputType,
                   ),
-                  title: Text('${convertToTime(entry.amount)}'),
+                  title: Text('${convertToDisplay(entry.amount, inputTypeFromCategory(entry, categories))}'),
                   trailing: Text(entry.time),
                 )),
           );
         });
+  }
+  
+  bool inputTypeFromCategory(Entry entry, List<Category> categories) {
+    for(final category in categories) {
+      if(entry.inputType == category.name) {
+        return category.isTimeBased;
+      }
+    }
+    return true;
   }
 }

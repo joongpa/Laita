@@ -65,9 +65,9 @@ DateTime daysAgo(int days, [DateTime dateTime]) {
   return DateTime(dateTime.year, dateTime.month, dateTime.day - days);
 }
 
-DateTime monthsAgo(int months, [DateTime dateTime]) {
+DateTime monthsAgo(int months, [DateTime dateTime, bool dayIndependent = false]) {
   dateTime = dateTime ?? DateTime.now();
-  if (dateTime.day != 1 && months > 0) months = 0;
+  if (dateTime.day != 1 && months > 0 && !dayIndependent) months = 0;
   return DateTime(dateTime.year, dateTime.month - months, 1);
 }
 
@@ -79,9 +79,9 @@ class UsefulShit {
   static final leadingZeroFormat = NumberFormat("00");
 }
 
-String convertToTime(double time) {
+String convertToDisplay(double time, [bool isTimeBased = true]) {
   int hours = time.floor();
   int minutes = ((time % 1) * 60).round();
 
-  return '$hours:${NumberFormat("00").format(minutes)}';
+  return (isTimeBased) ? '$hours:${NumberFormat("00").format(minutes)}' : time.round().toString();
 }

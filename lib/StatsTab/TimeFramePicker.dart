@@ -14,7 +14,7 @@ class _TimeFramePickerState extends State<TimeFramePicker> {
   @override
   Widget build(BuildContext context) {
     return Transform.scale(
-      scale: 0.8,
+      scale: 0.7,
       child: ToggleButtons(
         children: <Widget>[
           _choiceButton(TimeSpan.HalfYear.name),

@@ -43,20 +43,29 @@ class StatisticsSummaryWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 15.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      FullGraphWidget(),
-                      DateTraverser(),
-                      SizedBox(height: 5),
-                      TimeFramePicker(),
-                    ],
+                child: Container(
+                  height: 420,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Flexible(
+                          child: PageView(
+                            children: <Widget>[
+                              FullGraphWidget(isTimeBased: true,),
+                              FullGraphWidget(isTimeBased: false,),
+                            ],
+                          ),
+                        ),
+                        DateTraverser(),
+                        TimeFramePicker(),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: AverageDisplayWidget(),

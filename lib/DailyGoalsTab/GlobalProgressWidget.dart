@@ -46,7 +46,7 @@ class GlobalProgressWidget extends StatelessWidget {
                         child: Column(
                           children: <Widget>[
                             Text(
-                              convertToTime(value),
+                              convertToDisplay(value, inputType.isTimeBased),
                               style: TextStyle(fontSize: 25.0),
                             ),
                             const Divider(
@@ -57,7 +57,7 @@ class GlobalProgressWidget extends StatelessWidget {
                               endIndent: 0,
                             ),
                             Text(
-                              convertToTime(goalValue),
+                              convertToDisplay(goalValue, inputType.isTimeBased),
                               style: TextStyle(
                                 fontSize: 20.0,
                                 color: Colors.grey,

@@ -22,10 +22,11 @@ class InputSeries {
 }
 
 class InputChart extends StatelessWidget {
+  final bool isTimeBased;
   final customTickFormatter =
   charts.BasicNumericTickFormatterSpec((num value) {
     final isHalfHour = (value/4) % 1 != 0;
-    return isHalfHour ? '' : '${convertToTime(value/4)}';
+    return isHalfHour ? '' : '${convertToDisplay(value/4)}';
   });
 
   final List<bool> choiceArray;
@@ -35,12 +36,14 @@ class InputChart extends StatelessWidget {
 
   InputChart({
     @required this.choiceArray,
-    this.colorArray
+    this.colorArray,
+    this.isTimeBased = true
   });
 
   @override
   Widget build(BuildContext context) {
     var categories = Provider.of<List<cat.Category>>(context) ?? [];
+    categories = categories.where((element) => element.isTimeBased == isTimeBased).toList();
     var inputEntries = Provider.of<List<InputEntry>>(context) ?? [];
 
     return StreamBuilder(
@@ -67,10 +70,10 @@ class InputChart extends StatelessWidget {
         return charts.BarChart(
           series,
           animate: false,
-          barGroupingType: charts.BarGroupingType.stacked,
+          barGroupingType: (isTimeBased) ? charts.BarGroupingType.stacked : charts.BarGroupingType.grouped,
           primaryMeasureAxis: charts.NumericAxisSpec(
-            tickFormatterSpec: customTickFormatter,
-            tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredTickCount: getTicksFromMaxValue(inputSeriesList), dataIsInWholeNumbers: true),
+            tickFormatterSpec: isTimeBased ? customTickFormatter : null,
+            tickProviderSpec: charts.BasicNumericTickProviderSpec(desiredTickCount: isTimeBased ? getTicksFromMaxValue(inputSeriesList) : 11, dataIsInWholeNumbers: true),
           ),
         );
       }
@@ -102,7 +105,8 @@ class InputChart extends StatelessWidget {
           final tempDate = inputEntry.dateTime;
           for (int i = 0; i < tempList.length; i ++) {
             if (tempDate.isAfter(daysAgo(-i * 7, data[0])) && tempDate.isBefore(daysAgo((-i-1) * 7, data[0]))) {
-              tempList[i].add(4 * inputEntry.amount / 6);
+              double addValue = inputEntry.amount / 6 * (isTimeBased ? 4 : 1);
+              tempList[i].add(addValue);
             }
           }
         }
@@ -122,7 +126,8 @@ class InputChart extends StatelessWidget {
 
             if ((tempDate.isAtSameMomentAs(monthStart) || tempDate.isAfter(monthStart)) && tempDate.isBefore(monthEnd)) {
               final monthLength = daysBetween(monthStart, monthEnd);
-              tempList[i].add(4 * inputEntry.amount / (monthLength));
+              double addValue = inputEntry.amount / (monthLength) * (isTimeBased ? 4 : 1);
+              tempList[i].add(addValue);
             }
           }
         }
@@ -134,7 +139,8 @@ class InputChart extends StatelessWidget {
       final tempDate = inputEntry.dateTime;
       for (int i = 0; i < tempList.length; i++) {
         if (sameDay(daysAgo(-i, data[0]), tempDate)) {
-          tempList[i].add(4 * inputEntry.amount);
+          double addValue = inputEntry.amount * (isTimeBased ? 4 : 1);
+          tempList[i].add(addValue);
         }
       }
     }

@@ -7,7 +7,8 @@ import '../Models/DataStorageHelper.dart';
 import 'InputSeries.dart';
 
 class FullGraphWidget extends StatefulWidget {
-  FullGraphWidget();
+  final bool isTimeBased;
+  FullGraphWidget({this.isTimeBased = true});
 
   @override
   _FullGraphWidgetState createState() => _FullGraphWidgetState();
@@ -31,6 +32,7 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
   @override
   Widget build(BuildContext context) {
     var categories = Provider.of<List<Category>>(context) ?? [];
+    categories = categories.where((element) => element.isTimeBased == widget.isTimeBased).toList();
     return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
       Flexible(
           child: Wrap(
@@ -62,6 +64,7 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
         child: InputChart(
           choiceArray: _choiceBoxValues,
           colorArray: _choiceBoxColors,
+          isTimeBased: widget.isTimeBased,
         ),
         //decoration: BoxDecoration(color: Colors.grey),
       ),

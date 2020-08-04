@@ -7,6 +7,7 @@ import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:provider/provider.dart';
+import 'dart:math' as math;
 import '../Map.dart' as constants;
 import 'DatePicker.dart';
 
@@ -30,11 +31,12 @@ class _AddHoursState extends State<AddHours> {
   bool buttonDisabled = true;
 
   List<bool> _selections;
-  int _selectedIndex = 0;
+  Category _selectedCategory;
 
   @override
   void initState(){
     super.initState();
+    _selectedCategory = widget.categories[0];
     _selections = List.generate(8, (index) => false);
     _selections[0] = true;
     dateTime = DateTime.now();
@@ -93,7 +95,7 @@ class _AddHoursState extends State<AddHours> {
                           buttonIndex++) {
                         if (buttonIndex == index) {
                           _selections[buttonIndex] = true;
-                          _selectedIndex = index;
+                          _selectedCategory = widget.categories[index];
                         } else {
                           _selections[buttonIndex] = false;
                         }
@@ -105,76 +107,121 @@ class _AddHoursState extends State<AddHours> {
               SizedBox(
                 height: 20,
               ),
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(color: Colors.black, fontSize: 20),
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: f.format(hours),
-                              style: TextStyle(fontSize: 25)),
-                          TextSpan(text: " hrs")
-                        ],
+              if(_selectedCategory.isTimeBased)...
+                [
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black, fontSize: 20),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: f.format(math.min(6, hours)),
+                                style: TextStyle(fontSize: 25)),
+                            TextSpan(text: " hrs")
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 4,
-                    child: Slider(
-                      value: hours,
-                      min: 0,
-                      max: 6,
-                      onChanged: (newValue) {
-                        setState(() {
-                          hours = newValue;
-                          if(newValue != 0) buttonDisabled = false;
-                          else if(minutes == 0 && hours == 0) buttonDisabled = true;
-                        });
-                      },
-                      divisions: 6,
-                      onChangeEnd: (double) {},
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(color: Colors.black, fontSize: 20),
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: f.format(minutes),
-                              style: TextStyle(fontSize: 25)),
-                          TextSpan(text: " min")
-                        ],
+                    Expanded(
+                      flex: 4,
+                      child: Slider(
+                        value: math.min(6, hours),
+                        min: 0,
+                        max: 6,
+                        onChanged: (newValue) {
+                          setState(() {
+                            hours = newValue;
+                            if (newValue != 0)
+                              buttonDisabled = false;
+                            else if (minutes == 0 && hours == 0)
+                              buttonDisabled = true;
+                          });
+                        },
+                        divisions: 6,
+                        onChangeEnd: (double) {},
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 4,
-                    child: Slider(
-                      value: minutes,
-                      min: 0,
-                      max: 55,
-                      onChanged: (newValue) {
-                        setState(() {
-                          minutes = newValue;
-                          if(newValue != 0) buttonDisabled = false;
-                          else if(minutes == 0 && hours == 0) buttonDisabled = true;
-                        });
-                      },
-                      divisions: 11,
-                      onChangeEnd: (double) {},
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black, fontSize: 20),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: f.format(minutes),
+                                style: TextStyle(fontSize: 25)),
+                            TextSpan(text: " min")
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    Expanded(
+                      flex: 4,
+                      child: Slider(
+                        value: minutes,
+                        min: 0,
+                        max: 55,
+                        onChanged: (newValue) {
+                          setState(() {
+                            minutes = newValue;
+                            if (newValue != 0)
+                              buttonDisabled = false;
+                            else if (minutes == 0 && hours == 0)
+                              buttonDisabled = true;
+                          });
+                        },
+                        divisions: 11,
+                        onChangeEnd: (double) {},
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              if(!_selectedCategory.isTimeBased)...[
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black, fontSize: 20),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: hours.round().toString(),
+                                style: TextStyle(fontSize: 25)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Slider(
+                        value: hours,
+                        min: 0,
+                        max: 20,
+                        onChanged: (newValue) {
+                          setState(() {
+                            hours = newValue;
+                            if (newValue != 0)
+                              buttonDisabled = false;
+                            else if (minutes == 0 && hours == 0)
+                              buttonDisabled = true;
+                          });
+                        },
+                        divisions: 20,
+                        onChangeEnd: (double) {},
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               SizedBox(
                 height: 20,
               ),
@@ -199,7 +246,7 @@ class _AddHoursState extends State<AddHours> {
 
   _buttonAction(FirebaseUser user, List<Category> categories) {
     double totalTime = hours + minutes/60;
-    InputEntry entry = InputEntry(description: description, dateTime: dateTime, inputType: categories[_selectedIndex].name, amount: totalTime);
+    InputEntry entry = InputEntry(description: description, dateTime: dateTime, inputType: _selectedCategory.name, amount: totalTime);
     DatabaseService.instance.addInputEntry(user, entry);
     Navigator.pop(context);
   }
