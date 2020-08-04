@@ -6,8 +6,6 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
 - Statistics page
     - streaks for meeting daily goals
     - Lifetime summaries
-    - Add second graph for quantity-based categories
-- Allow user to specify if category is hours-based or quantity-based
 - Move hours and minutes sliders to the bottom for better ergonomics in the add screen
 - Goal page
     - Current goals should be displayed rather than just an empty text field
