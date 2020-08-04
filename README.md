@@ -8,7 +8,9 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
     - add page indicator
     - streaks for meeting daily goals
     - Lifetime summaries
-- Move hours and minutes sliders to the bottom for better ergonomics in the add screen
+- Add page
+    - Sliders kinda suck, there should be something else that's faster and more comfortable
+    - Move hours and minutes sliders to the bottom for better ergonomics in the add screen
 - Goal page
     - Current goals should be displayed rather than just an empty text field
 - Settings Page
