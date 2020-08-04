@@ -5,6 +5,7 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
     - Use themes (and dark mode)
 - Reduce number of Firebase reads
 - Statistics page
+    - Average gauge for quantity-based categories should round to 1 decimal place instead of being an integer
     - add page indicator
     - streaks for meeting daily goals
     - Lifetime summaries
