@@ -1,9 +1,11 @@
 MIA Input Tracker Todo List (Not in any particular order of importance)
 
+- remove scroll glow
 - Code refactoring
     - Use themes (and dark mode)
 - Reduce number of Firebase reads
 - Statistics page
+    - add page indicator
     - streaks for meeting daily goals
     - Lifetime summaries
 - Move hours and minutes sliders to the bottom for better ergonomics in the add screen
