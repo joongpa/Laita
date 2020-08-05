@@ -26,7 +26,7 @@ class StatisticsPageWidget extends StatelessWidget {
         if (stream.hasData) {
           final countedDays = math.min(TimeFrameModel().selectedTimeSpan.value, daysBetween(stream.data[0], DateTime.now()) + 1);
           final hours = Filter.getTotalInput(inputEntries, category: this.inputType, startDate: stream.data[0], endDate: stream.data[1]);
-          String value = convertToDisplay(hours / countedDays, inputType.isTimeBased);
+          String value = convertToStatsDisplay(hours / countedDays, inputType.isTimeBased);
           return _getWidget(value);
         } else return _getWidget("0:00");
       }

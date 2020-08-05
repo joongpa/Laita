@@ -79,9 +79,18 @@ class UsefulShit {
   static final leadingZeroFormat = NumberFormat("00");
 }
 
+String convertToStatsDisplay(double time, [bool isTimeBased = true]) {
+  int hours = time.floor();
+  int minutes = ((time % 1) * 60).round();
+
+  return (isTimeBased) ? '$hours:${NumberFormat("00").format(minutes)}' : UsefulShit.singleDecimalFormat.format(time);
+
+}
+
 String convertToDisplay(double time, [bool isTimeBased = true]) {
   int hours = time.floor();
   int minutes = ((time % 1) * 60).round();
 
   return (isTimeBased) ? '$hours:${NumberFormat("00").format(minutes)}' : time.round().toString();
+
 }
