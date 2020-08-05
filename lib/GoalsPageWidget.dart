@@ -1,10 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'dart:math' as math;
-import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/new_category_dialog.dart';

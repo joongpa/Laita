@@ -1,8 +1,5 @@
-import 'package:intl/intl.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/Entry.dart';
 
-import '../Map.dart';
 
 class GoalEntry extends Entry{
 

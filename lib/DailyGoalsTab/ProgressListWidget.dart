@@ -1,12 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/category.dart';
-import 'package:miatracker/Models/database.dart';
 import 'package:provider/provider.dart';
 
-import '../Models/DataStorageHelper.dart';
 import '../Models/InputEntry.dart';
 import 'GlobalProgressWidget.dart';
 

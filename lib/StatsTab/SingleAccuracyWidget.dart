@@ -1,10 +1,8 @@
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
-import 'package:miatracker/Models/TimeFrameModel.dart';
 import 'package:miatracker/Models/category.dart';
 import 'package:provider/provider.dart';
 

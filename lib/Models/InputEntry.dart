@@ -1,8 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
 
-import '../Map.dart';
 import 'Entry.dart';
 
 class InputEntry extends Entry{

@@ -1,14 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
-import 'package:miatracker/Models/GoalEntry.dart';
-import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
-import 'package:miatracker/StatsTab/AccuracyDisplayWidget.dart';
 import 'package:miatracker/StatsTab/AverageDisplayWidget.dart';
 import 'package:miatracker/StatsTab/FullGraphWidget.dart';
-import 'package:miatracker/StatsTab/SingleAccuracyWidget.dart';
 import 'package:miatracker/StatsTab/TimeFramePicker.dart';
 import 'package:provider/provider.dart';
 import 'DateTraverser.dart';

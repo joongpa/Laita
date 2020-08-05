@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/LogsTab/ConfirmDialog.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
 import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';

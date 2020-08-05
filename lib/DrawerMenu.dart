@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
-import 'Models/category.dart';
 import 'Models/auth.dart';
 import 'package:provider/provider.dart';
 
@@ -11,8 +10,6 @@ class DrawerMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var user = Provider.of<FirebaseUser>(context);
-    var categories = Provider.of<List<Category>>(context);
 
     return Drawer(
       child: ListView(

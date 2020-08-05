@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/DailyGoalsTab/AddHours.dart';
-import 'package:miatracker/DailyGoalsTab/CompositeProgressWidget.dart';
 import 'package:miatracker/DailyGoalsTab/ProgressListWidget.dart';
 import 'package:miatracker/DrawerMenu.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +13,6 @@ import 'package:miatracker/signInPage.dart';
 import 'package:provider/provider.dart';
 
 import 'LogsTab/MultiInputLog.dart';
-import 'Models/GoalEntry.dart';
-import 'Models/InputEntry.dart';
 import 'StatsTab/StatisticsSummaryWidget.dart';
 
 void main() async {
@@ -25,7 +22,6 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -93,28 +89,15 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     var user = Provider.of<FirebaseUser>(context);
     var categories = Provider.of<List<Category>>(context);
-    //DataStorageHelper().deleteAllInputEntries();
-    //DataStorageHelper().resetAllHours();
 
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(pageNames[selectedIndex]),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: IndexedStack(
           index: selectedIndex,
           children: <Widget>[
-//            ReorderableListView(
-//              onReorder: ,
-//              children: List.generate(DataStorageHelper().categoryNames.length + 1, (index) {
-//                if(index == DataStorageHelper().categoryNames.length) return SizedBox(height: 200);
-//                else return GlobalProgressWidget(DataStorageHelper().categories[index]);
-//              }),
-//            ),
             ProgressListWidget(),
             StatisticsSummaryWidget(),
             MultiInputLog(),
@@ -157,9 +140,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-  _onReorder(int index1, int index2) {
-
-  }
-
 }

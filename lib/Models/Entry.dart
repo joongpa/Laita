@@ -1,7 +1,5 @@
 import 'package:intl/intl.dart';
-import 'package:miatracker/Models/DataStorageHelper.dart';
 
-import '../Map.dart';
 
 abstract class Entry implements Comparable<Entry>{
   String docID;
