@@ -17,14 +17,14 @@ class AverageDisplayWidget extends StatelessWidget {
 
     return Wrap(
       alignment: WrapAlignment.center,
-      spacing: 10,
+      spacing: 5,
       runSpacing: 20,
       children:
           List.generate(categories.length, (index) {
         return Column(
           children: <Widget>[
             Container(
-              width: 75,
+              width: 80,
               child: Text(
                 categories[index].name,
                 textAlign: TextAlign.center,

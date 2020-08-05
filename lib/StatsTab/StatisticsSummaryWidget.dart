@@ -68,7 +68,7 @@ class StatisticsSummaryWidget extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: AverageDisplayWidget(),
               ),
               const SizedBox(height: 15),
