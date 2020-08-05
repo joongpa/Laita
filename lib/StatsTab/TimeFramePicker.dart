@@ -14,7 +14,8 @@ class _TimeFramePickerState extends State<TimeFramePicker> {
   @override
   Widget build(BuildContext context) {
     return Transform.scale(
-      scale: 0.7,
+      scale: 0.8,
+
       child: ToggleButtons(
         children: <Widget>[
           _choiceButton(TimeSpan.HalfYear.name),
@@ -45,7 +46,7 @@ class _TimeFramePickerState extends State<TimeFramePicker> {
   }
 
   _choiceButton(String text) => Padding(
-    padding: EdgeInsets.symmetric(horizontal: 40.0),
+    padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 0),
     child: Text(text, style: TextStyle(
       fontSize: 18,
     ),),

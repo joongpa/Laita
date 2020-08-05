@@ -51,7 +51,7 @@ class StatisticsSummaryWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Flexible(
+                        Expanded(
                           child: PageView(
                             children: <Widget>[
                               FullGraphWidget(isTimeBased: true,),
