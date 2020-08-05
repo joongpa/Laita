@@ -48,6 +48,7 @@ class StatisticsSummaryWidget extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Flexible(
