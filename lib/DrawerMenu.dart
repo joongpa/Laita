@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
 import 'Models/category.dart';
-import 'file:///C:/Users/Jeff%20Park/AndroidStudioProjects/mia_tracker/lib/Models/auth.dart';
+import 'Models/auth.dart';
 import 'package:provider/provider.dart';
 
 class DrawerMenu extends StatelessWidget {
