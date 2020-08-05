@@ -17,7 +17,7 @@ class AverageDisplayWidget extends StatelessWidget {
 
     return Wrap(
       alignment: WrapAlignment.center,
-      spacing: 0,
+      spacing: 10,
       runSpacing: 20,
       children:
           List.generate(categories.length, (index) {
