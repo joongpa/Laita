@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:miatracker/Models/Entry.dart';
+import 'package:miatracker/Models/aggregate_data_model.dart';
 import '../Map.dart';
 import 'GoalEntry.dart';
 import 'InputEntry.dart';
@@ -12,6 +13,7 @@ class DatabaseService {
   final String _inputEntries = 'inputEntries';
   final String _goalEntries = 'goalEntries';
   final String _categories = 'categories';
+  final String _aggregateInputEntries = 'aggregateInputEntries';
 
   Map<DateTime, List<Entry>> _entries = Map<DateTime, List<Entry>>();
 
@@ -73,9 +75,12 @@ class DatabaseService {
 
   Future<bool> addInputEntry(FirebaseUser user, InputEntry inputEntry) async {
     _entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
+
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_inputEntries);
+
     try {
       await ref.add(inputEntry.toMap());
+      _updateAggregateData(user, inputEntry);
       return true;
     } catch(e) {
       print(e.toString());
@@ -114,6 +119,7 @@ class DatabaseService {
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_inputEntries);
     try {
       await ref.document(inputEntry.docID).delete();
+      _updateAggregateData(user, inputEntry, isDelete: true);
       return true;
     } catch(e) {
       return false;
@@ -142,7 +148,7 @@ class DatabaseService {
   }
 
 
-  //Specialized Methods
+  ///Specialized Methods
 
   Future<List<Entry>> getEntriesOnDay(FirebaseUser user, DateTime day) async {
     if(_entries[day] == null) {
@@ -173,5 +179,25 @@ class DatabaseService {
     tempList.sort();
 
     return tempList;
+  }
+
+  void _updateAggregateData(FirebaseUser user, InputEntry inputEntry, {bool isDelete = false}) {
+    var ref2 = Firestore.instance.collection('users').document(user.uid).collection(_aggregateInputEntries);
+
+    ref2.where('dateTime', isEqualTo: daysAgo(0, inputEntry.dateTime)).limit(1).getDocuments().then((value) {
+      if(value.documents.length == 0) {
+        if(!isDelete) {
+          ref2.add(
+              DailyInputEntry(dateTime: inputEntry.dateTime, categoryHours: {
+                inputEntry.inputType: inputEntry.amount
+              }).toMap());
+        }
+      } else {
+        final id = value.documents.first.documentID;
+        final agData = DailyInputEntry.fromMap(value.documents.first.data, id);
+        agData.categoryHours[inputEntry.inputType] = ((isDelete) ? -1 : 1 * inputEntry.amount) + (agData.categoryHours[inputEntry.inputType] ?? 0.0);
+        ref2.document(id).updateData(agData.toMap());
+      }
+    });
   }
 }
