@@ -23,90 +23,82 @@ class InputLog extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = Provider.of<FirebaseUser>(context);
     final categories = Provider.of<List<Category>>(context);
-    final providedGoalEntries = Provider.of<List<GoalEntry>>(context) ?? [];
-    final providedInputEntries = Provider.of<List<InputEntry>>(context) ?? [];
 
-    if(providedInputEntries == null || providedGoalEntries == null || categories == null)
-      return Container();
+    return FutureBuilder<List<Entry>>(
+      future: DatabaseService.instance.getEntriesOnDay(user, dateTime),
+      builder: (context, snapshot) {
+        if(!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
-    final goalEntries = Filter.filterEntries(providedGoalEntries,
-        startDate: dateTime, endDate: daysAgo(-1, dateTime));
-    final inputEntries = Filter.filterEntries(providedInputEntries,
-        startDate: dateTime, endDate: daysAgo(-1, dateTime));
+        return ListView.builder(
+            itemCount: snapshot.data.length,
+            itemBuilder: (context, index) {
+              final entry = snapshot.data[index];
 
-    List<Entry> compiled = [];
-    compiled.addAll(goalEntries);
-    compiled.addAll(inputEntries);
-    compiled.sort();
+              String subtitleText = '';
+              if (entry is InputEntry) {
+                subtitleText = entry.description;
+              }
+              final goalText = "Set daily goal to ";
 
-    return ListView.builder(
-        itemCount: compiled.length,
-        itemBuilder: (context, index) {
-          final entry = compiled[index];
-
-          String subtitleText = '';
-          if (entry is InputEntry) {
-            subtitleText = entry.description;
-          }
-          final goalText = "Set daily goal to ";
-
-          if (entry is GoalEntry) {
-            return Card(
-                child: Container(
-                  color: Color.fromRGBO(235, 235, 235, 1),
-                  child: ListTile(
-                    subtitle: Text(subtitleText),
-                    leading: Text(
-                      entry.inputType,
-                      style: TextStyle(
-                        color: Color.fromRGBO(140, 140, 140, 1),
+              if (entry is GoalEntry) {
+                return Card(
+                    child: Container(
+                      color: Color.fromRGBO(235, 235, 235, 1),
+                      child: ListTile(
+                        subtitle: Text(subtitleText),
+                        leading: Text(
+                          entry.inputType,
+                          style: TextStyle(
+                            color: Color.fromRGBO(140, 140, 140, 1),
+                          ),
+                        ),
+                        title: Text(
+                          '$goalText${convertToDisplay(entry.amount, inputTypeFromCategory(entry, categories))}',
+                          style: TextStyle(
+                            color: Color.fromRGBO(140, 140, 140, 1),
+                          ),
+                        ),
+                        trailing: Text(
+                          entry.time,
+                          style: TextStyle(
+                            color: Color.fromRGBO(140, 140, 140, 1),
+                          ),
+                        ),
                       ),
-                    ),
-                    title: Text(
-                      '$goalText${convertToDisplay(entry.amount, inputTypeFromCategory(entry, categories))}',
-                      style: TextStyle(
-                        color: Color.fromRGBO(140, 140, 140, 1),
-                      ),
-                    ),
-                    trailing: Text(
-                      entry.time,
-                      style: TextStyle(
-                        color: Color.fromRGBO(140, 140, 140, 1),
-                      ),
-                    ),
+                    ));
+              }
+
+              return Dismissible(
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  alignment: AlignmentDirectional.centerEnd,
+                  color: Colors.red,
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
                   ),
-                ));
-          }
-
-          return Dismissible(
-            direction: DismissDirection.endToStart,
-            background: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              alignment: AlignmentDirectional.centerEnd,
-              color: Colors.red,
-              child: const Icon(
-                Icons.delete,
-                color: Colors.white,
-              ),
-            ),
-            key: UniqueKey(),
-            confirmDismiss: (disDirection) async {
-              return await asyncConfirmDialog(context, title: "Confirm Delete", description: 'Delete entry? This action cannot be undone');
-            },
-            onDismissed: (dis) {
-              DatabaseService.instance.deleteInputEntry(user, entry);
-            },
-            child: Card(
-                child: ListTile(
-                  subtitle: Text(subtitleText),
-                  leading: Text(
-                    entry.inputType,
-                  ),
-                  title: Text('${convertToDisplay(entry.amount, inputTypeFromCategory(entry, categories))}'),
-                  trailing: Text(entry.time),
-                )),
-          );
-        });
+                ),
+                key: UniqueKey(),
+                confirmDismiss: (disDirection) async {
+                  return await asyncConfirmDialog(context, title: "Confirm Delete", description: 'Delete entry? This action cannot be undone');
+                },
+                onDismissed: (dis) {
+                  DatabaseService.instance.deleteInputEntry(user, entry);
+                },
+                child: Card(
+                    child: ListTile(
+                      subtitle: Text(subtitleText),
+                      leading: Text(
+                        entry.inputType,
+                      ),
+                      title: Text('${convertToDisplay(entry.amount, inputTypeFromCategory(entry, categories))}'),
+                      trailing: Text(entry.time),
+                    )),
+              );
+            });
+      }
+    );
   }
   
   bool inputTypeFromCategory(Entry entry, List<Category> categories) {

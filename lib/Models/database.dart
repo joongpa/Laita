@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:miatracker/Models/Entry.dart';
 import '../Map.dart';
 import 'GoalEntry.dart';
 import 'InputEntry.dart';
@@ -11,6 +12,8 @@ class DatabaseService {
   final String _inputEntries = 'inputEntries';
   final String _goalEntries = 'goalEntries';
   final String _categories = 'categories';
+
+  Map<DateTime, List<Entry>> _entries = Map<DateTime, List<Entry>>();
 
   static final DatabaseService instance = DatabaseService._();
 
@@ -69,6 +72,7 @@ class DatabaseService {
   }
 
   Future<bool> addInputEntry(FirebaseUser user, InputEntry inputEntry) async {
+    _entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_inputEntries);
     try {
       await ref.add(inputEntry.toMap());
@@ -80,6 +84,7 @@ class DatabaseService {
   }
 
   Future<bool> addGoalEntry(FirebaseUser user, GoalEntry goalEntry) async {
+    _entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_goalEntries);
     try {
       await ref.add(goalEntry.toMap());
@@ -105,6 +110,7 @@ class DatabaseService {
   }
 
   Future<bool> deleteInputEntry(FirebaseUser user, InputEntry inputEntry) async {
+    _entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_inputEntries);
     try {
       await ref.document(inputEntry.docID).delete();
@@ -115,6 +121,7 @@ class DatabaseService {
   }
 
   Future<bool> deleteGoalEntry(FirebaseUser user, GoalEntry goalEntry) async {
+    _entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
     var ref = Firestore.instance.collection('users').document(user.uid).collection(_goalEntries);
     try {
       await ref.document(goalEntry.docID).delete();
@@ -132,5 +139,39 @@ class DatabaseService {
     } catch(e) {
       return false;
     }
+  }
+
+
+  //Specialized Methods
+
+  Future<List<Entry>> getEntriesOnDay(FirebaseUser user, DateTime day) async {
+    if(_entries[day] == null) {
+      final temp = await _getEntriesAsFuture(user, dateTime: day);
+      _entries[day] = temp;
+    }
+    return _entries[day] ?? [];
+  }
+
+  Future<List<Entry>> _getEntriesAsFuture(FirebaseUser user, {DateTime dateTime}) async{
+    var inputRef = Firestore.instance.collection('users').document(user.uid).collection(_inputEntries);
+    var goalRef = Firestore.instance.collection('users').document(user.uid).collection(_goalEntries);
+    List<Entry> tempList = [];
+
+    final iSnap = await inputRef
+        .where('dateTime', isGreaterThanOrEqualTo: dateTime)
+        .where('dateTime', isLessThan: daysAgo(-1, dateTime)).getDocuments();
+
+    final gSnap = await goalRef
+        .where('dateTime', isGreaterThanOrEqualTo: dateTime)
+        .where('dateTime', isLessThan: daysAgo(-1, dateTime)).getDocuments();
+
+    List<InputEntry> iEntries = iSnap.documents.map<InputEntry>((doc) => InputEntry.fromMap(doc.data, doc.documentID)).toList();;
+    List<GoalEntry> gEntries = gSnap.documents.map<GoalEntry>((doc) => GoalEntry.fromMap(doc.data, doc.documentID)).toList();;
+
+    tempList.addAll(iEntries);
+    tempList.addAll(gEntries);
+    tempList.sort();
+
+    return tempList;
   }
 }
