@@ -17,19 +17,13 @@ class StatisticsPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var timeFrames = Provider.of<List<DateTime>>(context) ?? [DateTime.now(), DateTime.now()];
     var inputEntries = Provider.of<List<InputEntry>>(context) ?? [];
 
-    return StreamBuilder(
-      stream: TimeFrameModel().timeFrameStream$,
-      builder: (context, stream) {
-        if (stream.hasData) {
-          final countedDays = math.min(TimeFrameModel().selectedTimeSpan.value, daysBetween(stream.data[0], DateTime.now()) + 1);
-          final hours = Filter.getTotalInput(inputEntries, category: this.inputType, startDate: stream.data[0], endDate: stream.data[1]);
-          String value = convertToStatsDisplay(hours / countedDays, inputType.isTimeBased);
-          return _getWidget(value);
-        } else return _getWidget("0:00");
-      }
-    );
+    final countedDays = math.min(TimeFrameModel().selectedTimeSpan.value, daysBetween(timeFrames[0], DateTime.now()) + 1);
+    final hours = Filter.getTotalInput(inputEntries, category: this.inputType, startDate: timeFrames[0], endDate: timeFrames[1]);
+    String value = convertToStatsDisplay(hours / countedDays, inputType.isTimeBased);
+    return _getWidget(value);
   }
 
   Widget _getWidget(String text) {

@@ -16,7 +16,7 @@ class StatisticsSummaryWidget extends StatelessWidget {
       providers: [
         StreamProvider<List<DateTime>>.value(
             value: TimeFrameModel().timeFrameStream$
-        )
+        ),
       ],
       child: StreamBuilder(
         stream: InputHoursUpdater.ihu.updateStream$,

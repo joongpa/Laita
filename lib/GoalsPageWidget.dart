@@ -92,7 +92,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                               ],
                             ),
                             onPressed: () async {
-                              Category category = await showDialog(context: context, child: NewCategoryDialog());
+                              Category category = await showDialog(context: context, child: NewCategoryDialog()) ?? Category();
                               if (category.name != null && category.name != '' && category.isTimeBased != null)
                                 DatabaseService.instance.addCategory(user, category);
                             },

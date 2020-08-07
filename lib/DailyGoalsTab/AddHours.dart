@@ -31,16 +31,35 @@ class _AddHoursState extends State<AddHours> {
   Category _selectedCategory;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    _selectedCategory = widget.categories[0];
-    _selections = List.generate(8, (index) => false);
-    _selections[0] = true;
+    try {
+      _selectedCategory = widget.categories[0];
+      _selections = List.generate(8, (index) => false);
+      _selections[0] = true;
+    } catch (e) {}
     dateTime = DateTime.now();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_selections == null && _selectedCategory == null) {
+      return Scaffold(
+          appBar: AppBar(
+            title: Text("Woops!"),
+          ),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(50.0),
+              child: Text(
+                'To log your input, go to the "Goals" page under the drawer menu and add a new category. Good luck on your language learning journey!',
+                style: TextStyle(
+                  fontSize: 20
+                ),),
+            ),
+          )
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text("New Immersion Entry"),
@@ -52,7 +71,7 @@ class _AddHoursState extends State<AddHours> {
             children: <Widget>[
               TextField(
                 decoration: InputDecoration(
-                  labelText: "Description (optional)"
+                    labelText: "Description (optional)"
                 ),
                 onChanged: (s) {
                   description = s;
@@ -64,10 +83,14 @@ class _AddHoursState extends State<AddHours> {
               DatePicker(
                 selectedDate: dateTime,
                 onChanged: (dt) {
-                  setState((){
+                  setState(() {
                     dateTime = dt;
-                    if(constants.sameDay(dt, DateTime.now())){
-                      final duration = Duration(hours: DateTime.now().hour, minutes: DateTime.now().minute);
+                    if (constants.sameDay(dt, DateTime.now())) {
+                      final duration = Duration(hours: DateTime
+                          .now()
+                          .hour, minutes: DateTime
+                          .now()
+                          .minute);
                       dateTime.add(duration);
                     }
                   });
@@ -78,34 +101,36 @@ class _AddHoursState extends State<AddHours> {
               ),
               if(widget.categories.length != 0)
                 SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ToggleButtons(
-                  children: List.generate(widget.categories.length, (index) => choiceButton(widget.categories[index].name)),
-                  borderRadius: BorderRadius.circular(10),
-                  selectedColor: Colors.white,
-                  fillColor: Colors.red,
-                  isSelected: _selections.sublist(0, widget.categories.length),
-                  onPressed: (int index) {
-                    setState(() {
-                      for (int buttonIndex = 0;
-                          buttonIndex < _selections.length;
-                          buttonIndex++) {
-                        if (buttonIndex == index) {
-                          _selections[buttonIndex] = true;
-                          _selectedCategory = widget.categories[index];
-                        } else {
-                          _selections[buttonIndex] = false;
+                  scrollDirection: Axis.horizontal,
+                  child: ToggleButtons(
+                    children: List.generate(widget.categories.length, (index) =>
+                        choiceButton(widget.categories[index].name)),
+                    borderRadius: BorderRadius.circular(10),
+                    selectedColor: Colors.white,
+                    fillColor: Colors.red,
+                    isSelected: _selections.sublist(
+                        0, widget.categories.length),
+                    onPressed: (int index) {
+                      setState(() {
+                        for (int buttonIndex = 0;
+                        buttonIndex < _selections.length;
+                        buttonIndex++) {
+                          if (buttonIndex == index) {
+                            _selections[buttonIndex] = true;
+                            _selectedCategory = widget.categories[index];
+                          } else {
+                            _selections[buttonIndex] = false;
+                          }
                         }
-                      }
-                    });
-                  },
+                      });
+                    },
+                  ),
                 ),
-              ),
               SizedBox(
                 height: 20,
               ),
               if(_selectedCategory.isTimeBased)...
-                [
+              [
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
@@ -230,25 +255,31 @@ class _AddHoursState extends State<AddHours> {
     );
   }
 
-  Widget _submitButton(FirebaseUser user, List<Category> categories) => RaisedButton(
+  Widget _submitButton(FirebaseUser user, List<Category> categories) =>
+      RaisedButton(
         child: Text(
           "Done",
           style: TextStyle(
             color: Colors.white,
           ),
         ),
-        onPressed: buttonDisabled ? null : () => _buttonAction(user, categories),
+        onPressed: buttonDisabled ? null : () =>
+            _buttonAction(user, categories),
         color: Colors.lightBlue,
       );
 
   _buttonAction(FirebaseUser user, List<Category> categories) {
-    double totalTime = hours + minutes/60;
-    InputEntry entry = InputEntry(description: description, dateTime: dateTime, inputType: _selectedCategory.name, amount: totalTime);
+    double totalTime = hours + minutes / 60;
+    InputEntry entry = InputEntry(description: description,
+        dateTime: dateTime,
+        inputType: _selectedCategory.name,
+        amount: totalTime);
     DatabaseService.instance.addInputEntry(user, entry);
     Navigator.pop(context);
   }
 
-  Widget choiceButton(String text) => Padding(
+  Widget choiceButton(String text) =>
+      Padding(
         padding: EdgeInsets.all(10.0),
         child: Text(text),
       );

@@ -24,6 +24,8 @@ class InputLog extends StatelessWidget {
     final user = Provider.of<FirebaseUser>(context);
     final categories = Provider.of<List<Category>>(context);
 
+    if(user == null || categories == null) return Container();
+
     return FutureBuilder<List<Entry>>(
       future: DatabaseService.instance.getEntriesOnDay(user, dateTime),
       builder: (context, snapshot) {
@@ -100,7 +102,7 @@ class InputLog extends StatelessWidget {
       }
     );
   }
-  
+
   bool inputTypeFromCategory(Entry entry, List<Category> categories) {
     for(final category in categories) {
       if(entry.inputType == category.name) {

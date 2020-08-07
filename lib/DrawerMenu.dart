@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
+import 'package:miatracker/Models/database.dart';
 import 'Models/auth.dart';
 import 'package:provider/provider.dart';
 
@@ -42,6 +43,7 @@ class DrawerMenu extends StatelessWidget {
             text: "Log out",
             onTap: () {
               AuthService.instance.signOut();
+              DatabaseService.instance.clearCache();
             },
           )
         ],
