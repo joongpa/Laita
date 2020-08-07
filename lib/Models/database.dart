@@ -110,7 +110,6 @@ class DatabaseService {
   }
 
   Future<bool> addInputEntry(FirebaseUser user, InputEntry inputEntry) async {
-    _entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
 
     var ref = Firestore.instance
         .collection('users')
@@ -118,8 +117,10 @@ class DatabaseService {
         .collection(_inputEntries);
 
     try {
-      await ref.add(inputEntry.toMap());
+      final docRef = await ref.add(inputEntry.toMap());
       _updateAggregateData(user, inputEntry);
+      inputEntry.docID = docRef.documentID;
+      _entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
       return true;
     } catch (e) {
       print(e.toString());
@@ -128,13 +129,14 @@ class DatabaseService {
   }
 
   Future<bool> addGoalEntry(FirebaseUser user, GoalEntry goalEntry) async {
-    _entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
         .collection(_goalEntries);
     try {
-      await ref.add(goalEntry.toMap());
+      final docRef = await ref.add(goalEntry.toMap());
+      goalEntry.docID = docRef.documentID;
+      _entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
       return true;
     } catch (e) {
       return false;
@@ -164,13 +166,13 @@ class DatabaseService {
 
   Future<bool> deleteInputEntry(
       FirebaseUser user, InputEntry inputEntry) async {
-    _entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
         .collection(_inputEntries);
     try {
       await ref.document(inputEntry.docID).delete();
+      _entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
       _updateAggregateData(user, inputEntry, isDelete: true);
       return true;
     } catch (e) {
@@ -179,13 +181,13 @@ class DatabaseService {
   }
 
   Future<bool> deleteGoalEntry(FirebaseUser user, GoalEntry goalEntry) async {
-    _entries[daysAgo(0, goalEntry.dateTime)].remove(goalEntry);
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
         .collection(_goalEntries);
     try {
       await ref.document(goalEntry.docID).delete();
+      _entries[daysAgo(0, goalEntry.dateTime)].remove(goalEntry);
       return true;
     } catch (e) {
       return false;
