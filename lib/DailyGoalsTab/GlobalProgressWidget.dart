@@ -10,92 +10,85 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 
 class GlobalProgressWidget extends StatelessWidget {
-  final Category inputType;
+  final double goal;
   final double value;
+  final String name;
+  final bool isTimeBased;
   final f = new NumberFormat('0.0');
 
-  GlobalProgressWidget(this.inputType, this.value);
+  GlobalProgressWidget({this.value, this.goal, this.name, this.isTimeBased});
 
   @override
   Widget build(BuildContext context) {
-    var user = Provider.of<FirebaseUser>(context);
-
-    return StreamBuilder<GoalEntry>(
-      stream: DatabaseService.instance.lastGoalEntry(user, inputType),
-      builder: (context, snapshot) {
-        final goalValue = (snapshot.hasData) ? snapshot.data.amount : 0.0;
-
-        return Card(
-          margin: EdgeInsets.all(8.0),
-          child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            children: <Widget>[
+              Text(
+                name,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
+              Row(
                 children: <Widget>[
-                  Text(
-                    inputType.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
-                    ),
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: <Widget>[
-                            Text(
-                              convertToDisplay(value, inputType.isTimeBased),
-                              style: TextStyle(fontSize: 25.0),
-                            ),
-                            const Divider(
-                              height: 2,
-                              thickness: 2,
-                              color: Colors.grey,
-                              indent: 0,
-                              endIndent: 0,
-                            ),
-                            Text(
-                              convertToDisplay(goalValue, inputType.isTimeBased),
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          convertToDisplay(value, isTimeBased),
+                          style: TextStyle(fontSize: 25.0),
                         ),
-                      ),
-                      const Text(
-                        "  hrs",
-                        style: TextStyle(
-                          fontSize: 15.0,
+                        const Divider(
+                          height: 2,
+                          thickness: 2,
                           color: Colors.grey,
+                          indent: 0,
+                          endIndent: 0,
                         ),
-                      ),
-                      const SizedBox(
-                        width: 17,
-                      ),
-                      Expanded(
-                        flex: 4,
-                        child: Padding(
-                          padding: const EdgeInsets.all(0.0),
-                          child: LinearPercentIndicator(
-                            lineHeight: 20.0,
-                            percent: _getPercent(value, goalValue),
-                            linearStrokeCap: LinearStrokeCap.roundAll,
-                            progressColor: _getPercent(value, goalValue) == 1.0
-                                ? Colors.green
-                                : Colors.blue,
-                            backgroundColor: Color.fromRGBO(237, 237, 237, 1),
+                        Text(
+                          convertToDisplay(goal, isTimeBased),
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.grey,
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const Text(
+                    "  hrs",
+                    style: TextStyle(
+                      fontSize: 15.0,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 17,
+                  ),
+                  Expanded(
+                    flex: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: LinearPercentIndicator(
+                        lineHeight: 20.0,
+                        percent: _getPercent(value, goal),
+                        linearStrokeCap: LinearStrokeCap.roundAll,
+                        progressColor: _getPercent(value, goal) == 1.0
+                            ? Colors.green
+                            : Colors.blue,
+                        backgroundColor: Color.fromRGBO(237, 237, 237, 1),
                       ),
-                    ],
+                    ),
                   ),
                 ],
-              )),
-        );
-      }
+              ),
+            ],
+          )),
     );
   }
 

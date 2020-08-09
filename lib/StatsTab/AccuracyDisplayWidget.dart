@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:miatracker/StatsTab/SingleAccuracyWidget.dart';
 import 'package:provider/provider.dart';
 
@@ -9,16 +10,17 @@ class AccuracyDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var categories = Provider.of<List<Category>>(context) ?? [];
+    AppUser user = Provider.of<AppUser>(context);
+    if(user == null) return Container();
 
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 25,
       runSpacing: 20,
       children:
-      List.generate(categories.length, (index) {
+      List.generate(user.categories.length, (index) {
         return SingleAccuracyWidget(
-          inputType: categories[index],
+          inputType: user.categories[index],
         );
       }),
     );

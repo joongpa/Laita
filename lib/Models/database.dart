@@ -6,14 +6,13 @@ import 'package:miatracker/Models/aggregate_data_model.dart';
 import '../Map.dart';
 import 'GoalEntry.dart';
 import 'InputEntry.dart';
-import 'category.dart';
+import 'user.dart';
 
 class DatabaseService {
   DatabaseService._();
 
   final String _inputEntries = 'inputEntries';
   final String _goalEntries = 'goalEntries';
-  final String _categories = 'categories';
   final String _aggregateInputEntries = 'aggregateInputEntries';
 
   static Map<DateTime, List<Entry>> _entries = Map<DateTime, List<Entry>>();
@@ -21,6 +20,12 @@ class DatabaseService {
       Map<DateTime, DailyInputEntry>();
 
   static final DatabaseService instance = DatabaseService._();
+
+  Stream<AppUser> appUserStream(FirebaseUser user) {
+    var ref = Firestore.instance.collection('users').document(user.uid);
+
+    return ref.snapshots().map((value) => AppUser.fromMap(value.data));
+  }
 
   Stream<List<InputEntry>> inputEntriesStream(FirebaseUser user,
       {Category category, DateTime startDate, DateTime endDate}) {
@@ -82,35 +87,7 @@ class DatabaseService {
             .toList());
   }
 
-  Stream<GoalEntry> lastGoalEntry(FirebaseUser user, Category category) {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_goalEntries);
-
-    return ref
-        .where('inputType', isEqualTo: category.name)
-        .orderBy('dateTime', descending: true)
-        .limit(1)
-        .snapshots()
-        .map((list) => list.documents
-            .map((doc) => GoalEntry.fromMap(doc.data, doc.documentID))
-            .first);
-  }
-
-  Stream<List<Category>> categoriesStream(FirebaseUser user) {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_categories);
-
-    return ref.orderBy('dateTime').snapshots().map((list) => list.documents
-        .map((doc) => Category.fromMap(doc.data, doc.documentID))
-        .toList());
-  }
-
-  Future<bool> addInputEntry(FirebaseUser user, InputEntry inputEntry) async {
-
+  Future<bool> addInputEntry(AppUser user, InputEntry inputEntry) async {
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
@@ -128,14 +105,20 @@ class DatabaseService {
     }
   }
 
-  Future<bool> addGoalEntry(FirebaseUser user, GoalEntry goalEntry) async {
+  Future<bool> addGoalEntry(AppUser user, GoalEntry goalEntry) async {
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
         .collection(_goalEntries);
+
     try {
+      int index = user.categories.indexOf(Category(name: goalEntry.inputType));
+      if(index >= 0 && user.categories[index].goalAmount == goalEntry.amount)
+        return false;
+
       final docRef = await ref.add(goalEntry.toMap());
       goalEntry.docID = docRef.documentID;
+      _updateAggregateGoalData(user, goalEntry);
       _entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
       return true;
     } catch (e) {
@@ -143,29 +126,23 @@ class DatabaseService {
     }
   }
 
-  Future<bool> addCategory(FirebaseUser user, Category category) async {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_categories);
-    int size;
-    await ref
-        .where('name', isEqualTo: category.name)
-        .getDocuments()
-        .then((value) => size = value.documents.length);
-    if (size == 0) {
-      try {
-        await ref.add(category.toMap());
-        return true;
-      } catch (e) {
-        return false;
+  void updateCategories(AppUser user, {Category category, bool isDelete}) {
+    var userRef = Firestore.instance.collection('users').document(user.uid);
+    if (isDelete) {
+      user.categories.remove(category);
+      userRef.setData(user.toMap());
+    } else {
+      //2 categories cannot have the same name
+      int index = user.categories.indexOf(category);
+
+      if(index == -1) {
+        user.categories.add(category);
+        userRef.setData(user.toMap());
       }
     }
-    return false;
   }
 
-  Future<bool> deleteInputEntry(
-      FirebaseUser user, InputEntry inputEntry) async {
+  Future<bool> deleteInputEntry(AppUser user, InputEntry inputEntry) async {
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
@@ -180,36 +157,9 @@ class DatabaseService {
     }
   }
 
-  Future<bool> deleteGoalEntry(FirebaseUser user, GoalEntry goalEntry) async {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_goalEntries);
-    try {
-      await ref.document(goalEntry.docID).delete();
-      _entries[daysAgo(0, goalEntry.dateTime)].remove(goalEntry);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> deleteCategory(FirebaseUser user, Category category) async {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_categories);
-    try {
-      await ref.document(category.docID).delete();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
   ///Specialized Methods
 
-  Future<List<Entry>> getEntriesOnDay(FirebaseUser user, DateTime day) async {
+  Future<List<Entry>> getEntriesOnDay(AppUser user, DateTime day) async {
     if (_entries[day] == null) {
       final temp = await _getEntriesAsFuture(user, dateTime: day);
       _entries[day] = temp;
@@ -217,7 +167,7 @@ class DatabaseService {
     return _entries[day] ?? [];
   }
 
-  Future<List<Entry>> _getEntriesAsFuture(FirebaseUser user,
+  Future<List<Entry>> _getEntriesAsFuture(AppUser user,
       {DateTime dateTime}) async {
     var inputRef = Firestore.instance
         .collection('users')
@@ -253,10 +203,8 @@ class DatabaseService {
     return tempList;
   }
 
-  Future<Map<DateTime, DailyInputEntry>> getTotalInputHoursOnDays(
-      FirebaseUser user,
-      {@required DateTime startDate,
-      @required DateTime endDate}) async {
+  Future<Map<DateTime, DailyInputEntry>> getTotalInputHoursOnDays(AppUser user,
+      {@required DateTime startDate, @required DateTime endDate}) async {
     for (int i = 1; i <= daysBetween(startDate, endDate); i++) {
       final tempEntry = _aggregateEntries[daysAgo(i, endDate)];
       if (tempEntry == null) {
@@ -270,7 +218,7 @@ class DatabaseService {
   }
 
   Future<Map<DateTime, DailyInputEntry>> _getMissingAggregateEntries(
-      FirebaseUser user, DateTime startDate, DateTime endDate) async {
+      AppUser user, DateTime startDate, DateTime endDate) async {
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
@@ -289,12 +237,11 @@ class DatabaseService {
     return tempMap ?? {};
   }
 
-  Stream<DailyInputEntry> dailyProgressStream(FirebaseUser user) {
+  Stream<DailyInputEntry> dailyProgressStream(AppUser user) {
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
         .collection(_aggregateInputEntries);
-
 
     return ref
         .where('dateTime', isGreaterThanOrEqualTo: daysAgo(0))
@@ -302,11 +249,22 @@ class DatabaseService {
         .limit(1)
         .snapshots()
         .map((list) => list.documents
-        .map((doc) => DailyInputEntry.fromMap(doc.data, doc.documentID))
-        .first);
+            .map((doc) => DailyInputEntry.fromMap(doc.data, doc.documentID))
+            .first);
   }
 
-  void _updateAggregateData(FirebaseUser user, InputEntry inputEntry,
+  void _updateAggregateGoalData(AppUser user, GoalEntry goalEntry) {
+    var ref2 = Firestore.instance.collection('users').document(user.uid);
+    try {
+      int index = user.categories.indexOf(Category(name: goalEntry.inputType));
+      if(index == -1) return;
+
+      user.categories[index].goalAmount = goalEntry.amount;
+      ref2.setData(user.toMap(), merge: true);
+    } catch (e) {}
+  }
+
+  void _updateAggregateData(AppUser user, InputEntry inputEntry,
       {bool isDelete = false}) {
     var ref2 = Firestore.instance
         .collection('users')
@@ -324,7 +282,7 @@ class DatabaseService {
         try {
           DocumentReference docRef = value.documents.first.reference;
           freshSnap = await transaction.get(docRef);
-        } catch (e){}
+        } catch (e) {}
 
         if (freshSnap == null) {
           if (!isDelete) {
@@ -335,7 +293,8 @@ class DatabaseService {
                 }).toMap());
           }
         } else {
-          final agData = DailyInputEntry.fromMap(freshSnap.data, freshSnap.reference.documentID);
+          final agData = DailyInputEntry.fromMap(
+              freshSnap.data, freshSnap.reference.documentID);
           agData.categoryHours[inputEntry.inputType] =
               ((isDelete) ? -1 : 1) * inputEntry.amount +
                   (agData.categoryHours[inputEntry.inputType] ?? 0.0);

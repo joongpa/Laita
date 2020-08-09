@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ import 'Models/category.dart';
 import 'Models/auth.dart';
 import 'package:miatracker/signInPage.dart';
 import 'package:provider/provider.dart';
+import 'Models/user.dart';
 
 import 'LogsTab/MultiInputLog.dart';
 import 'StatsTab/StatisticsSummaryWidget.dart';
@@ -87,8 +90,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var user = Provider.of<FirebaseUser>(context);
-    var categories = Provider.of<List<Category>>(context);
+    var user = Provider.of<AppUser>(context);
+    user ??= AppUser();
 
     return Scaffold(
       appBar: AppBar(
@@ -133,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AddHours(user, categories)),
+              MaterialPageRoute(builder: (context) => AddHours(user, user.categories)),
             );
           },
         ),

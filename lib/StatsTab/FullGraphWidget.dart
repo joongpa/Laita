@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 
 import 'InputSeries.dart';
@@ -29,8 +30,12 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var categories = Provider.of<List<Category>>(context) ?? [];
-    categories = categories.where((element) => element.isTimeBased == widget.isTimeBased).toList();
+    AppUser user = Provider.of<AppUser>(context);
+    if(user == null) return Container();
+
+
+    List<Category> categories = user.categories.where((element) => element.isTimeBased == widget.isTimeBased).toList();
+
     return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
       Flexible(
           child: Wrap(

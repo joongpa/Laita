@@ -4,6 +4,7 @@ import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 
 import '../Map.dart';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'Models/category.dart';
+import 'Models/user.dart';
 
 class NewCategoryDialog extends StatefulWidget {
   @override
@@ -68,7 +69,7 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
             Category category = Category(
                 name: _newCategoryDialogController.text,
                 isTimeBased: isTimeBased,
-                dateTime: DateTime.now());
+                addDate: DateTime.now());
             Navigator.of(context).pop(category);
             _newCategoryDialogController.clear();
           },

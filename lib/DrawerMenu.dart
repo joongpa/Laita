@@ -3,14 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
 import 'package:miatracker/Models/database.dart';
-import 'Models/auth.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
+import 'Models/auth.dart';
 
 class DrawerMenu extends StatelessWidget {
-  final FirebaseAuth auth = FirebaseAuth.instance;
-
   @override
   Widget build(BuildContext context) {
+    var user = Provider.of<FirebaseUser>(context);
 
     return Drawer(
       child: ListView(
@@ -27,8 +27,9 @@ class DrawerMenu extends StatelessWidget {
                   builder: (context) {
                     return MultiProvider(
                       providers: [
-                        StreamProvider<FirebaseUser>.value(
-                            value: FirebaseAuth.instance.onAuthStateChanged),
+                        StreamProvider<AppUser>.value(
+                          value: DatabaseService.instance.appUserStream(user),
+                        ),
                       ],
                       child: GoalsPageWidget(),
                     );

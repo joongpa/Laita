@@ -7,10 +7,11 @@ import 'package:miatracker/Models/database.dart';
 import 'dart:math' as math;
 import '../Map.dart' as constants;
 import 'DatePicker.dart';
+import '../Models/user.dart';
 
 class AddHours extends StatefulWidget {
 
-  final FirebaseUser user;
+  final AppUser user;
   final List<Category> categories;
 
   AddHours(this.user, this.categories);
@@ -35,15 +36,18 @@ class _AddHoursState extends State<AddHours> {
     super.initState();
     try {
       _selectedCategory = widget.categories[0];
-      _selections = List.generate(8, (index) => false);
-      _selections[0] = true;
-    } catch (e) {}
+      _selections = List.generate(8, (index) {
+        if(index == 0) return true;
+        return false;
+      });
+    } catch (e) {
+    }
     dateTime = DateTime.now();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_selections == null && _selectedCategory == null) {
+    if (_selectedCategory == null) {
       return Scaffold(
           appBar: AppBar(
             title: Text("Woops!"),
@@ -255,7 +259,7 @@ class _AddHoursState extends State<AddHours> {
     );
   }
 
-  Widget _submitButton(FirebaseUser user, List<Category> categories) =>
+  Widget _submitButton(AppUser user, List<Category> categories) =>
       RaisedButton(
         child: Text(
           "Done",
@@ -268,7 +272,7 @@ class _AddHoursState extends State<AddHours> {
         color: Colors.lightBlue,
       );
 
-  _buttonAction(FirebaseUser user, List<Category> categories) {
+  _buttonAction(AppUser user, List<Category> categories) {
     double totalTime = hours + minutes / 60;
     InputEntry entry = InputEntry(description: description,
         dateTime: dateTime,

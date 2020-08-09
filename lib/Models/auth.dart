@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/rxdart.dart';
+import 'user.dart';
 
 class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -9,18 +10,10 @@ class AuthService {
   final Firestore _db = Firestore.instance;
 
   Stream<FirebaseUser> user;
-  Stream<Map<String, dynamic>> profile;
   PublishSubject<bool> loading = PublishSubject();
 
   AuthService._() {
     user = _auth.onAuthStateChanged;
-    profile = user.switchMap((FirebaseUser u) {
-      if(u != null) {
-        return _db.collection('users').document(u.uid).snapshots().map((snap) => snap.data);
-      } else {
-        return Stream.empty();
-      }
-    });
   }
   static final AuthService instance = AuthService._();
 
@@ -42,7 +35,7 @@ class AuthService {
 
   void _updateUserData(FirebaseUser user) {
     DocumentReference ref = _db.collection('users').document(user.uid);
-    
+
     ref.setData({
       'uid': user.uid,
       'email': user.email,
@@ -52,7 +45,9 @@ class AuthService {
 
   void signInAnonymously() async {
     loading.add(true);
-    await _auth.signInAnonymously();
+    AuthResult auth = await _auth.signInAnonymously();
+    FirebaseUser user = auth.user;
+    _updateUserData(user);
     loading.add(false);
   }
 

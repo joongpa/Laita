@@ -9,6 +9,7 @@ import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:provider/provider.dart';
+import '../Models/user.dart';
 
 import '../Models/InputEntry.dart';
 import '../Map.dart';
@@ -21,15 +22,13 @@ class InputLog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<FirebaseUser>(context);
-    final categories = Provider.of<List<Category>>(context);
-
-    if(user == null || categories == null) return Container();
+    final user = Provider.of<AppUser>(context);
+    if(user == null) return Container();
 
     return FutureBuilder<List<Entry>>(
       future: DatabaseService.instance.getEntriesOnDay(user, dateTime),
       builder: (context, snapshot) {
-        if(!snapshot.hasData) return Center(child: CircularProgressIndicator());
+        if(snapshot.connectionState == ConnectionState.waiting) return Center(child: CircularProgressIndicator());
 
         return ListView.builder(
             itemCount: snapshot.data.length,
@@ -55,7 +54,7 @@ class InputLog extends StatelessWidget {
                           ),
                         ),
                         title: Text(
-                          '$goalText${convertToDisplay(entry.amount, inputTypeFromCategory(entry, categories))}',
+                          '$goalText${convertToDisplay(entry.amount, user.categories[user.categories.indexOf(Category(name: entry.inputType))].isTimeBased)}',
                           style: TextStyle(
                             color: Color.fromRGBO(140, 140, 140, 1),
                           ),
@@ -94,21 +93,12 @@ class InputLog extends StatelessWidget {
                       leading: Text(
                         entry.inputType,
                       ),
-                      title: Text('${convertToDisplay(entry.amount, inputTypeFromCategory(entry, categories))}'),
+                      title: Text('${convertToDisplay(entry.amount, user.categories[user.categories.indexOf(Category(name: entry.inputType))].isTimeBased)}'),
                       trailing: Text(entry.time),
                     )),
               );
             });
       }
     );
-  }
-
-  bool inputTypeFromCategory(Entry entry, List<Category> categories) {
-    for(final category in categories) {
-      if(entry.inputType == category.name) {
-        return category.isTimeBased;
-      }
-    }
-    return true;
   }
 }

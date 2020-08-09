@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
-import '../Models/category.dart' as cat;
+import '../Models/user.dart' as model;
 import '../Models/InputEntry.dart';
 import '../Map.dart';
 
@@ -41,8 +42,10 @@ class InputChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var categories = Provider.of<List<cat.Category>>(context) ?? [];
-    categories = categories.where((element) => element.isTimeBased == isTimeBased).toList();
+    AppUser user = Provider.of<AppUser>(context);
+    if(user == null) return Container();
+
+    List<model.Category> categories = user.categories.where((element) => element.isTimeBased == isTimeBased).toList();
     var inputEntries = Provider.of<List<InputEntry>>(context) ?? [];
 
     return StreamBuilder(

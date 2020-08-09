@@ -8,6 +8,8 @@ import 'Models/auth.dart';
 import 'package:miatracker/main.dart';
 import 'package:provider/provider.dart';
 
+import 'Models/user.dart';
+
 class SignInPage extends StatelessWidget {
 
   @override
@@ -66,8 +68,8 @@ class SignInPage extends StatelessWidget {
           StreamProvider<List<GoalEntry>>.value(
               value: DatabaseService.instance.goalEntriesStream(user)
           ),
-          StreamProvider<List<Category>>.value(
-              value: DatabaseService.instance.categoriesStream(user)
+          StreamProvider<AppUser>.value(
+            value: DatabaseService.instance.appUserStream(user),
           )
         ],
         child: MyHomePage(title: "Immersion Tracker",));

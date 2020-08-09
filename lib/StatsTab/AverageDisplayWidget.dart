@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:miatracker/StatsTab/SingleAccuracyWidget.dart';
 import 'package:provider/provider.dart';
 
@@ -10,20 +11,21 @@ class AverageDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var categories = Provider.of<List<Category>>(context) ?? [];
+    AppUser user = Provider.of<AppUser>(context);
+    if(user == null) return Container();
 
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 5,
       runSpacing: 20,
       children:
-          List.generate(categories.length, (index) {
+          List.generate(user.categories.length, (index) {
         return Column(
           children: <Widget>[
             Container(
               width: 80,
               child: Text(
-                categories[index].name,
+                user.categories[index].name,
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -34,11 +36,11 @@ class AverageDisplayWidget extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             StatisticsPageWidget(
-              inputType: categories[index],
+              inputType: user.categories[index],
             ),
             const SizedBox(height: 5),
             SingleAccuracyWidget(
-              inputType: categories[index],
+              inputType: user.categories[index],
             ),
           ],
         );

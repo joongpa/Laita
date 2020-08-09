@@ -7,6 +7,7 @@ import 'package:miatracker/Models/TimeFrameModel.dart';
 import 'dart:math' as math;
 
 import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 
 class StatisticsPageWidget extends StatelessWidget {

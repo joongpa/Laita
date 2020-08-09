@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'category.dart';
