@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
 import 'package:miatracker/StatsTab/AverageDisplayWidget.dart';
@@ -15,7 +16,8 @@ class StatisticsSummaryWidget extends StatelessWidget {
     return MultiProvider(
       providers: [
         StreamProvider<List<DateTime>>.value(
-            value: TimeFrameModel().timeFrameStream$
+          value: TimeFrameModel().timeFrameStream$,
+          initialData: [daysAgo(7, DateTime.now()), daysAgo(0, DateTime.now())],
         ),
       ],
       child: StreamBuilder(

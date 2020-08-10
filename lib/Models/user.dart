@@ -9,9 +9,8 @@ class AppUser {
   factory AppUser.fromMap(Map<String, dynamic> map) {
     List<Category> tempList = [];
     try {
-      tempList = List<Category>.from(
-          map['categories'].map((i) => Category.fromMap(i)));
-    } catch (e) {}
+      tempList = List<Category>.from(map['categories'].map((i) => Category.fromMap(i)));
+    } catch (e) {print(e);}
 
     return AppUser(
       displayName: map['displayName'],
@@ -49,7 +48,7 @@ class Category {
         name: map['name'],
         addDate: map['addDate'].toDate(),
         isTimeBased: map['isTimeBased'],
-        goalAmount: map['goalAmount'],
+        goalAmount: map['goalAmount'].toDouble(),
       );
 
   Map<String, dynamic> toMap() => {

@@ -21,20 +21,12 @@ class InputHoursUpdater {
 
   Stream get dbChangesStream$ => _dbChanges.stream;
 
-  BehaviorSubject<List<GoalEntry>> _goalDbChanges = BehaviorSubject.seeded([]);
-
-  Stream get goalDbChangesStream$ => _goalDbChanges.stream;
-
   void resumeUpdate() {
     _update.add(1.0);
   }
 
   void addEntry(List<InputEntry> data) {
     _dbChanges.add(data);
-  }
-
-  void addGoalEntry(List<GoalEntry> data) {
-    _goalDbChanges.add(data);
   }
 }
 

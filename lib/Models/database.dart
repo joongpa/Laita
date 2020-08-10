@@ -24,7 +24,7 @@ class DatabaseService {
   Stream<AppUser> appUserStream(FirebaseUser user) {
     var ref = Firestore.instance.collection('users').document(user.uid);
 
-    return ref.snapshots().map((value) => AppUser.fromMap(value.data));
+    return ref.snapshots().map((doc) => AppUser.fromMap(doc.data));
   }
 
   Stream<List<InputEntry>> inputEntriesStream(FirebaseUser user,
@@ -94,10 +94,14 @@ class DatabaseService {
         .collection(_inputEntries);
 
     try {
-      final docRef = await ref.add(inputEntry.toMap());
+      final docID =
+          '${inputEntry.inputType} ${UsefulShit.doubleDecimalFormat.format(inputEntry.amount)} ${inputEntry.dateTime} ${UniqueKey().hashCode}';
+      inputEntry.docID = docID;
       _updateAggregateData(user, inputEntry);
-      inputEntry.docID = docRef.documentID;
       _entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
+
+      await ref.document(docID).setData(inputEntry.toMap());
+
       return true;
     } catch (e) {
       print(e.toString());
@@ -113,13 +117,17 @@ class DatabaseService {
 
     try {
       int index = user.categories.indexOf(Category(name: goalEntry.inputType));
-      if(index >= 0 && user.categories[index].goalAmount == goalEntry.amount)
+      if (index >= 0 && user.categories[index].goalAmount == goalEntry.amount)
         return false;
 
-      final docRef = await ref.add(goalEntry.toMap());
-      goalEntry.docID = docRef.documentID;
+      final docID =
+          '${goalEntry.inputType} ${goalEntry.amount} ${goalEntry.dateTime}';
+      goalEntry.docID = docID;
       _updateAggregateGoalData(user, goalEntry);
       _entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
+
+      await ref.document(docID).setData(goalEntry.toMap());
+
       return true;
     } catch (e) {
       return false;
@@ -135,7 +143,7 @@ class DatabaseService {
       //2 categories cannot have the same name
       int index = user.categories.indexOf(category);
 
-      if(index == -1) {
+      if (index == -1) {
         user.categories.add(category);
         userRef.setData(user.toMap());
       }
@@ -241,23 +249,19 @@ class DatabaseService {
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
-        .collection(_aggregateInputEntries);
+        .collection(_aggregateInputEntries)
+        .document(daysAgo(0, DateTime.now()).toString());
 
-    return ref
-        .where('dateTime', isGreaterThanOrEqualTo: daysAgo(0))
-        .where('dateTime', isLessThan: daysAgo(-1))
-        .limit(1)
-        .snapshots()
-        .map((list) => list.documents
-            .map((doc) => DailyInputEntry.fromMap(doc.data, doc.documentID))
-            .first);
+    return ref.snapshots().map((doc) => (doc == null)
+        ? null
+        : DailyInputEntry.fromMap(doc.data, doc.documentID));
   }
 
   void _updateAggregateGoalData(AppUser user, GoalEntry goalEntry) {
     var ref2 = Firestore.instance.collection('users').document(user.uid);
     try {
       int index = user.categories.indexOf(Category(name: goalEntry.inputType));
-      if(index == -1) return;
+      if (index == -1) return;
 
       user.categories[index].goalAmount = goalEntry.amount;
       ref2.setData(user.toMap(), merge: true);
@@ -266,41 +270,44 @@ class DatabaseService {
 
   void _updateAggregateData(AppUser user, InputEntry inputEntry,
       {bool isDelete = false}) {
-    var ref2 = Firestore.instance
+    String docID = daysAgo(0, inputEntry.dateTime).toString();
+
+    DocumentReference docRef = Firestore.instance
         .collection('users')
         .document(user.uid)
-        .collection(_aggregateInputEntries);
+        .collection(_aggregateInputEntries)
+        .document(docID);
 
-    ref2
-        .where('dateTime', isEqualTo: daysAgo(0, inputEntry.dateTime))
-        .limit(1)
-        .getDocuments()
-        .then((value) {
-      Firestore.instance.runTransaction((transaction) async {
-        DocumentSnapshot freshSnap;
+    docRef.get().then((value) {
+      Firestore.instance.runTransaction(
+            (transaction) async {
+          DocumentSnapshot freshSnap;
 
-        try {
-          DocumentReference docRef = value.documents.first.reference;
-          freshSnap = await transaction.get(docRef);
-        } catch (e) {}
+          try {
+            if(value.exists) freshSnap = await transaction.get(docRef);
+          } catch (e) {}
 
-        if (freshSnap == null) {
-          if (!isDelete) {
-            ref2.add(DailyInputEntry(
-                dateTime: inputEntry.dateTime,
-                categoryHours: <String, dynamic>{
-                  inputEntry.inputType: inputEntry.amount
-                }).toMap());
+          if (freshSnap == null) {
+            if (!isDelete) {
+              await transaction.set(
+                docRef,
+                DailyInputEntry(
+                  dateTime: inputEntry.dateTime,
+                  categoryHours: <String, dynamic>{
+                    inputEntry.inputType: inputEntry.amount
+                  },
+                ).toMap(),
+              );
+            }
+          } else {
+            final agData = DailyInputEntry.fromMap(freshSnap.data);
+            agData.categoryHours[inputEntry.inputType] =
+                ((isDelete) ? -1 : 1) * inputEntry.amount +
+                    (agData.categoryHours[inputEntry.inputType] ?? 0.0);
+            await transaction.set(freshSnap.reference, agData.toMap());
           }
-        } else {
-          final agData = DailyInputEntry.fromMap(
-              freshSnap.data, freshSnap.reference.documentID);
-          agData.categoryHours[inputEntry.inputType] =
-              ((isDelete) ? -1 : 1) * inputEntry.amount +
-                  (agData.categoryHours[inputEntry.inputType] ?? 0.0);
-          await transaction.update(freshSnap.reference, agData.toMap());
-        }
-      });
+        },
+      );
     });
   }
 

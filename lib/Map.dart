@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import 'Models/user.dart';
+
 String getMonth(int month) {
   Map<int, String> months = {
     1: 'Jan',
@@ -91,5 +93,25 @@ String convertToDisplay(double time, [bool isTimeBased = true]) {
   int minutes = ((time % 1) * 60).round();
 
   return (isTimeBased) ? '$hours:${NumberFormat("00").format(minutes)}' : time.round().toString();
+
+}
+
+Category categoryFromName(String name, List<Category> categories) {
+  int index = categories.indexOf(Category(name: name));
+  if(index == -1) {
+    return Category(name: "", goalAmount: 0.0, isTimeBased: false);
+  }
+
+  return categories[index];
+}
+
+double parseTime(String input) {
+  var hhMM = input.split(':');
+  int hours = int.tryParse(hhMM[0]);
+  int minutes = int.tryParse(hhMM[1]);
+
+  if(hours == null || minutes == null || hhMM[1].length != 2) return null;
+
+  return hours.toDouble() + minutes.toDouble()/60;
 
 }
