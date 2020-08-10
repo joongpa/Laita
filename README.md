@@ -12,7 +12,6 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
     - User should be able to tap category to add an entry directly without having to select in the add screen
 - Settings Page
     - Allow user to choose between keeping or deleting log data when removing a category
-    - Allow user to give each category a color (for graphs and other widgets)
 - First time user landing page
    
 - Figure out how to optimize code (Adding any more features causes noticeable lag)
