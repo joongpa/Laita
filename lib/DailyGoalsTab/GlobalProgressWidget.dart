@@ -60,13 +60,6 @@ class GlobalProgressWidget extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Text(
-                    "  hrs",
-                    style: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
-                    ),
-                  ),
                   const SizedBox(
                     width: 17,
                   ),

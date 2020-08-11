@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
+import 'Map.dart';
 import 'Models/category.dart';
 import 'Models/user.dart';
 
 class NewCategoryDialog extends StatefulWidget {
+  final int index;
+  NewCategoryDialog(this.index);
+
   @override
   _NewCategoryDialogState createState() => _NewCategoryDialogState();
 }
@@ -21,8 +26,8 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           TextField(
-            controller: _newCategoryDialogController,
-            decoration: InputDecoration(hintText: "Name of category"),
+              controller: _newCategoryDialogController,
+              decoration: InputDecoration(hintText: "Name of category"),
               inputFormatters: [
                 LengthLimitingTextInputFormatter(10),
               ]
@@ -69,7 +74,8 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
             Category category = Category(
                 name: _newCategoryDialogController.text,
                 isTimeBased: isTimeBased,
-                addDate: DateTime.now());
+                addDate: DateTime.now(),
+                color: Global.defaultColors[widget.index]);
             Navigator.of(context).pop(category);
             _newCategoryDialogController.clear();
           },

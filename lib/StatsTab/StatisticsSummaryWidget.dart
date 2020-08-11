@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'package:miatracker/Models/aggregate_data_model.dart';
+import 'package:miatracker/Models/database.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:miatracker/StatsTab/AverageDisplayWidget.dart';
 import 'package:miatracker/StatsTab/FullGraphWidget.dart';
 import 'package:miatracker/StatsTab/TimeFramePicker.dart';
@@ -10,20 +13,27 @@ import 'package:provider/provider.dart';
 import 'DateTraverser.dart';
 
 class StatisticsSummaryWidget extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
+    AppUser user = Provider.of<AppUser>(context);
+    if(user == null) return Container();
+
     return MultiProvider(
       providers: [
         StreamProvider<List<DateTime>>.value(
           value: TimeFrameModel().timeFrameStream$,
-          initialData: [daysAgo(7, DateTime.now()), daysAgo(0, DateTime.now())],
+          initialData: [
+            daysAgo(7, DateTime.now()),
+            daysAgo(-1, DateTime.now())
+          ],
         ),
       ],
-      child: StreamBuilder(
-        stream: InputHoursUpdater.ihu.updateStream$,
-        builder: (context, snapshot) {
-          return ListView(
+      child: Consumer<List<DateTime>>(builder: (context, value, child) {
+        return StreamProvider<Map<DateTime,DailyInputEntry>>.value(
+          initialData: {},
+          value: DatabaseService.instance.dailyInputEntriesStream(user.uid,
+              startDate: value[0], endDate: value[1]),
+          child: ListView(
             children: <Widget>[
               Container(
                 decoration: BoxDecoration(
@@ -31,8 +41,10 @@ class StatisticsSummaryWidget extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey[300],
-                      blurRadius: 5.0, // has the effect of softening the shadow
-                      spreadRadius: 2.0, // has the effect of extending the shadow
+                      blurRadius: 5.0,
+                      // has the effect of softening the shadow
+                      spreadRadius: 2.0,
+                      // has the effect of extending the shadow
                       offset: Offset(
                         1.0, // horizontal, move right 10
                         1.0, // vertical, move down 10
@@ -51,8 +63,12 @@ class StatisticsSummaryWidget extends StatelessWidget {
                         Expanded(
                           child: PageView(
                             children: <Widget>[
-                              FullGraphWidget(isTimeBased: true,),
-                              FullGraphWidget(isTimeBased: false,),
+                              FullGraphWidget(
+                                isTimeBased: true,
+                              ),
+                              FullGraphWidget(
+                                isTimeBased: false,
+                              ),
                             ],
                           ),
                         ),
@@ -70,10 +86,9 @@ class StatisticsSummaryWidget extends StatelessWidget {
               ),
               const SizedBox(height: 15),
             ],
-          );
-        }
-      ),
+          ),
+        );
+      }),
     );
   }
-
 }

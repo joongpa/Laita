@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:miatracker/Map.dart';
+import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/database.dart';
 import 'Models/GoalEntry.dart';
 import 'Models/InputEntry.dart';
@@ -11,31 +13,30 @@ import 'package:provider/provider.dart';
 import 'Models/user.dart';
 
 class SignInPage extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     var user = Provider.of<FirebaseUser>(context);
     var loading = Provider.of<bool>(context) ?? false;
     bool loggedIn = user != null;
 
-    if(loading) {
+    if (loading) {
       return SafeArea(
-        child: Scaffold(
-          body: Center(
+          child: Scaffold(
+        body: Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                CircularProgressIndicator(),
-                SizedBox(height: 20,),
-                Text("Logging you in..."),
-              ],
-            )
-          ),
-        )
-      );
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            CircularProgressIndicator(),
+            SizedBox(
+              height: 20,
+            ),
+            Text("Logging you in..."),
+          ],
+        )),
+      ));
     }
 
-    if(!loggedIn) {
+    if (!loggedIn) {
       return SafeArea(
         child: Scaffold(
           body: Center(
@@ -47,31 +48,35 @@ class SignInPage extends StatelessWidget {
                     child: Text("Sign In With Google"),
                     onPressed: () {
                       AuthService.instance.googleSignIn();
-                    }
-                ),
+                    }),
                 RaisedButton(
                     child: Text("Sign In Anonymously"),
                     onPressed: () {
                       AuthService.instance.signInAnonymously();
-                    }
-                )
+                    })
               ],
             ),
           ),
         ),
       );
-    } else return MultiProvider(
-        providers: [
-          StreamProvider<List<InputEntry>>.value(
-              value: DatabaseService.instance.inputEntriesStream(user)
-          ),
-          StreamProvider<List<GoalEntry>>.value(
-              value: DatabaseService.instance.goalEntriesStream(user)
-          ),
-          StreamProvider<AppUser>.value(
-            value: DatabaseService.instance.appUserStream(user),
-          )
-        ],
-        child: MyHomePage(title: "Immersion Tracker",));
+    } else
+      return MultiProvider(
+          providers: [
+            StreamProvider<List<InputEntry>>.value(
+                value: DatabaseService.instance.inputEntriesStream(user)),
+            StreamProvider<List<GoalEntry>>.value(
+                value: DatabaseService.instance.goalEntriesStream(user)),
+            StreamProvider<AppUser>.value(
+              value: DatabaseService.instance.appUserStream(user),
+            ),
+            StreamProvider<Map<DateTime, DailyInputEntry>>.value(
+              initialData: {},
+              value: DatabaseService.instance.dailyInputEntriesStream(user.uid,
+                  startDate: daysAgo(0), endDate: daysAgo(-1)),
+            )
+          ],
+          child: MyHomePage(
+            title: "Immersion Tracker",
+          ));
   }
 }

@@ -67,14 +67,13 @@ class DateTraverser extends StatelessWidget {
 
     switch(TimeFrameModel().selectedTimeSpan) {
       case TimeSpan.Week:
-        shownDate = 'Week of ' + getDate(dates[0]);
+        shownDate = '${getDate(dates[0], showYear: false)} - ${getDate(daysAgo(1, dates[1]), showYear: false)}';
         break;
       case TimeSpan.Month:
-        shownDate = getDate(daysAgo(-7, dates[0]), showDay: false);
+        shownDate = '${getDate(dates[0], showYear: false)} - ${getDate(daysAgo(1, dates[1]), showYear: false)}';
         break;
       case TimeSpan.HalfYear:
-        if(dates[0].month == 1) shownDate = '1st Half of ${dates[0].year}';
-        else shownDate = '2nd Half of ${dates[0].year}';
+        shownDate = '${getDate(dates[0], showDay: false)} - ${getDate(daysAgo(1, dates[1]), showDay: false)}';
     }
 
     return shownDate;

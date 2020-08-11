@@ -1,5 +1,6 @@
 
 import '../Map.dart';
+import 'dart:math' as math;
 
 class DailyInputEntry {
   String docID;
@@ -11,12 +12,15 @@ class DailyInputEntry {
     this.dateTime = daysAgo(0, dateTime);
   }
 
-  factory DailyInputEntry.fromMap(Map<String, dynamic> map, [String docID]) => DailyInputEntry(
+  factory DailyInputEntry.fromMap(Map<String, dynamic> map, [String docID]) {
+    if(map == null) return null;
+    return DailyInputEntry(
     docID: docID,
     dateTime: (map['dateTime'] != null) ? map['dateTime'].toDate() : null,
     categoryHours: map['categoryHours'],
     goalAmounts: map['goalAmounts']
   );
+  }
 
   Map<String, dynamic> toMap() => {
     "docID": docID,
@@ -24,4 +28,13 @@ class DailyInputEntry {
     "categoryHours": categoryHours,
     'goalAmounts': goalAmounts,
   };
+
+  @override
+  bool operator ==(other) {
+    return other is DailyInputEntry && sameDay(dateTime, other.dateTime);
+  }
+
+  @override
+  int get hashCode => dateTime.hashCode;
+
 }

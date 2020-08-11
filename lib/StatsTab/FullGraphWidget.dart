@@ -17,17 +17,6 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
   List<bool> _choiceBoxValues =
       List.generate(8, (i) => true);
 
-  List<Color> _choiceBoxColors = [
-    Colors.blue,
-    Colors.blueGrey,
-    Colors.green,
-    Colors.orange,
-    Colors.red,
-    Colors.yellow,
-    Colors.deepPurple,
-    Colors.pink
-  ];
-
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
@@ -48,7 +37,7 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Checkbox(
-                activeColor: _choiceBoxColors[i],
+                activeColor: categories[i].color,
                 value: _choiceBoxValues[i],
                 onChanged: (bool) {
                   setState(() {
@@ -66,7 +55,6 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
         width: 450,
         child: InputChart(
           choiceArray: _choiceBoxValues,
-          colorArray: _choiceBoxColors,
           isTimeBased: widget.isTimeBased,
         ),
         //decoration: BoxDecoration(color: Colors.grey),

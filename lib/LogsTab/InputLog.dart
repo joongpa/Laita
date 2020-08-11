@@ -33,6 +33,8 @@ class InputLog extends StatelessWidget {
         return ListView.builder(
             itemCount: snapshot.data.length,
             itemBuilder: (context, index) {
+              if(index >= snapshot.data.length) return Container();
+
               final entry = snapshot.data[index];
 
               String subtitleText = '';
@@ -90,8 +92,21 @@ class InputLog extends StatelessWidget {
                 child: Card(
                     child: ListTile(
                       subtitle: Text(subtitleText),
-                      leading: Text(
-                        entry.inputType,
+                      leading: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            entry.inputType,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Container(
+                            color: categoryFromName(entry.inputType, user.categories).color,
+                            width: 40,
+                            height: 10
+                          )
+                        ],
                       ),
                       title: Text('${convertToDisplay(entry.amount, categoryFromName(entry.inputType, user.categories).isTimeBased)}'),
                       trailing: Text(entry.time),

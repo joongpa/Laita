@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'Models/user.dart';
@@ -81,6 +82,7 @@ class UsefulShit {
 }
 
 String convertToStatsDisplay(double time, [bool isTimeBased = true]) {
+  if(time < 0) return (isTimeBased) ? '0:00' : '0.0';
   int hours = time.floor();
   int minutes = ((time % 1) * 60).round();
 
@@ -89,6 +91,7 @@ String convertToStatsDisplay(double time, [bool isTimeBased = true]) {
 }
 
 String convertToDisplay(double time, [bool isTimeBased = true]) {
+  if(time < 0) return (isTimeBased) ? '0:00' : '0';
   int hours = time.floor();
   int minutes = ((time % 1) * 60).round();
 
@@ -115,3 +118,18 @@ double parseTime(String input) {
   return hours.toDouble() + minutes.toDouble()/60;
 
 }
+
+
+class Global {
+  static List<Color> defaultColors = [
+    Colors.blue,
+    Colors.blueGrey,
+    Colors.green,
+    Colors.orange,
+    Colors.red,
+    Colors.yellow,
+    Colors.deepPurple,
+    Colors.pink
+  ];
+}
+

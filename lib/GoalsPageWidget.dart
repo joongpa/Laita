@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'dart:math' as math;
@@ -64,13 +65,23 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                   child: Text(
                     'Daily Goal',
                     style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left,
                   ),
                 ),
                 Expanded(
-                  flex: 3,
+                  flex: 4,
+                  child: Text(
+                    'Color',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
                   child: Text(
                     'Input Type',
                     style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
@@ -102,7 +113,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                           ],
                         ),
                         onPressed: () async {
-                          Category category = await showDialog(context: context, child: NewCategoryDialog()) ?? Category();
+                          Category category = await showDialog(context: context, child: NewCategoryDialog(index)) ?? Category();
                           if (category.name != null && category.name != '' && category.isTimeBased != null)
                             DatabaseService.instance.updateCategories(user, category:category, isDelete: false);
                         },
@@ -159,14 +170,48 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                                 } else {
                                   result = int.tryParse(value);
                                 }
-                                if(result == null) return 'Incorrect Format';
+                                if(result == null) return 'Invalid';
                                 else return null;
                               },
                             ),
                           ),
-
                           Expanded(
-                            flex: 3,
+                            flex: 4,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 26),
+                              child: InkWell(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        actionsPadding: EdgeInsets.all(10),
+                                        content: SingleChildScrollView(
+                                          child: BlockPicker(
+                                            pickerColor: user.categories[index].color ?? Global.defaultColors[index],
+                                            onColorChanged: (value) {
+                                              setState(() {
+                                                user.categories[index].color = value;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: user.categories[index].color ?? Global.defaultColors[index],
+                                  ),
+                                  height: 50,
+                                ),
+                              ),
+                              ),
+                            ),
+                          Expanded(
+                            flex: 4,
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
@@ -201,7 +246,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                     ),
                     RaisedButton(
                       child: Text(
-                        "Save",
+                        "Apply",
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -221,6 +266,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                               print("get yeeted on by doubles");
                             }
                           });
+                          DatabaseService.instance.editUser(user);
                           Navigator.pop(context);
                         }
                       },
@@ -242,5 +288,4 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
       });
     super.dispose();
   }
-
 }

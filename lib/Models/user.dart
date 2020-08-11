@@ -1,3 +1,6 @@
+
+import 'package:flutter/material.dart';
+
 class AppUser {
   String displayName;
   String email;
@@ -41,21 +44,24 @@ class Category {
   DateTime addDate;
   bool isTimeBased;
   double goalAmount;
+  Color color;
 
-  Category({this.name, this.addDate, this.isTimeBased, this.goalAmount});
+  Category({this.name, this.addDate, this.isTimeBased, this.goalAmount, this.color});
 
   factory Category.fromMap(Map<String, dynamic> map) => Category(
         name: map['name'],
         addDate: map['addDate'].toDate(),
         isTimeBased: map['isTimeBased'],
-        goalAmount: map['goalAmount'].toDouble(),
+        goalAmount: map['goalAmount'],
+        color: Color(map['color'] ?? 0).withOpacity(1),
       );
 
   Map<String, dynamic> toMap() => {
         'name': name,
         'addDate': addDate,
         'isTimeBased': isTimeBased,
-        'goalAmount': goalAmount
+        'goalAmount': goalAmount,
+        'color': color.value,
       };
 
   @override
@@ -66,4 +72,15 @@ class Category {
 
   @override
   int get hashCode => name.hashCode;
+
+  bool fieldsEqual(Category other) {
+    if(other == null) return false;
+
+    return (
+      name == other.name &&
+      isTimeBased == other.isTimeBased &&
+      goalAmount == other.goalAmount &&
+      color == other.color
+    );
+  }
 }

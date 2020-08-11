@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -20,6 +22,10 @@ class InputHoursUpdater {
   BehaviorSubject<List<InputEntry>> _dbChanges = BehaviorSubject.seeded([]);
 
   Stream get dbChangesStream$ => _dbChanges.stream;
+
+  Stream<List<DailyInputEntry>> get inputDataStream => TimeFrameModel().timeFrameStream$.switchMap((dateTimes) {
+    //return
+  });
 
   void resumeUpdate() {
     _update.add(1.0);
