@@ -32,7 +32,7 @@ class InputChart extends StatelessWidget {
 
   final List<bool> choiceArray;
 
-  final List<List<InputSeries>> inputSeriesList = List<List<InputSeries>>(8);
+  //final List<List<InputSeries>> inputSeriesList = List<List<InputSeries>>(8);
 
   InputChart({@required this.choiceArray, this.isTimeBased = true});
 
@@ -49,90 +49,124 @@ class InputChart extends StatelessWidget {
         .where((element) => element.isTimeBased == isTimeBased)
         .toList();
 
-    List<charts.Series<InputSeries, DateTime>> series = [];
+    //List<charts.Series<InputSeries, DateTime>> series = [];
+    List<LineChartBarData> series = [];
 
     for (int i = categories.length - 1; i >= 0; i--) {
       if (choiceArray[i]) {
-        inputSeriesList[i] = [];
-        for (int j = 0; j < daysBetween(dateTimes.dateStartEndTimes[0], dateTimes.dateStartEndTimes[1]); j++) {
+        List<FlSpot> inputSeriesList = [];
+        for (int j = 0;
+            j <
+                daysBetween(dateTimes.dateStartEndTimes[0],
+                    dateTimes.dateStartEndTimes[1]);
+            j++) {
           double hours = 0;
           if (entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])] != null &&
               entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
-                      .categoryHours[categories[i].name] != null) {
-            hours = math.max(0, entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
-                .categoryHours[categories[i].name]);
-            hours *= (categories[i].isTimeBased) ? 4 : 1;
+                      .categoryHours[categories[i].name] !=
+                  null) {
+            hours = math.max(
+                0,
+                entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
+                    .categoryHours[categories[i].name]);
           }
-          inputSeriesList[i]
-              .add(InputSeries(day: daysAgo(-j, dateTimes.dateStartEndTimes[0]), hours: hours));
+          inputSeriesList.add(FlSpot(j.toDouble(), hours));
         }
 
-        series.add(charts.Series(
-            id: categories[i].name,
-            data: inputSeriesList[i],
-            domainFn: (InputSeries series, _) => series.day,
-            measureFn: (InputSeries series, _) => series.hours,
-            colorFn: (_, __) =>
-                charts.ColorUtil.fromDartColor(categories[i].color)));
+        series.add(LineChartBarData(
+            spots: inputSeriesList,
+            colors: [categories[i].color],
+            dotData: FlDotData(show: false)));
       }
     }
     if (series.length == 0) return Container();
+    var maxValue = getMaxValue(series);
 
-//    return LineChart(
-//      LineChartData(
-//
-//      ),
-//    );
-    return charts.TimeSeriesChart(
-      series,
-      animate: false,
-      domainAxis: charts.DateTimeAxisSpec(
-        tickProviderSpec: _getXAxis(series, dateTimes.dateStartEndTimes),
-      ),
-      primaryMeasureAxis: charts.NumericAxisSpec(
-        tickFormatterSpec: isTimeBased ? customTickFormatter : null,
-        tickProviderSpec: charts.BasicNumericTickProviderSpec(
-            desiredTickCount: getTicksFromMaxValue(series), dataIsInWholeNumbers: true),
-      ),
+    return LineChart(
+      LineChartData(
+        maxY: maxValue + 0.25,
+          gridData: FlGridData(
+              show: true, drawHorizontalLine: true, horizontalInterval: getTicksFromMaxValue(maxValue)),
+          titlesData: FlTitlesData(
+            bottomTitles: _getXAxis(series, dateTimes.dateStartEndTimes),
+            leftTitles: SideTitles(
+              reservedSize: isTimeBased ? 25 : 10,
+              showTitles: true,
+              interval: getTicksFromMaxValue(maxValue),
+              getTitles: (value) {
+                return convertToDisplay(value, isTimeBased);
+              },
+              checkToShowTitle: (minValue, maxValue, sideTitles, appliedInterval, value) => (value % 0.5 == 0),
+            ),
+          ),
+          borderData: FlBorderData(
+            border: Border(
+              bottom: BorderSide(width: 1, color: Colors.grey),
+            ),
+          ),
+          lineBarsData: series),
+      swapAnimationDuration: Duration(milliseconds: 0),
     );
   }
 
-  int getTicksFromMaxValue(List<charts.Series<InputSeries, DateTime>> entryList) {
-    final maxValue = entryList.map((series) => series.data.map((e) => e.hours).reduce(math.max)).reduce(math.max);
-    int ticks = (maxValue / 2).ceil() + 1;
-
-    if (ticks >= 17)
-      ticks = ((ticks - 1) / 2).round() + 1;
-    else if (ticks % 2 == 0) ticks++;
-
-    return math.max(5, ticks);
+  double getTicksFromMaxValue(double maxValue) {
+    if(!isTimeBased) return 1;
+    if(maxValue >= 5) return 1;
+    else if(maxValue >= 4) return 0.5;
+    else return 0.25;
   }
 
-  charts.StaticDateTimeTickProviderSpec _getXAxis(List<charts.Series<InputSeries, DateTime>> series, List<DateTime> startEndPoints) {
-    if(series.length == 0) return charts.StaticDateTimeTickProviderSpec([charts.TickSpec<DateTime>(DateTime(2077, 10, 23))]);
+  double getMaxValue(List<LineChartBarData> series) {
+    return series
+        .map((series) => series.spots.map((e) => e.y).reduce(math.max))
+        .reduce(math.max);
+  }
 
-    List<charts.TickSpec<DateTime>> ticks = [];
-    TimeSpan timeSpan = TimeFrameModel().selectedTimeSpan;
+  SideTitles _getXAxis(
+      List<LineChartBarData> lineChartDataList, List<DateTime> startEndPoints) {
+    var tickProvider;
+    var tickFormatter;
 
-    switch(timeSpan) {
+    switch (TimeFrameModel().selectedTimeSpan) {
       case TimeSpan.HalfYear:
-        for(int i = 0; i < 6; i++) {
-          if(i == 0) ticks.add(charts.TickSpec<DateTime>(monthsAgo(-1, monthsAgo(1, series[0].data[0].day))));
-          else ticks.add(charts.TickSpec<DateTime>(monthsAgo(-1, ticks[i-1].value)));
-        }
+        tickProvider =
+            (minValue, maxValue, sideTitles, appliedInterval, value) {
+          return daysAgo(-value.toInt(), TimeFrameModel().dateStartEndTimes[0])
+                  .day ==
+              1;
+        };
+        tickFormatter = (value) {
+          DateTime date =
+              daysAgo(-value.toInt(), TimeFrameModel().dateStartEndTimes[0]);
+          return '${getDate(date, showYear: false, showDay: false)}\n${getDate(date, showYear: true, showMonth: false, showDay: false).substring(2)}';
+        };
         break;
       case TimeSpan.Month:
-        for(int i = 0; i < 5; i++) {
-          ticks.add(charts.TickSpec<DateTime>(daysAgo(i * 7, series[0].data.last.day)));
-        }
+        tickProvider =
+            (minValue, maxValue, sideTitles, appliedInterval, value) {
+          return (value + 1) % 7 == 0 || value == 0;
+        };
+        tickFormatter = (value) {
+          DateTime date =
+              daysAgo(-value.toInt(), TimeFrameModel().dateStartEndTimes[0]);
+          return '${getDate(date, showYear: false)}';
+        };
         break;
       case TimeSpan.Week:
-        series[0].data.forEach((element) => ticks.add(charts.TickSpec<DateTime>(element.day)));
-        if(sameDay(DateTime.now(), daysAgo(1,startEndPoints[1])))
-          ticks.add(charts.TickSpec<DateTime>(daysAgo(0, startEndPoints[1])));
+        tickFormatter = (value) {
+          DateTime date =
+              daysAgo(-value.toInt(), TimeFrameModel().dateStartEndTimes[0]);
+          return '${getDate(date, showYear: false)}\n${getDay(date.weekday)}';
+        };
         break;
     }
 
-    return charts.StaticDateTimeTickProviderSpec(ticks);
+    return SideTitles(
+      reservedSize: 10,
+      showTitles: true,
+      interval: 1,
+      checkToShowTitle: tickProvider,
+      getTitles: tickFormatter,
+    );
   }
 }

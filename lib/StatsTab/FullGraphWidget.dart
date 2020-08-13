@@ -49,14 +49,17 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
           ),
         ),
       )),
-      Container(
-        height: 250,
-        width: 450,
-        child: InputChart(
-          choiceArray: _choiceBoxValues,
-          isTimeBased: widget.isTimeBased,
+      Padding(
+        padding: const EdgeInsets.only(right: 25),
+        child: Container(
+          height: 250,
+          width: 360,
+          child: InputChart(
+            choiceArray: _choiceBoxValues,
+            isTimeBased: widget.isTimeBased,
+          ),
+          //decoration: BoxDecoration(color: Colors.grey),
         ),
-        //decoration: BoxDecoration(color: Colors.grey),
       ),
     ]);
   }
