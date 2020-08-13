@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
+import 'package:miatracker/Models/TimeFrameModel.dart';
 import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
@@ -17,20 +18,20 @@ class SingleAccuracyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final providedTimeFrame = Provider.of<List<DateTime>>(context);
+    final providedTimeFrame = Provider.of<TimeFrameModel>(context);
     final providedGoalList = Provider.of<List<GoalEntry>>(context) ?? [];
     final providedInputList = Provider.of<List<InputEntry>>(context) ?? [];
 
     if(providedTimeFrame == null || providedGoalList == null || providedInputList == null)
       return Container();
 
-    DateTime realEndDate = providedTimeFrame[1];
+    DateTime realEndDate = providedTimeFrame.dateStartEndTimes[1];
     if(realEndDate.isAfter(daysAgo(-1, DateTime.now()))) {
       realEndDate = daysAgo(-1, DateTime.now());
     }
 
-    final goals = Filter.goalsPerDay(providedGoalList, category: this.inputType, startDate: providedTimeFrame[0], endDate: realEndDate);
-    final hours = Filter.totalInputPerDay(providedInputList, category: this.inputType, startDate: providedTimeFrame[0], endDate: realEndDate);
+    final goals = Filter.goalsPerDay(providedGoalList, category: this.inputType, startDate: providedTimeFrame.dateStartEndTimes[0], endDate: realEndDate);
+    final hours = Filter.totalInputPerDay(providedInputList, category: this.inputType, startDate: providedTimeFrame.dateStartEndTimes[0], endDate: realEndDate);
     int passCount = 0;
     int failCount = 0;
 

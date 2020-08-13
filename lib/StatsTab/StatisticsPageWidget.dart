@@ -19,15 +19,18 @@ class StatisticsPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var timeFrames = Provider.of<List<DateTime>>(context);
-    Map<DateTime, DailyInputEntry> entries = Provider.of<Map<DateTime, DailyInputEntry>>(context);
+    var entries = Provider.of<Map<DateTime, DailyInputEntry>>(context);
+    if(entries == null || entries.length == 0) return CircularProgressIndicator();
 
-    final countedDays = daysBetween(timeFrames[0], timeFrames[1]);
+    var dates = entries.keys.toList();
+    dates.sort();
+
+    final countedDays = daysBetween(dates.first, dates.last);
 
     double hours;
     if(entries.length == 0)
       hours = 0.0;
-    else hours = entries.values.map<double>((e) => e.categoryHours[inputType.name] ?? 0).reduce((a,b) => a + b);
+    else hours = entries.values.where((e) => e != null).map<double>((e) => (e.categoryHours[inputType.name] ?? 0)).reduce((a,b) => a + b);
     String value = convertToStatsDisplay(hours / countedDays, inputType.isTimeBased);
     return _getWidget(value);
   }

@@ -273,7 +273,7 @@ class _AddHoursState extends State<AddHours> {
       );
 
   _buttonAction(AppUser user, List<Category> categories) {
-    double totalTime = hours + minutes / 60;
+    double totalTime = hours + ((_selectedCategory.isTimeBased) ? minutes / 60 : 0);
     InputEntry entry = InputEntry(description: description,
         dateTime: dateTime,
         inputType: _selectedCategory.name,

@@ -20,19 +20,14 @@ class StatisticsSummaryWidget extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        StreamProvider<List<DateTime>>.value(
-          value: TimeFrameModel().timeFrameStream$,
-          initialData: [
-            daysAgo(7, DateTime.now()),
-            daysAgo(-1, DateTime.now())
-          ],
+        ChangeNotifierProvider<TimeFrameModel>.value(
+          value: TimeFrameModel(),
         ),
       ],
-      child: Consumer<List<DateTime>>(builder: (context, value, child) {
+      child: Consumer<TimeFrameModel>(builder: (context, value, child) {
         return StreamProvider<Map<DateTime,DailyInputEntry>>.value(
-          initialData: {},
           value: DatabaseService.instance.dailyInputEntriesStream(user.uid,
-              startDate: value[0], endDate: value[1]),
+              startDate: value.dateStartEndTimes[0], endDate: value.dateStartEndTimes[1]),
           child: ListView(
             children: <Widget>[
               Container(

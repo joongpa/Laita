@@ -99,7 +99,7 @@ class DatabaseService {
       inputEntry.docID = docID;
       _updateAggregateData(user, inputEntry);
 
-      if(_entries[daysAgo(0, inputEntry.dateTime)] != null) {
+      if (_entries[daysAgo(0, inputEntry.dateTime)] != null) {
         _entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
       }
 
@@ -219,25 +219,26 @@ class DatabaseService {
     return tempList;
   }
 
-  Future<Map<DateTime, DailyInputEntry>> getTotalInputHoursOnDays(AppUser user,
+  Future<Map<DateTime, DailyInputEntry>> getTotalInputHoursOnDays(String uid,
       {@required DateTime startDate, @required DateTime endDate}) async {
+    Map<DateTime, DailyInputEntry> tempMap = {};
     for (int i = 1; i <= daysBetween(startDate, endDate); i++) {
-      final tempEntry = _aggregateEntries[daysAgo(i, endDate)];
-      if (tempEntry == null) {
+      if (_aggregateEntries[daysAgo(i, endDate)] == null) {
         _aggregateEntries.addAll(await _getMissingAggregateEntries(
-            user, daysAgo(0, startDate), daysAgo(i - 1, endDate)));
-      } else {
-        _aggregateEntries[daysAgo(i, endDate)] = tempEntry;
+            uid, daysAgo(0, startDate), daysAgo(i - 1, endDate)));
       }
+      tempMap[daysAgo(i, endDate)] = _aggregateEntries[daysAgo(i, endDate)];
     }
-    return _aggregateEntries ?? {};
+    tempMap[startDate] ??= DailyInputEntry(dateTime: startDate, categoryHours: {}, goalAmounts: {});
+    tempMap[endDate] ??= DailyInputEntry(dateTime: endDate, categoryHours: {}, goalAmounts: {});
+    return tempMap ?? {};
   }
 
   Future<Map<DateTime, DailyInputEntry>> _getMissingAggregateEntries(
-      AppUser user, DateTime startDate, DateTime endDate) async {
+      String uid, DateTime startDate, DateTime endDate) async {
     var ref = Firestore.instance
         .collection('users')
-        .document(user.uid)
+        .document(uid)
         .collection(_aggregateInputEntries);
     final agSnap = await ref
         .where('dateTime', isGreaterThanOrEqualTo: startDate)
@@ -248,7 +249,7 @@ class DatabaseService {
         .toList();
     final List<DateTime> dates =
         List.generate(tempList.length, (index) => daysAgo(-index, startDate));
-    final Map<DateTime, DailyInputEntry> tempMap =
+    Map<DateTime, DailyInputEntry> tempMap =
         Map.fromIterables(dates, tempList);
     return tempMap ?? {};
   }
@@ -264,26 +265,21 @@ class DatabaseService {
         .where('dateTime',
             isGreaterThanOrEqualTo: startDate, isLessThan: endDate)
         .snapshots()
-        .map((list) => Map<DateTime, DailyInputEntry>.fromIterables(
-            list.documents
-                .map<DateTime>((doc) => doc.data['dateTime'].toDate())
-                .toList(),
-            list.documents
-                .map((doc) => DailyInputEntry.fromMap(doc.data))
-                .toList()));
+        .map((list) {
+      var map = Map<DateTime, DailyInputEntry>.fromIterables(
+          list.documents
+              .map<DateTime>((doc) => doc.data['dateTime'].toDate())
+              .toList(),
+          list.documents
+              .map((doc) => DailyInputEntry.fromMap(doc.data))
+              .toList());
+      map[startDate] ??= DailyInputEntry(dateTime: startDate, categoryHours: {}, goalAmounts: {});
+      map[endDate] ??= DailyInputEntry(dateTime: endDate, categoryHours: {}, goalAmounts: {});
+      return map;
+    });
   }
 
   void _updateAggregateGoalData(AppUser user, GoalEntry goalEntry) {
-    String docID = daysAgo(0, goalEntry.dateTime).toString();
-
-    DocumentReference docRef = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_aggregateInputEntries)
-        .document(docID);
-
-    ///TODO add goal amounts to dailyInputEntries
-
     var ref2 = Firestore.instance.collection('users').document(user.uid);
     try {
       int index = user.categories.indexOf(Category(name: goalEntry.inputType));
@@ -334,7 +330,9 @@ class DatabaseService {
             agData.categoryHours[inputEntry.inputType] =
                 (((isDelete) ? -1 : 1) * inputEntry.amount) +
                     (agData.categoryHours[inputEntry.inputType] ?? 0.0);
-            agData.goalAmounts[inputEntry.inputType] = categoryFromName(inputEntry.inputType, user.categories).goalAmount;
+            agData.goalAmounts[inputEntry.inputType] =
+                categoryFromName(inputEntry.inputType, user.categories)
+                    .goalAmount;
             await transaction.set(docRef, agData.toMap());
           }
         },

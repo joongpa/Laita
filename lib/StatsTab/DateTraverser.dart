@@ -1,64 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Map.dart';
+import 'package:provider/provider.dart';
 
 import '../Models/TimeFrameModel.dart';
 
 class DateTraverser extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<DateTime>>(
-        stream: TimeFrameModel().timeFrameStream$,
-        builder: (context, snapshot) {
-          final data = snapshot.data ?? [DateTime.now(), DateTime.now()];
-          String shownDate = _getShownDate(data);
+    var timeFrameModel = Provider.of<TimeFrameModel>(context);
+    final dateStartEndTimes = timeFrameModel.dateStartEndTimes;
+    String shownDate = _getShownDate(dateStartEndTimes);
 
-//          switch(TimeFrameModel().selectedTimeSpan) {
-//            case TimeSpan.HalfYear:
-//              final bool firstHalf = TimeFrameModel().
-//              shownDate = '${()}';
-//              break;
-//            case TimeSpan.Month:
-//              break;
-//          }
-
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Expanded(
-                child: FlatButton(
-                  onPressed: () {
-                    TimeFrameModel().shiftTimeFramePast();
-                  },
-                  child: const Icon(
-                    Icons.chevron_left,
-                    size: 40,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Text(
-                  shownDate,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-              Expanded(
-                child: FlatButton(
-                  onPressed: data[1].isBefore(daysAgo(-1, daysAgo(0)))
-                      ? () {
-                    TimeFrameModel().shiftTimeFrameFuture();
-                  } : null,
-                  child: const Icon(
-                    Icons.chevron_right,
-                    size: 40,
-                  ),
-                ),
-              ),
-            ],
-          );
-        }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        Expanded(
+          child: FlatButton(
+            onPressed: () {
+              TimeFrameModel().shiftTimeFramePast();
+            },
+            child: const Icon(
+              Icons.chevron_left,
+              size: 40,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Text(
+            shownDate,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+        Expanded(
+          child: FlatButton(
+            onPressed: dateStartEndTimes[1].isBefore(daysAgo(-1, daysAgo(0)))
+                ? () {
+              TimeFrameModel().shiftTimeFrameFuture();
+            } : null,
+            child: const Icon(
+              Icons.chevron_right,
+              size: 40,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

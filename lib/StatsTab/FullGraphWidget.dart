@@ -22,7 +22,6 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
     AppUser user = Provider.of<AppUser>(context);
     if(user == null) return Container();
 
-
     List<Category> categories = user.categories.where((element) => element.isTimeBased == widget.isTimeBased).toList();
 
     return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[

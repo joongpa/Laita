@@ -1,4 +1,5 @@
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:fl_chart/fl_chart.dart';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -38,10 +39,11 @@ class InputChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
-    List<DateTime> dateTimes = Provider.of<List<DateTime>>(context);
+    var dateTimes = Provider.of<TimeFrameModel>(context);
+
     Map<DateTime, DailyInputEntry> entries =
         Provider.of<Map<DateTime, DailyInputEntry>>(context);
-    if (user == null) return Container();
+    if (user == null || entries == null) return CircularProgressIndicator();
 
     List<model.Category> categories = user.categories
         .where((element) => element.isTimeBased == isTimeBased)
@@ -52,18 +54,17 @@ class InputChart extends StatelessWidget {
     for (int i = categories.length - 1; i >= 0; i--) {
       if (choiceArray[i]) {
         inputSeriesList[i] = [];
-        for (int j = 0; j < daysBetween(dateTimes[0], dateTimes[1]); j++) {
+        for (int j = 0; j < daysBetween(dateTimes.dateStartEndTimes[0], dateTimes.dateStartEndTimes[1]); j++) {
           double hours = 0;
-          if (entries[daysAgo(-j, dateTimes[0])] != null &&
-              entries[daysAgo(-j, dateTimes[0])]
-                      .categoryHours[categories[i].name] !=
-                  null) {
-            hours = math.max(0, entries[daysAgo(-j, dateTimes[0])]
+          if (entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])] != null &&
+              entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
+                      .categoryHours[categories[i].name] != null) {
+            hours = math.max(0, entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
                 .categoryHours[categories[i].name]);
             hours *= (categories[i].isTimeBased) ? 4 : 1;
           }
           inputSeriesList[i]
-              .add(InputSeries(day: daysAgo(-j, dateTimes[0]), hours: hours));
+              .add(InputSeries(day: daysAgo(-j, dateTimes.dateStartEndTimes[0]), hours: hours));
         }
 
         series.add(charts.Series(
@@ -77,9 +78,17 @@ class InputChart extends StatelessWidget {
     }
     if (series.length == 0) return Container();
 
+//    return LineChart(
+//      LineChartData(
+//
+//      ),
+//    );
     return charts.TimeSeriesChart(
       series,
       animate: false,
+      domainAxis: charts.DateTimeAxisSpec(
+        tickProviderSpec: _getXAxis(series, dateTimes.dateStartEndTimes),
+      ),
       primaryMeasureAxis: charts.NumericAxisSpec(
         tickFormatterSpec: isTimeBased ? customTickFormatter : null,
         tickProviderSpec: charts.BasicNumericTickProviderSpec(
@@ -97,5 +106,33 @@ class InputChart extends StatelessWidget {
     else if (ticks % 2 == 0) ticks++;
 
     return math.max(5, ticks);
+  }
+
+  charts.StaticDateTimeTickProviderSpec _getXAxis(List<charts.Series<InputSeries, DateTime>> series, List<DateTime> startEndPoints) {
+    if(series.length == 0) return charts.StaticDateTimeTickProviderSpec([charts.TickSpec<DateTime>(DateTime(2077, 10, 23))]);
+
+    List<charts.TickSpec<DateTime>> ticks = [];
+    TimeSpan timeSpan = TimeFrameModel().selectedTimeSpan;
+
+    switch(timeSpan) {
+      case TimeSpan.HalfYear:
+        for(int i = 0; i < 6; i++) {
+          if(i == 0) ticks.add(charts.TickSpec<DateTime>(monthsAgo(-1, monthsAgo(1, series[0].data[0].day))));
+          else ticks.add(charts.TickSpec<DateTime>(monthsAgo(-1, ticks[i-1].value)));
+        }
+        break;
+      case TimeSpan.Month:
+        for(int i = 0; i < 5; i++) {
+          ticks.add(charts.TickSpec<DateTime>(daysAgo(i * 7, series[0].data.last.day)));
+        }
+        break;
+      case TimeSpan.Week:
+        series[0].data.forEach((element) => ticks.add(charts.TickSpec<DateTime>(element.day)));
+        if(sameDay(DateTime.now(), daysAgo(1,startEndPoints[1])))
+          ticks.add(charts.TickSpec<DateTime>(daysAgo(0, startEndPoints[1])));
+        break;
+    }
+
+    return charts.StaticDateTimeTickProviderSpec(ticks);
   }
 }

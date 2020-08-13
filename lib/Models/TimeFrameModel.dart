@@ -21,27 +21,27 @@ extension TimeSpanExtension on TimeSpan {
   }[this];
 }
 
-class TimeFrameModel {
+class TimeFrameModel extends ChangeNotifier{
   static final TimeFrameModel _model = TimeFrameModel._();
   TimeSpan _selectedTimeSpan = TimeSpan.Week;
-  DateTime realMonth;
   Map<TimeSpan, DateTime> _displayDates = Map<TimeSpan, DateTime>();
-  BehaviorSubject<List<DateTime>> _timeFrame;
-  Stream get timeFrameStream$ => _timeFrame.stream;
 
   set selectedTimeSpan(TimeSpan timeSpan) {
     _selectedTimeSpan = timeSpan;
-    _emitStream();
+    notifyListeners();
   }
 
   TimeSpan get selectedTimeSpan => _selectedTimeSpan;
+  List<DateTime> get dateStartEndTimes => [
+    daysAgo(_selectedTimeSpan.value, _displayDates[_selectedTimeSpan]),
+    _displayDates[_selectedTimeSpan]
+  ];
 
   TimeFrameModel._() {
     TimeSpan.values.forEach((timeSpan) {
       final Map<TimeSpan, DateTime> map = {timeSpan : daysAgo(-1, DateTime.now())};
       _displayDates.addAll(map);
     });
-    _timeFrame = BehaviorSubject.seeded([daysAgo(_selectedTimeSpan.value, _displayDates[_selectedTimeSpan]), _displayDates[_selectedTimeSpan]]);
   }
 
   factory TimeFrameModel() {
@@ -49,21 +49,15 @@ class TimeFrameModel {
   }
 
   void shiftTimeFramePast() {
-    updateTimeFrame(false);
+    _displayDates[_selectedTimeSpan] = getNewEndDate(
+        false, _displayDates[_selectedTimeSpan]);
+    notifyListeners();
   }
 
   void shiftTimeFrameFuture() {
-    updateTimeFrame(true);
-  }
-
-  void updateTimeFrame(bool isForward) {
     _displayDates[_selectedTimeSpan] = getNewEndDate(
-        isForward, _displayDates[_selectedTimeSpan]);
-    _emitStream();
-  }
-
-  void _emitStream() {
-    _timeFrame.add([daysAgo(_selectedTimeSpan.value, _displayDates[_selectedTimeSpan]), _displayDates[_selectedTimeSpan]]);
+        true, _displayDates[_selectedTimeSpan]);
+    notifyListeners();
   }
 //
 //  DateTime _getNearestSunday(

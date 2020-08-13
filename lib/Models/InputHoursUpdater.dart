@@ -23,10 +23,6 @@ class InputHoursUpdater {
 
   Stream get dbChangesStream$ => _dbChanges.stream;
 
-  Stream<List<DailyInputEntry>> get inputDataStream => TimeFrameModel().timeFrameStream$.switchMap((dateTimes) {
-    //return
-  });
-
   void resumeUpdate() {
     _update.add(1.0);
   }
