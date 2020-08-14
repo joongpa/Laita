@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputEntry.dart';
@@ -14,39 +13,40 @@ import '../Map.dart';
 class SingleAccuracyWidget extends StatelessWidget {
   final Category inputType;
 
-  SingleAccuracyWidget(
-      {@required this.inputType});
+  SingleAccuracyWidget({@required this.inputType});
 
   @override
   Widget build(BuildContext context) {
-    final providedTimeFrame = Provider.of<TimeFrameModel>(context);
-    final entries = Provider.of<Map<DateTime,DailyInputEntry>>(context);
+    final entries = Provider.of<Map<DateTime, DailyInputEntry>>(context);
 
-    if(providedTimeFrame == null || entries == null)
-      return Container();
+    if (entries == null) return Container();
 
-    DateTime realEndDate = providedTimeFrame.dateStartEndTimes[1];
-    if(realEndDate.isAfter(daysAgo(-1, DateTime.now()))) {
-      realEndDate = daysAgo(-1, DateTime.now());
-    }
-    int passCount = 0;
-    int failCount = 0;
+    List<DateTime> dateStartEndTimes = [];
 
-    for(int i = 0; i < daysBetween(providedTimeFrame.dateStartEndTimes[0], providedTimeFrame.dateStartEndTimes[1]); i++) {
+    entries.values.toSet()
+        .where((element) =>
+            element.categoryHours.isEmpty && element.goalAmounts.isEmpty)
+        .forEach((element) {
+      dateStartEndTimes.add(element.dateTime);
+    });
+    dateStartEndTimes.sort();
+
+    var successes = entries.values.toSet().where((element) {
       try {
-        if(entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].categoryHours[inputType.name] == 0 && entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].goalAmounts[inputType.name] == 0) {
-          failCount++;
-          continue;
-        }
-        passCount += (entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].categoryHours[inputType.name] >= entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].goalAmounts[inputType.name]) ? 1 : 0;
-        failCount += (entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].categoryHours[inputType.name] < entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].goalAmounts[inputType.name]) ? 1 : 0;
+        return element.categoryHours[inputType.name] >=
+                element.goalAmounts[inputType.name] &&
+            element.categoryHours[inputType.name] != 0;
       } catch (e) {
-        failCount++;
+        return false;
       }
-    }
+    });
 
-    if(passCount + failCount == 0) return _getWidget("0");
-    String value = (100 * passCount.toDouble() / (passCount + failCount)).round().toString();
+    String value = (100 *
+            successes.length.toDouble() /
+            daysBetween(dateStartEndTimes[0],
+                dateStartEndTimes[1]))
+        .round()
+        .toString();
     return _getWidget(value);
   }
 
@@ -65,14 +65,10 @@ class SingleAccuracyWidget extends StatelessWidget {
                 fontSize: 30,
               ),
             ),
-            Text(
-                '%',
-                style: TextStyle(color: Colors.grey, fontSize: 20)),
+            Text('%', style: TextStyle(color: Colors.grey, fontSize: 20)),
           ],
         ),
-        Text(
-            'met goal',
-            style: TextStyle(color: Colors.grey, fontSize: 15)),
+        Text('met goal', style: TextStyle(color: Colors.grey, fontSize: 15)),
       ],
     );
   }

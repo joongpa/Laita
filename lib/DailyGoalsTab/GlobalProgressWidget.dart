@@ -86,6 +86,7 @@ class GlobalProgressWidget extends StatelessWidget {
   }
 
   _getPercent(double num, double dom) {
+    if(num < 0.01) num = 0;
     if(num < 0 || dom < 0) return 0.0;
     if(num == null) num = 0;
     if(dom == null) dom = 0;
