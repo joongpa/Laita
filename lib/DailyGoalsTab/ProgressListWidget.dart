@@ -7,6 +7,7 @@ import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:provider/provider.dart';
 import '../Models/user.dart';
+import 'AddHours.dart';
 import 'GlobalProgressWidget.dart';
 
 class ProgressListWidget extends StatelessWidget {
@@ -24,17 +25,38 @@ class ProgressListWidget extends StatelessWidget {
             return SizedBox(height: 100);
 
           if (dailyInputEntry == null || dailyInputEntry[daysAgo(0)] == null)
-            return GlobalProgressWidget(
-              name: user.categories[index].name,
-              isTimeBased: user.categories[index].isTimeBased,
-              value: 0.0,
-              goal: user.categories[index].goalAmount ?? 0.0,
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddHours(user, user.categories, initialSelectionIndex: index)),
+                );
+              },
+              child: GlobalProgressWidget(
+                name: user.categories[index].name,
+                isTimeBased: user.categories[index].isTimeBased,
+                value: 0.0,
+                goal: user.categories[index].goalAmount ?? 0.0,
+              ),
             );
-          return GlobalProgressWidget(
-            goal: user.categories[index].goalAmount ?? 0.0,
-            value: dailyInputEntry[daysAgo(0)].categoryHours[user.categories[index].name] ?? 0.0,
-            isTimeBased: user.categories[index].isTimeBased,
-            name: user.categories[index].name,
+          return Material(
+            child: Ink(
+              child: InkWell(
+                splashColor: Colors.lightBlue,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AddHours(user, user.categories, initialSelectionIndex: index)),
+                  );
+                },
+                child: GlobalProgressWidget(
+                  goal: user.categories[index].goalAmount ?? 0.0,
+                  value: dailyInputEntry[daysAgo(0)].categoryHours[user.categories[index].name] ?? 0.0,
+                  isTimeBased: user.categories[index].isTimeBased,
+                  name: user.categories[index].name,
+                ),
+              ),
+            ),
           );
         });
 

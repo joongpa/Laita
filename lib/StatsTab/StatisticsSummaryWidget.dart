@@ -10,7 +10,6 @@ import 'package:miatracker/StatsTab/AverageDisplayWidget.dart';
 import 'package:miatracker/StatsTab/FullGraphWidget.dart';
 import 'package:miatracker/StatsTab/TimeFramePicker.dart';
 import 'package:provider/provider.dart';
-import 'DateTraverser.dart';
 
 class StatisticsSummaryWidget extends StatelessWidget {
   @override
@@ -48,7 +47,7 @@ class StatisticsSummaryWidget extends StatelessWidget {
                   ],
                 ),
                 child: Container(
-                  height: 420,
+                  height: 390,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8),
                     child: Column(
@@ -67,8 +66,12 @@ class StatisticsSummaryWidget extends StatelessWidget {
                             ],
                           ),
                         ),
-                        DateTraverser(),
-                        TimeFramePicker(),
+                        //DateTraverser(),
+                        Row(
+                          children: [
+                            Expanded(child: TimeFramePicker()),
+                          ],
+                        ),
                       ],
                     ),
                   ),

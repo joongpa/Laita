@@ -13,8 +13,9 @@ class AddHours extends StatefulWidget {
 
   final AppUser user;
   final List<Category> categories;
+  final int initialSelectionIndex;
 
-  AddHours(this.user, this.categories);
+  AddHours(this.user, this.categories, {this.initialSelectionIndex = 0});
 
   @override
   _AddHoursState createState() => _AddHoursState();
@@ -35,9 +36,9 @@ class _AddHoursState extends State<AddHours> {
   void initState() {
     super.initState();
     try {
-      _selectedCategory = widget.categories[0];
+      _selectedCategory = widget.categories[widget.initialSelectionIndex];
       _selections = List.generate(8, (index) {
-        if(index == 0) return true;
+        if(index == widget.initialSelectionIndex) return true;
         return false;
       });
     } catch (e) {

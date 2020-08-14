@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:miatracker/Map.dart';
 
 class DatePicker extends StatelessWidget {
   static const _YEAR = 365;
@@ -15,7 +16,7 @@ class DatePicker extends StatelessWidget {
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime.now().subtract(Duration(days: _YEAR * 10)),
-      lastDate: DateTime.now().add(Duration(days: _YEAR * 10)),
+      lastDate: daysAgo(0),
     );
     if (picked != null && picked != selectedDate) {
       onChanged(picked);
