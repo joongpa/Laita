@@ -1,6 +1,5 @@
 MIA Input Tracker Todo List (Not in any particular order of importance)
 
-- remove scroll glow
 - Code refactoring
     - Use themes (and dark mode)
 - Reduce number of Firebase reads
