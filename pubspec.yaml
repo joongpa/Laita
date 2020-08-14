@@ -24,7 +24,6 @@ dependencies:
   cloud_firestore: ^0.13.7
   firebase_auth: ^0.16.1
   percent_indicator: ^2.1.5
-  charts_flutter:
   intl: ^0.16.1
   rxdart: ^0.24.1
   provider: ^4.3.1

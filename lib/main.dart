@@ -17,6 +17,7 @@ import 'Models/user.dart';
 
 import 'LogsTab/MultiInputLog.dart';
 import 'StatsTab/StatisticsSummaryWidget.dart';
+import 'anti_scroll_glow.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,12 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        builder: (context, child) {
+          return ScrollConfiguration(
+            behavior: MyBehavior(),
+            child: child,
+          );
+        },
         title: 'MIA Tracker',
         theme: ThemeData(
 

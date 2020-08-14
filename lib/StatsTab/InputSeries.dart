@@ -1,4 +1,3 @@
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
@@ -12,27 +11,10 @@ import '../Models/user.dart' as model;
 import '../Models/InputEntry.dart';
 import '../Map.dart';
 
-class InputSeries {
-  DateTime day;
-  double hours;
-
-  InputSeries({@required this.day, @required this.hours});
-
-  void add(double hours) {
-    this.hours += hours;
-  }
-}
-
 class InputChart extends StatelessWidget {
   final bool isTimeBased;
-  final customTickFormatter = charts.BasicNumericTickFormatterSpec((num value) {
-    final isHalfHour = (value / 4) % 1 != 0;
-    return isHalfHour ? '' : '${convertToDisplay(value / 4)}';
-  });
 
   final List<bool> choiceArray;
-
-  //final List<List<InputSeries>> inputSeriesList = List<List<InputSeries>>(8);
 
   InputChart({@required this.choiceArray, this.isTimeBased = true});
 
@@ -49,7 +31,6 @@ class InputChart extends StatelessWidget {
         .where((element) => element.isTimeBased == isTimeBased)
         .toList();
 
-    //List<charts.Series<InputSeries, DateTime>> series = [];
     List<LineChartBarData> series = [];
 
     for (int i = categories.length - 1; i >= 0; i--) {
@@ -84,7 +65,10 @@ class InputChart extends StatelessWidget {
 
     return LineChart(
       LineChartData(
-        maxY: maxValue + 0.25,
+        lineTouchData: LineTouchData(
+          enabled: false,
+        ),
+        maxY: math.max((maxValue * 2).ceilToDouble()/2 + .25, 1.25),
           gridData: FlGridData(
               show: true, drawHorizontalLine: true, horizontalInterval: getTicksFromMaxValue(maxValue)),
           titlesData: FlTitlesData(
