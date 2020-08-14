@@ -62,10 +62,6 @@ class SignInPage extends StatelessWidget {
     } else
       return MultiProvider(
           providers: [
-            StreamProvider<List<InputEntry>>.value(
-                value: DatabaseService.instance.inputEntriesStream(user)),
-            StreamProvider<List<GoalEntry>>.value(
-                value: DatabaseService.instance.goalEntriesStream(user)),
             StreamProvider<AppUser>.value(
               value: DatabaseService.instance.appUserStream(user),
             ),

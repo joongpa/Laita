@@ -95,7 +95,7 @@ class DatabaseService {
 
     try {
       final docID =
-          '${inputEntry.inputType} ${UsefulShit.doubleDecimalFormat.format(inputEntry.amount)} ${inputEntry.dateTime} ${UniqueKey().hashCode}';
+          '${inputEntry.dateTime} ${inputEntry.inputType} ${inputEntry.amount} ${UniqueKey().hashCode}';
       inputEntry.docID = docID;
       _updateAggregateData(user, inputEntry);
 
@@ -124,7 +124,7 @@ class DatabaseService {
         return false;
 
       final docID =
-          '${goalEntry.inputType} ${goalEntry.amount} ${goalEntry.dateTime}';
+          '${goalEntry.dateTime} ${goalEntry.inputType} ${goalEntry.amount}';
       goalEntry.docID = docID;
       _updateAggregateGoalData(user, goalEntry);
       _entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
@@ -311,6 +311,18 @@ class DatabaseService {
 
           if (freshSnap == null) {
             if (!isDelete) {
+              var goalRef = Firestore.instance
+                  .collection('users')
+                  .document(user.uid)
+                  .collection('goalEntries');
+
+              var snap = await goalRef.where('dateTime', isLessThan: daysAgo(-1, inputEntry.dateTime)).orderBy('dateTime').limit(1).getDocuments();
+              double amount;
+              try {
+                amount = snap.documents.map((e) => GoalEntry.fromMap(e.data)).first.amount;
+              }  catch (e) {
+                amount = 0;
+              }
               await transaction.set(
                 docRef,
                 DailyInputEntry(
@@ -319,20 +331,19 @@ class DatabaseService {
                       inputEntry.inputType: inputEntry.amount
                     },
                     goalAmounts: <String, dynamic>{
-                      inputEntry.inputType: categoryFromName(
-                              inputEntry.inputType, user.categories)
-                          .goalAmount,
+                      inputEntry.inputType: amount,
                     }).toMap(),
-              );
+                );
             }
           } else {
             final agData = DailyInputEntry.fromMap(freshSnap.data);
             agData.categoryHours[inputEntry.inputType] =
                 (((isDelete) ? -1 : 1) * inputEntry.amount) +
                     (agData.categoryHours[inputEntry.inputType] ?? 0.0);
-            agData.goalAmounts[inputEntry.inputType] =
-                categoryFromName(inputEntry.inputType, user.categories)
-                    .goalAmount;
+            if(sameDay(inputEntry.dateTime, DateTime.now())) {
+              agData.goalAmounts[inputEntry.inputType] =
+                  categoryFromName(inputEntry.inputType, user.categories).goalAmount;
+            }
             await transaction.set(docRef, agData.toMap());
           }
         },

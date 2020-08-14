@@ -49,6 +49,7 @@ class _AddHoursState extends State<AddHours> {
   Widget build(BuildContext context) {
     if (_selectedCategory == null) {
       return Scaffold(
+          resizeToAvoidBottomPadding: false,
           appBar: AppBar(
             title: Text("Woops!"),
           ),
@@ -65,6 +66,7 @@ class _AddHoursState extends State<AddHours> {
       );
     }
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Text("New Immersion Entry"),
       ),

@@ -50,7 +50,6 @@ class MyApp extends StatelessWidget {
         },
         title: 'MIA Tracker',
         theme: ThemeData(
-
           primarySwatch: Colors.blue,
         ),
         home: SignInPage(),

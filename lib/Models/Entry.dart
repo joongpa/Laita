@@ -1,5 +1,6 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 
 abstract class Entry implements Comparable<Entry>{
   String docID;
@@ -23,4 +24,13 @@ abstract class Entry implements Comparable<Entry>{
   int compareTo(Entry other) {
     return this.dateTime.compareTo(other.dateTime);
   }
+
+  @override
+  bool operator ==(other) {
+    return other is Entry && docID == other.docID;
+  }
+
+  @override
+  int get hashCode => docID.hashCode;
+
 }

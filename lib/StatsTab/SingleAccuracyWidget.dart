@@ -4,6 +4,7 @@ import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
+import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
@@ -19,29 +20,29 @@ class SingleAccuracyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final providedTimeFrame = Provider.of<TimeFrameModel>(context);
-    final providedGoalList = Provider.of<List<GoalEntry>>(context) ?? [];
-    final providedInputList = Provider.of<List<InputEntry>>(context) ?? [];
+    final entries = Provider.of<Map<DateTime,DailyInputEntry>>(context);
 
-    if(providedTimeFrame == null || providedGoalList == null || providedInputList == null)
+    if(providedTimeFrame == null || entries == null)
       return Container();
 
     DateTime realEndDate = providedTimeFrame.dateStartEndTimes[1];
     if(realEndDate.isAfter(daysAgo(-1, DateTime.now()))) {
       realEndDate = daysAgo(-1, DateTime.now());
     }
-
-    final goals = Filter.goalsPerDay(providedGoalList, category: this.inputType, startDate: providedTimeFrame.dateStartEndTimes[0], endDate: realEndDate);
-    final hours = Filter.totalInputPerDay(providedInputList, category: this.inputType, startDate: providedTimeFrame.dateStartEndTimes[0], endDate: realEndDate);
     int passCount = 0;
     int failCount = 0;
 
-    for(int i = 0; i < goals.length; i++) {
-      if(goals[i] == 0 && hours[i] == 0) {
+    for(int i = 0; i < daysBetween(providedTimeFrame.dateStartEndTimes[0], providedTimeFrame.dateStartEndTimes[1]); i++) {
+      try {
+        if(entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].categoryHours[inputType.name] == 0 && entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].goalAmounts[inputType.name] == 0) {
+          failCount++;
+          continue;
+        }
+        passCount += (entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].categoryHours[inputType.name] >= entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].goalAmounts[inputType.name]) ? 1 : 0;
+        failCount += (entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].categoryHours[inputType.name] < entries[daysAgo(-i, providedTimeFrame.dateStartEndTimes[0])].goalAmounts[inputType.name]) ? 1 : 0;
+      } catch (e) {
         failCount++;
-        continue;
       }
-      passCount += (hours[i] >= goals[i]) ? 1 : 0;
-      failCount += (hours[i] < goals[i]) ? 1 : 0;
     }
 
     if(passCount + failCount == 0) return _getWidget("0");
