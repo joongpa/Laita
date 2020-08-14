@@ -53,7 +53,7 @@ class _TimeFramePickerState extends State<TimeFramePicker> {
             ),
           ),
           Positioned(
-              right: 65,
+              right: 50,
               child: FlatButton(
                 shape: CircleBorder(side: BorderSide.none),
                 padding: EdgeInsets.all(10),
