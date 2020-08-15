@@ -30,7 +30,7 @@ class StatisticsSummaryWidget extends StatelessWidget {
       ],
       child: Consumer<TimeFrameModel>(builder: (context, value, child) {
         return StreamProvider<Map<DateTime, DailyInputEntry>>.value(
-          value: DatabaseService.instance.dailyInputEntriesStream(user.uid,
+          value: DatabaseService.instance.getDailyInputEntriesOnDays(user.uid,
               startDate: value.dateStartEndTimes[0],
               endDate: value.dateStartEndTimes[1]),
           child: ListView(

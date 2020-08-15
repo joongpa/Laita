@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
+import 'package:rxdart/rxdart.dart';
 import '../Map.dart';
 import 'GoalEntry.dart';
 import 'InputEntry.dart';
@@ -11,7 +12,6 @@ import 'user.dart';
 class DatabaseService {
   DatabaseService._();
 
-  final String _inputEntries = 'inputEntries';
   final String _goalEntries = 'goalEntries';
   final String _aggregateInputEntries = 'aggregateInputEntries';
 
@@ -142,40 +142,16 @@ class DatabaseService {
     return tempList;
   }
 
-  Future<Map<DateTime, DailyInputEntry>> getTotalInputHoursOnDays(String uid,
-      {@required DateTime startDate, @required DateTime endDate}) async {
-    Map<DateTime, DailyInputEntry> tempMap = {};
-    for (int i = 1; i <= daysBetween(startDate, endDate); i++) {
-      if (_aggregateEntries[daysAgo(i, endDate)] == null) {
-        _aggregateEntries.addAll(await _getMissingAggregateEntries(
-            uid, daysAgo(0, startDate), daysAgo(i - 1, endDate)));
-      }
-      tempMap[daysAgo(i, endDate)] = _aggregateEntries[daysAgo(i, endDate)];
+  Stream<Map<DateTime, DailyInputEntry>> getDailyInputEntriesOnDays(String uid,
+      {@required DateTime startDate, @required DateTime endDate}) async* {
+    if (_aggregateEntries[startDate] == null) {
+      _aggregateEntries.addAll(await dailyInputEntriesStream(uid,
+              startDate: startDate, endDate: endDate)
+          .first);
     }
-    tempMap[startDate] ??= DailyInputEntry(
-        dateTime: startDate, categoryHours: {}, goalAmounts: {});
-    tempMap[endDate] ??=
-        DailyInputEntry(dateTime: endDate, categoryHours: {}, goalAmounts: {});
-    return tempMap ?? {};
-  }
-
-  Future<Map<DateTime, DailyInputEntry>> _getMissingAggregateEntries(
-      String uid, DateTime startDate, DateTime endDate) async {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(uid)
-        .collection(_aggregateInputEntries);
-    final agSnap = await ref
-        .where('dateTime', isGreaterThanOrEqualTo: startDate)
-        .where('dateTime', isLessThan: endDate)
-        .getDocuments();
-    final List<DailyInputEntry> tempList = agSnap.documents
-        .map((e) => DailyInputEntry.fromMap(e.data, e.documentID))
-        .toList();
-    final List<DateTime> dates =
-        List.generate(tempList.length, (index) => daysAgo(-index, startDate));
-    Map<DateTime, DailyInputEntry> tempMap = Map.fromIterables(dates, tempList);
-    return tempMap ?? {};
+    yield Map.from(_aggregateEntries)
+      ..removeWhere(
+          (date, value) => date.isBefore(startDate) || date.isAfter(endDate));
   }
 
   Stream<Map<DateTime, DailyInputEntry>> dailyInputEntriesStream(String uid,
@@ -236,18 +212,21 @@ class DatabaseService {
 
           if (freshSnap == null && !isDelete) {
             double amount = await _getGoalOfInputEntry(user.uid, inputEntry);
+            final newDailyInputEntry = DailyInputEntry(
+              dateTime: inputEntry.dateTime,
+              categoryHours: <String, dynamic>{
+                inputEntry.inputType: inputEntry.amount
+              },
+              goalAmounts: <String, dynamic>{
+                inputEntry.inputType: amount,
+              },
+              inputEntries: [inputEntry],
+            );
+            _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = newDailyInputEntry;
+
             await transaction.set(
               docRef,
-              DailyInputEntry(
-                dateTime: inputEntry.dateTime,
-                categoryHours: <String, dynamic>{
-                  inputEntry.inputType: inputEntry.amount
-                },
-                goalAmounts: <String, dynamic>{
-                  inputEntry.inputType: amount,
-                },
-                inputEntries: [inputEntry],
-              ).toMap(),
+              newDailyInputEntry.toMap(),
             );
           } else {
             final agData = DailyInputEntry.fromMap(freshSnap.data);
@@ -265,6 +244,8 @@ class DatabaseService {
                   categoryFromName(inputEntry.inputType, user.categories)
                       .goalAmount;
             }
+            _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
+
             await transaction.set(docRef, agData.toMap());
           }
         },
@@ -316,7 +297,6 @@ class DatabaseService {
         .collection('users')
         .document(uid)
         .collection(_aggregateInputEntries);
-
 
     return ref.orderBy('dateTime').limit(1).snapshots().map((singleList) =>
         DailyInputEntry.fromMap(singleList.documents.first.data));
