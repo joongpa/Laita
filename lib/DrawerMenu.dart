@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/GoalsPageWidget.dart';
 import 'package:miatracker/Models/database.dart';
+import 'package:miatracker/Models/input_entries_provider.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 import 'Models/auth.dart';
@@ -44,7 +45,7 @@ class DrawerMenu extends StatelessWidget {
             text: "Log out",
             onTap: () {
               AuthService.instance.signOut();
-              DatabaseService.instance.clearCache();
+              InputEntriesProvider.instance.clear();
             },
           )
         ],

@@ -317,6 +317,7 @@ class DatabaseService {
         .document(uid)
         .collection(_aggregateInputEntries);
 
+
     return ref.orderBy('dateTime').limit(1).snapshots().map((singleList) =>
         DailyInputEntry.fromMap(singleList.documents.first.data));
   }

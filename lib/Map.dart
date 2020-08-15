@@ -91,6 +91,7 @@ String convertToStatsDisplay(double time, [bool isTimeBased = true]) {
 }
 
 String convertToDisplay(double time, [bool isTimeBased = true]) {
+  time = (time * 100).round().toDouble()/100;
   if(time < 0) return (isTimeBased) ? '0:00' : '0';
   int hours = time.floor();
   int minutes = ((time % 1) * 60).round();

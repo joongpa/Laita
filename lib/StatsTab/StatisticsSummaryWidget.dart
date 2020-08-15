@@ -25,6 +25,7 @@ class StatisticsSummaryWidget extends StatelessWidget {
         ),
         StreamProvider<DailyInputEntry>.value(
           value: DatabaseService.instance.getFirstDayOfActivity(user.uid),
+          catchError: (context, object) => null,
         )
       ],
       child: Consumer<TimeFrameModel>(builder: (context, value, child) {
