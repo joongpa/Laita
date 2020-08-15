@@ -87,7 +87,7 @@ class GlobalProgressWidget extends StatelessWidget {
   }
 
   _getPercent(double num, double dom) {
-    num = (num * 100).round().toDouble()/100;
+    num = roundTo2Decimals(num);
     if(num < 0.01) num = 0;
     if(num < 0 || dom < 0) return 0.0;
     if(num == null) num = 0;
