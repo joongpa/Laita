@@ -159,7 +159,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                             child: TextFormField(
                               controller:
                               controllersMap[user.categories[index]],
-                              keyboardType: (user.categories[index].isTimeBased) ? TextInputType.datetime : TextInputType.numberWithOptions(signed: false, decimal: false),
+                              keyboardType: TextInputType.datetime,
                               decoration: InputDecoration(
                                 labelText: (user.categories[index].isTimeBased) ? 'HH:mm' : '#',
                               ),

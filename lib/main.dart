@@ -41,27 +41,18 @@ class MyApp extends StatelessWidget {
           value: FirebaseAuth.instance.onAuthStateChanged
         ),
       ],
-      child: GestureDetector(
-        onTap: () {
-          FocusScopeNode currentFocus = FocusScope.of(context);
-
-          if (!currentFocus.hasPrimaryFocus) {
-            currentFocus.unfocus();
-          }
+      child: MaterialApp(
+        builder: (context, child) {
+          return ScrollConfiguration(
+            behavior: MyBehavior(),
+            child: child,
+          );
         },
-        child: MaterialApp(
-          builder: (context, child) {
-            return ScrollConfiguration(
-              behavior: MyBehavior(),
-              child: child,
-            );
-          },
-          title: 'MIA Tracker',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          home: SignInPage(),
+        title: 'MIA Tracker',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
         ),
+        home: SignInPage(),
       ),
     );
   }
