@@ -100,12 +100,7 @@ String convertToDisplay(double time, [bool isTimeBased = true]) {
 }
 
 Category categoryFromName(String name, List<Category> categories) {
-  int index = categories.indexOf(Category(name: name));
-  if(index == -1) {
-    return Category(name: "", goalAmount: 0.0, isTimeBased: false);
-  }
-
-  return categories[index];
+  return categories.toSet().lookup(Category(name: name));
 }
 
 double parseTime(String input) {

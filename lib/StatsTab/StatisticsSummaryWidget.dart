@@ -9,13 +9,14 @@ import 'package:miatracker/Models/user.dart';
 import 'package:miatracker/StatsTab/AverageDisplayWidget.dart';
 import 'package:miatracker/StatsTab/FullGraphWidget.dart';
 import 'package:miatracker/StatsTab/TimeFramePicker.dart';
+import 'package:miatracker/StatsTab/lifetime_amount_display.dart';
 import 'package:provider/provider.dart';
 
 class StatisticsSummaryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
-    if(user == null) return Container();
+    if (user == null) return Container();
 
     return MultiProvider(
       providers: [
@@ -24,9 +25,10 @@ class StatisticsSummaryWidget extends StatelessWidget {
         ),
       ],
       child: Consumer<TimeFrameModel>(builder: (context, value, child) {
-        return StreamProvider<Map<DateTime,DailyInputEntry>>.value(
+        return StreamProvider<Map<DateTime, DailyInputEntry>>.value(
           value: DatabaseService.instance.dailyInputEntriesStream(user.uid,
-              startDate: value.dateStartEndTimes[0], endDate: value.dateStartEndTimes[1]),
+              startDate: value.dateStartEndTimes[0],
+              endDate: value.dateStartEndTimes[1]),
           child: ListView(
             children: <Widget>[
               Container(
@@ -82,7 +84,15 @@ class StatisticsSummaryWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: AverageDisplayWidget(),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 25),
+              Center(
+                child: Text(
+                  "Lifetime Summary",
+                  style: TextStyle(color: Colors.grey, fontSize: 18),
+                ),
+              ),
+              const SizedBox(height: 10),
+              LifetimeAmountDisplay()
             ],
           ),
         );

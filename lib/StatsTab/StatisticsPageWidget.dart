@@ -32,17 +32,18 @@ class StatisticsPageWidget extends StatelessWidget {
       hours = 0.0;
     else hours = entries.values.where((e) => e != null).map<double>((e) => (e.categoryHours[inputType.name] ?? 0)).reduce((a,b) => a + b);
     String value = convertToStatsDisplay(hours / countedDays, inputType.isTimeBased);
-    return _getWidget(value);
+    Color color = (hours/countedDays >= inputType.goalAmount) ? Colors.green[800] : Colors.red[900];
+    return _getWidget(value, color);
   }
 
-  Widget _getWidget(String text) {
+  Widget _getWidget(String text, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Text(
           text,
           style: TextStyle(
-            color: Colors.black,
+            color: color,
             fontSize: 30,
           ),
         ),

@@ -27,66 +27,6 @@ class DatabaseService {
     return ref.snapshots().map((doc) => AppUser.fromMap(doc.data));
   }
 
-  Stream<List<InputEntry>> inputEntriesStream(FirebaseUser user,
-      {Category category, DateTime startDate, DateTime endDate}) {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_inputEntries);
-
-    if (startDate == null && endDate == null && category == null) {
-      return ref.snapshots().map((list) => list.documents
-          .map((doc) => InputEntry.fromMap(doc.data, doc.documentID))
-          .toList());
-    } else if (startDate == null && endDate == null) {
-      return ref.where('category', isEqualTo: category.name).snapshots().map(
-          (list) => list.documents
-              .map((doc) => InputEntry.fromMap(doc.data, doc.documentID))
-              .toList());
-    }
-    startDate ??= DateTime.now();
-    endDate ??= daysAgo(-1, DateTime.now());
-
-    return ref
-        .where('category', isEqualTo: category.name)
-        .where('dateTime', isGreaterThanOrEqualTo: startDate)
-        .where('dateTime', isLessThan: endDate)
-        .snapshots()
-        .map((list) => list.documents
-            .map((doc) => InputEntry.fromMap(doc.data, doc.documentID))
-            .toList());
-  }
-
-  Stream<List<GoalEntry>> goalEntriesStream(FirebaseUser user,
-      {Category category, DateTime startDate, DateTime endDate}) {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_goalEntries);
-
-    if (startDate == null && endDate == null && category == null) {
-      return ref.snapshots().map((list) => list.documents
-          .map((doc) => GoalEntry.fromMap(doc.data, doc.documentID))
-          .toList());
-    } else if (startDate == null && endDate == null) {
-      return ref.where('category', isEqualTo: category.name).snapshots().map(
-          (list) => list.documents
-              .map((doc) => GoalEntry.fromMap(doc.data, doc.documentID))
-              .toList());
-    }
-    startDate ??= DateTime.now();
-    endDate ??= daysAgo(-1, DateTime.now());
-
-    return ref
-        .where('category', isEqualTo: category.name)
-        .where('dateTime', isGreaterThanOrEqualTo: startDate)
-        .where('dateTime', isLessThan: endDate)
-        .snapshots()
-        .map((list) => list.documents
-            .map((doc) => GoalEntry.fromMap(doc.data, doc.documentID))
-            .toList());
-  }
-
   Future<bool> addInputEntry(AppUser user, InputEntry inputEntry) async {
     var ref = Firestore.instance
         .collection('users')
@@ -108,6 +48,21 @@ class DatabaseService {
       return true;
     } catch (e) {
       print(e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> deleteInputEntry(AppUser user, InputEntry inputEntry) async {
+    var ref = Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection(_inputEntries);
+    try {
+      _entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
+      _updateAggregateData(user, inputEntry, isDelete: true);
+      await ref.document(inputEntry.docID).delete();
+      return true;
+    } catch (e) {
       return false;
     }
   }
@@ -157,23 +112,6 @@ class DatabaseService {
     var userRef = Firestore.instance.collection('users').document(user.uid);
     userRef.setData(user.toMap());
   }
-
-  Future<bool> deleteInputEntry(AppUser user, InputEntry inputEntry) async {
-    var ref = Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection(_inputEntries);
-    try {
-      _entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
-      _updateAggregateData(user, inputEntry, isDelete: true);
-      await ref.document(inputEntry.docID).delete();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  ///Specialized Methods
 
   Future<List<Entry>> getEntriesOnDay(AppUser user, DateTime day) async {
     if (_entries[day] == null) {
@@ -229,8 +167,10 @@ class DatabaseService {
       }
       tempMap[daysAgo(i, endDate)] = _aggregateEntries[daysAgo(i, endDate)];
     }
-    tempMap[startDate] ??= DailyInputEntry(dateTime: startDate, categoryHours: {}, goalAmounts: {});
-    tempMap[endDate] ??= DailyInputEntry(dateTime: endDate, categoryHours: {}, goalAmounts: {});
+    tempMap[startDate] ??= DailyInputEntry(
+        dateTime: startDate, categoryHours: {}, goalAmounts: {});
+    tempMap[endDate] ??=
+        DailyInputEntry(dateTime: endDate, categoryHours: {}, goalAmounts: {});
     return tempMap ?? {};
   }
 
@@ -249,8 +189,7 @@ class DatabaseService {
         .toList();
     final List<DateTime> dates =
         List.generate(tempList.length, (index) => daysAgo(-index, startDate));
-    Map<DateTime, DailyInputEntry> tempMap =
-        Map.fromIterables(dates, tempList);
+    Map<DateTime, DailyInputEntry> tempMap = Map.fromIterables(dates, tempList);
     return tempMap ?? {};
   }
 
@@ -273,8 +212,10 @@ class DatabaseService {
           list.documents
               .map((doc) => DailyInputEntry.fromMap(doc.data))
               .toList());
-      map[startDate] ??= DailyInputEntry(dateTime: startDate, categoryHours: {}, goalAmounts: {});
-      map[endDate] ??= DailyInputEntry(dateTime: endDate, categoryHours: {}, goalAmounts: {});
+      map[startDate] ??= DailyInputEntry(
+          dateTime: startDate, categoryHours: {}, goalAmounts: {});
+      map[endDate] ??= DailyInputEntry(
+          dateTime: endDate, categoryHours: {}, goalAmounts: {});
       return map;
     });
   }
@@ -282,10 +223,9 @@ class DatabaseService {
   void _updateAggregateGoalData(AppUser user, GoalEntry goalEntry) {
     var ref2 = Firestore.instance.collection('users').document(user.uid);
     try {
-      int index = user.categories.indexOf(Category(name: goalEntry.inputType));
-      if (index == -1) return;
+      categoryFromName(goalEntry.inputType, user.categories).goalAmount =
+          goalEntry.amount;
 
-      user.categories[index].goalAmount = goalEntry.amount;
       ref2.setData(user.toMap(), merge: true);
     } catch (e) {}
   }
@@ -316,11 +256,19 @@ class DatabaseService {
                   .document(user.uid)
                   .collection('goalEntries');
 
-              var snap = await goalRef.where('dateTime', isLessThan: daysAgo(-1, inputEntry.dateTime)).orderBy('dateTime').limit(1).getDocuments();
+              var snap = await goalRef
+                  .where('dateTime',
+                      isLessThan: daysAgo(-1, inputEntry.dateTime))
+                  .orderBy('dateTime')
+                  .limit(1)
+                  .getDocuments();
               double amount;
               try {
-                amount = snap.documents.map((e) => GoalEntry.fromMap(e.data)).first.amount;
-              }  catch (e) {
+                amount = snap.documents
+                    .map((e) => GoalEntry.fromMap(e.data))
+                    .first
+                    .amount;
+              } catch (e) {
                 amount = 0;
               }
               await transaction.set(
@@ -333,21 +281,38 @@ class DatabaseService {
                     goalAmounts: <String, dynamic>{
                       inputEntry.inputType: amount,
                     }).toMap(),
-                );
+              );
             }
           } else {
             final agData = DailyInputEntry.fromMap(freshSnap.data);
             agData.categoryHours[inputEntry.inputType] =
                 (((isDelete) ? -1 : 1) * inputEntry.amount) +
                     (agData.categoryHours[inputEntry.inputType] ?? 0.0);
-            if(sameDay(inputEntry.dateTime, DateTime.now())) {
+            if (sameDay(inputEntry.dateTime, DateTime.now())) {
               agData.goalAmounts[inputEntry.inputType] =
-                  categoryFromName(inputEntry.inputType, user.categories).goalAmount;
+                  categoryFromName(inputEntry.inputType, user.categories)
+                      .goalAmount;
             }
             await transaction.set(docRef, agData.toMap());
           }
         },
       );
+    });
+    _updateLifetimeAmounts(user.uid, inputEntry, isDelete: isDelete);
+  }
+
+  void _updateLifetimeAmounts(String uid, InputEntry inputEntry,
+      {bool isDelete = false}) {
+    DocumentReference docRef =
+        Firestore.instance.collection('users').document(uid);
+
+    Firestore.instance.runTransaction((transaction) async {
+      AppUser user = AppUser.fromMap((await transaction.get(docRef)).data);
+      try {
+        categoryFromName(inputEntry.inputType, user.categories)
+            .lifetimeAmount += ((isDelete) ? -1 : 1) * inputEntry.amount;
+      } catch (e) {}
+      await transaction.update(docRef, user.toMap());
     });
   }
 

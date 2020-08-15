@@ -60,7 +60,7 @@ class InputLog extends StatelessWidget {
                             ),
                           ),
                           title: Text(
-                            '$goalText${convertToDisplay(entry.amount, categoryFromName(entry.inputType, user.categories).isTimeBased)}',
+                            '$goalText${convertToDisplay(entry.amount, (categoryFromName(entry.inputType, user.categories) ?? Category(isTimeBased: false)).isTimeBased)}',
                             style: TextStyle(
                               color: Color.fromRGBO(140, 140, 140, 1),
                             ),
@@ -118,7 +118,7 @@ class InputLog extends StatelessWidget {
                           ],
                         ),
                         title: Text(
-                            '${convertToDisplay(entry.amount, categoryFromName(entry.inputType, user.categories).isTimeBased)}'),
+                            '${convertToDisplay(entry.amount, (categoryFromName(entry.inputType, user.categories) ?? Category(isTimeBased: false)).isTimeBased)}'),
                         trailing: Text(entry.time),
                       )),
                 );
