@@ -23,6 +23,9 @@ class StatisticsSummaryWidget extends StatelessWidget {
         ChangeNotifierProvider<TimeFrameModel>.value(
           value: TimeFrameModel(),
         ),
+        StreamProvider<DailyInputEntry>.value(
+          value: DatabaseService.instance.getFirstDayOfActivity(user.uid),
+        )
       ],
       child: Consumer<TimeFrameModel>(builder: (context, value, child) {
         return StreamProvider<Map<DateTime, DailyInputEntry>>.value(
@@ -92,7 +95,8 @@ class StatisticsSummaryWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              LifetimeAmountDisplay()
+              LifetimeAmountDisplay(),
+              const SizedBox(height: 10)
             ],
           ),
         );

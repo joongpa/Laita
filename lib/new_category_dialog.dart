@@ -75,7 +75,9 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
                 name: _newCategoryDialogController.text,
                 isTimeBased: isTimeBased,
                 addDate: DateTime.now(),
-                color: Global.defaultColors[widget.index]);
+                color: Global.defaultColors[widget.index],
+                lifetimeAmount: 0,
+                goalAmount: 0);
             Navigator.of(context).pop(category);
             _newCategoryDialogController.clear();
           },

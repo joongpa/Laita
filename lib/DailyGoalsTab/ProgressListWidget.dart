@@ -16,7 +16,7 @@ class ProgressListWidget extends StatelessWidget {
     var user = Provider.of<AppUser>(context);
     var dailyInputEntry = Provider.of<Map<DateTime, DailyInputEntry>>(context);
 
-    if (user == null) return Container();
+    if (user == null || user.categories == null) return Container();
 
     return ListView.builder(
         itemCount: user.categories.length + 1,

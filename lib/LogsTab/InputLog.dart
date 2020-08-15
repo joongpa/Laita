@@ -18,7 +18,6 @@ import '../Map.dart';
 class InputLog extends StatelessWidget {
   final durationFormat = NumberFormat("0.0");
   final DateTime dateTime;
-  int counter = 0;
 
   InputLog({this.dateTime});
 
@@ -32,7 +31,7 @@ class InputLog extends StatelessWidget {
       value: InputEntriesProvider.instance,
       child: Consumer<InputEntriesProvider>(
         builder: (context, value, child) {
-          if(value.entries == null) return Center(child: CircularProgressIndicator());
+          if(value.isLoading) return Center(child: CircularProgressIndicator());
 
           return ListView.builder(
               itemCount: value.entries.length,
@@ -95,7 +94,6 @@ class InputLog extends StatelessWidget {
                   },
                   onDismissed: (dis) {
                     value.remove(user, entry);
-                    //DatabaseService.instance.deleteInputEntry(user, entry);
                   },
                   child: Card(
                       child: ListTile(

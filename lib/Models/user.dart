@@ -47,15 +47,15 @@ class Category {
   double lifetimeAmount;
   Color color;
 
-  Category({this.name, this.addDate, this.isTimeBased, this.goalAmount, this.color, this.lifetimeAmount});
+  Category({this.name, this.addDate, this.isTimeBased, this.goalAmount=0, this.color, this.lifetimeAmount=0});
 
   factory Category.fromMap(Map<String, dynamic> map) => Category(
         name: map['name'],
         addDate: map['addDate'].toDate(),
         isTimeBased: map['isTimeBased'],
-        goalAmount: map['goalAmount'],
+        goalAmount: (map['goalAmount'] ?? 0).toDouble(),
         color: Color(map['color'] ?? 0).withOpacity(1),
-        lifetimeAmount: map['lifetimeAmount'] ?? 0
+        lifetimeAmount: (map['lifetimeAmount'] ?? 0).toDouble(),
       );
 
   Map<String, dynamic> toMap() => {

@@ -10,8 +10,8 @@ class InputEntry extends Entry{
   InputEntry.now({docID, this.description, inputType, amount}) :
         super.now(docID: docID, inputType: inputType, amount: amount);
 
-  factory InputEntry.fromMap(Map<String,dynamic> map, [String docID]) => InputEntry(
-    docID: docID,
+  factory InputEntry.fromMap(Map<String,dynamic> map) => InputEntry(
+    docID: map['docID'],
     dateTime: map['dateTime'].toDate(),
     description: map['description'],
     inputType: map['inputType'],

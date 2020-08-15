@@ -20,7 +20,7 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
-    if(user == null) return Container();
+    if(user == null || user.categories == null) return Container();
 
     List<Category> categories = user.categories.where((element) => element.isTimeBased == widget.isTimeBased).toList();
 

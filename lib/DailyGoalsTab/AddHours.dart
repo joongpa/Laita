@@ -77,6 +77,8 @@ class _AddHoursState extends State<AddHours> {
           child: Column(
             children: <Widget>[
               TextField(
+                maxLength: 140,
+                maxLines: 3,
                 decoration: InputDecoration(
                     labelText: "Description (optional)"
                 ),

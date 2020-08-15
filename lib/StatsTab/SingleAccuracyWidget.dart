@@ -21,15 +21,10 @@ class SingleAccuracyWidget extends StatelessWidget {
 
     if (entries == null) return Container();
 
-    List<DateTime> dateStartEndTimes = [];
+    var dates = entries.keys.toList();
+    dates.sort();
 
-    entries.values.toSet()
-        .where((element) =>
-            element.categoryHours.isEmpty && element.goalAmounts.isEmpty)
-        .forEach((element) {
-      dateStartEndTimes.add(element.dateTime);
-    });
-    dateStartEndTimes.sort();
+    final countedDays = daysBetween(dates.first, dates.last);
 
     var successes = entries.values.toSet().where((element) {
       try {
@@ -41,12 +36,8 @@ class SingleAccuracyWidget extends StatelessWidget {
       }
     });
 
-    String value = (100 *
-            successes.length.toDouble() /
-            daysBetween(dateStartEndTimes[0],
-                dateStartEndTimes[1]))
-        .round()
-        .toString();
+    String value =
+        (100 * successes.length.toDouble() / countedDays).round().toString();
     return _getWidget(value);
   }
 

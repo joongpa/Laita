@@ -12,7 +12,7 @@ class AverageDisplayWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
-    if(user == null) return Container();
+    if(user == null || user.categories == null) return Container();
 
     return Wrap(
       alignment: WrapAlignment.center,
