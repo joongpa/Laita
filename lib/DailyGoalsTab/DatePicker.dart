@@ -10,7 +10,11 @@ class DatePicker extends StatelessWidget {
   final ValueChanged<DateTime> onChanged;
 
   Future<Null> _selectDate(BuildContext context) async {
-    FocusScope.of(context).requestFocus(FocusNode());
+    FocusScopeNode currentFocus = FocusScope.of(context);
+
+    if (!currentFocus.hasPrimaryFocus) {
+      currentFocus.unfocus();
+    }
     await Future.delayed(Duration(milliseconds: 100));
     final DateTime picked = await showDatePicker(
       context: context,
