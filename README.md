@@ -2,7 +2,6 @@ MIA Input Tracker Todo List (Not in any particular order of importance)
 
 - Code refactoring
     - Use themes (and dark mode)
-- Reduce number of Firebase reads
 - Add Page
     - Add tick labels to sliders
     - Add + and - buttons for quantity-based categories

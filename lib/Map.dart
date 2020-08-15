@@ -90,7 +90,12 @@ String convertToStatsDisplay(double time, [bool isTimeBased = true]) {
 
 }
 
+double roundTo2Decimals(double value) {
+  return (value * 100).round().toDouble()/100;
+}
+
 String convertToDisplay(double time, [bool isTimeBased = true]) {
+  time = roundTo2Decimals(time);
   if(time < 0) return (isTimeBased) ? '0:00' : '0';
   int hours = time.floor();
   int minutes = ((time % 1) * 60).round();

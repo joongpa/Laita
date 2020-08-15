@@ -8,7 +8,7 @@ import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/database.dart';
-import 'package:miatracker/Models/inputEntriesProvider.dart';
+import 'package:miatracker/Models/input_entries_provider.dart';
 import 'package:provider/provider.dart';
 import '../Models/user.dart';
 
@@ -32,13 +32,14 @@ class InputLog extends StatelessWidget {
       child: Consumer<InputEntriesProvider>(
         builder: (context, value, child) {
           if(value.isLoading) return Center(child: CircularProgressIndicator());
+          if(value.entries[dateTime] == null || value.entries[dateTime].length == 0) return Container();
 
           return ListView.builder(
-              itemCount: value.entries.length,
+              itemCount: value.entries[dateTime].length,
               itemBuilder: (context, index) {
-                if (index >= value.entries.length) return Center(child: Container());
+                if (index >= value.entries[dateTime].length) return Center(child: Container());
 
-                final entry = value.entries[index];
+                final entry = value.entries[dateTime][index];
 
                 String subtitleText = '';
                 if (entry is InputEntry) {

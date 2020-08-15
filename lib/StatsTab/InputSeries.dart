@@ -25,7 +25,7 @@ class InputChart extends StatelessWidget {
 
     Map<DateTime, DailyInputEntry> entries =
         Provider.of<Map<DateTime, DailyInputEntry>>(context);
-    if (user == null || entries == null) return CircularProgressIndicator();
+    if (user == null || entries == null) return Center(child: CircularProgressIndicator());
 
     List<model.Category> categories = user.categories
         .where((element) => element.isTimeBased == isTimeBased)

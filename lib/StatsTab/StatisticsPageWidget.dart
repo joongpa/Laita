@@ -20,12 +20,13 @@ class StatisticsPageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var entries = Provider.of<Map<DateTime, DailyInputEntry>>(context);
-    if(entries == null || entries.length == 0) return CircularProgressIndicator();
+    if(entries == null || entries.length == 0) return Center(child: CircularProgressIndicator());
 
     var dates = entries.keys.toList();
     dates.sort();
 
-    final countedDays = daysBetween(dates.first, dates.last);
+    var countedDays = daysBetween(dates.first, dates.last);
+    countedDays = (countedDays == 0) ? 1 : countedDays;
 
     double hours;
     if(entries.length == 0)

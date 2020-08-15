@@ -3,13 +3,19 @@ import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
+import 'dart:math' as math;
 
 class LifetimeAmountDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
     DailyInputEntry firstEntry = Provider.of<DailyInputEntry>(context);
-    if (user == null || firstEntry == null) return Container();
+    if (user == null) return Container();
+
+    DateTime startDate;
+    if(firstEntry == null)
+      startDate = DateTime.fromMillisecondsSinceEpoch(0);
+    else startDate = firstEntry.dateTime;
 
     return Column(
       children: [
@@ -34,7 +40,7 @@ class LifetimeAmountDisplay extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 _getWidget(_convertToDisplay(
-                    user.categories[index].lifetimeAmount,
+                    math.max(0,user.categories[index].lifetimeAmount),
                     user.categories[index].isTimeBased),
                     user.categories[index].isTimeBased),
               ],
@@ -52,7 +58,7 @@ class LifetimeAmountDisplay extends StatelessWidget {
             )),
             SizedBox(width: 10),
             Expanded(
-              child: Text(getDate(firstEntry.dateTime)),
+              child: Text(getDate(startDate)),
             )
           ],
         )
