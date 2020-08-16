@@ -23,6 +23,16 @@ class InputEntriesProvider extends ChangeNotifier {
     } else _entries[dateTime] = await DatabaseService.instance.getEntriesOnDay(user, dateTime);
   }
 
+  reload(AppUser user, DateTime dateTime) async {
+    isLoading = true;
+    notifyListeners();
+    _entries.clear();
+    DatabaseService.instance.entries.clear();
+    await getEntriesOnDay(user, dateTime);
+    isLoading = false;
+    notifyListeners();
+  }
+
   void remove(AppUser user, InputEntry inputEntry) {
     _entries.remove(inputEntry);
     DatabaseService.instance.deleteInputEntry(user, inputEntry);

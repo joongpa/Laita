@@ -15,8 +15,8 @@ class DatabaseService {
   final String _goalEntries = 'goalEntries';
   final String _aggregateInputEntries = 'aggregateInputEntries';
 
-  static Map<DateTime, List<Entry>> _entries = Map<DateTime, List<Entry>>();
-  static Map<DateTime, DailyInputEntry> _aggregateEntries =
+  Map<DateTime, List<Entry>> entries = Map<DateTime, List<Entry>>();
+  Map<DateTime, DailyInputEntry> _aggregateEntries =
       Map<DateTime, DailyInputEntry>();
 
   static final DatabaseService instance = DatabaseService._();
@@ -34,8 +34,8 @@ class DatabaseService {
       inputEntry.docID = docID;
       _updateAggregateData(user, inputEntry);
 
-      if (_entries[daysAgo(0, inputEntry.dateTime)] != null) {
-        _entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
+      if (entries[daysAgo(0, inputEntry.dateTime)] != null) {
+        entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
       }
       return true;
     } catch (e) {
@@ -46,7 +46,7 @@ class DatabaseService {
 
   Future<bool> deleteInputEntry(AppUser user, InputEntry inputEntry) async {
     try {
-      _entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
+      entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
       _updateAggregateData(user, inputEntry, isDelete: true);
       return true;
     } catch (e) {
@@ -69,7 +69,7 @@ class DatabaseService {
           '${goalEntry.dateTime} ${goalEntry.inputType} ${goalEntry.amount}';
       goalEntry.docID = docID;
       _updateAggregateGoalData(user, goalEntry);
-      _entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
+      entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
 
       await ref.document(docID).setData(goalEntry.toMap());
 
@@ -101,11 +101,11 @@ class DatabaseService {
   }
 
   Future<List<Entry>> getEntriesOnDay(AppUser user, DateTime day) async {
-    if (_entries[day] == null) {
+    if (entries[day] == null) {
       final temp = await _getEntriesAsFuture(user, dateTime: day);
-      _entries[day] = temp;
+      entries[day] = temp;
     }
-    return _entries[day] ?? [];
+    return entries[day] ?? [];
   }
 
   Future<List<Entry>> _getEntriesAsFuture(AppUser user,
@@ -181,19 +181,31 @@ class DatabaseService {
     });
   }
 
-  void _updateAggregateGoalData(AppUser user, GoalEntry goalEntry) {
+  void _updateAggregateGoalData(AppUser user, GoalEntry goalEntry) async {
     var ref2 = Firestore.instance.collection('users').document(user.uid);
+    var dailyInputEntryRef = ref2
+        .collection(_aggregateInputEntries)
+        .document(daysAgo(0, goalEntry.dateTime).toString());
+
     try {
       categoryFromName(goalEntry.inputType, user.categories).goalAmount =
           goalEntry.amount;
-
       ref2.setData(user.toMap(), merge: true);
+
+      final goalMap = <String, dynamic>{};
+      user.categories.forEach((element) {
+        goalMap[element.name] = element.goalAmount;
+      });
+      goalMap[goalEntry.inputType] = goalEntry.amount;
+
+      dailyInputEntryRef.updateData({'goalAmounts':goalMap});
     } catch (e) {}
   }
 
   void _updateAggregateData(AppUser user, InputEntry inputEntry,
       {bool isDelete = false}) {
     String docID = daysAgo(0, inputEntry.dateTime).toString();
+    bool successfulDeletion = true;
 
     DocumentReference docRef = Firestore.instance
         .collection('users')
@@ -222,7 +234,8 @@ class DatabaseService {
               },
               inputEntries: [inputEntry],
             );
-            _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = newDailyInputEntry;
+            _aggregateEntries[daysAgo(0, inputEntry.dateTime)] =
+                newDailyInputEntry;
 
             await transaction.set(
               docRef,
@@ -230,14 +243,17 @@ class DatabaseService {
             );
           } else {
             final agData = DailyInputEntry.fromMap(freshSnap.data);
-            agData.categoryHours[inputEntry.inputType] =
-                (((isDelete) ? -1 : 1) * inputEntry.amount) +
-                    (agData.categoryHours[inputEntry.inputType] ?? 0.0);
 
             if (isDelete) {
-              agData.inputEntries.remove(inputEntry);
+              successfulDeletion = agData.inputEntries.remove(inputEntry);
             } else
               agData.inputEntries.add(inputEntry);
+            
+            if(successfulDeletion) {
+              agData.categoryHours[inputEntry.inputType] =
+                  (((isDelete) ? -1 : 1) * inputEntry.amount) +
+                      (agData.categoryHours[inputEntry.inputType] ?? 0.0);
+            }
 
             if (sameDay(inputEntry.dateTime, DateTime.now())) {
               agData.goalAmounts[inputEntry.inputType] =
@@ -248,10 +264,10 @@ class DatabaseService {
 
             await transaction.set(docRef, agData.toMap());
           }
+          _updateLifetimeAmounts(user.uid, inputEntry, isDelete: isDelete, notPhantomDelete: successfulDeletion);
         },
       );
     });
-    _updateLifetimeAmounts(user.uid, inputEntry, isDelete: isDelete);
   }
 
   Future<double> _getGoalOfInputEntry(String uid, InputEntry inputEntry) async {
@@ -278,15 +294,17 @@ class DatabaseService {
   }
 
   void _updateLifetimeAmounts(String uid, InputEntry inputEntry,
-      {bool isDelete = false}) {
+      {bool isDelete = false, bool notPhantomDelete = true}) {
     DocumentReference docRef =
         Firestore.instance.collection('users').document(uid);
 
     Firestore.instance.runTransaction((transaction) async {
       AppUser user = AppUser.fromMap((await transaction.get(docRef)).data);
       try {
-        categoryFromName(inputEntry.inputType, user.categories)
-            .lifetimeAmount += ((isDelete) ? -1 : 1) * inputEntry.amount;
+        if (notPhantomDelete) {
+          categoryFromName(inputEntry.inputType, user.categories)
+              .lifetimeAmount += ((isDelete) ? -1 : 1) * inputEntry.amount;
+        }
       } catch (e) {}
       await transaction.update(docRef, user.toMap());
     });
@@ -303,7 +321,7 @@ class DatabaseService {
   }
 
   clearCache() {
-    _entries.clear();
+    entries.clear();
     _aggregateEntries.clear();
   }
 }
