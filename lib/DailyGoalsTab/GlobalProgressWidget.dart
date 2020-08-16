@@ -6,17 +6,16 @@ import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/database.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 
 class GlobalProgressWidget extends StatelessWidget {
-  final double goal;
   final double value;
-  final String name;
-  final bool isTimeBased;
+  final Category category;
   final f = new NumberFormat('0.0');
 
-  GlobalProgressWidget({this.value, this.goal, this.name, this.isTimeBased});
+  GlobalProgressWidget({this.value, this.category});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +26,7 @@ class GlobalProgressWidget extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Text(
-                name,
+                category.name,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
@@ -40,7 +39,7 @@ class GlobalProgressWidget extends StatelessWidget {
                     child: Column(
                       children: <Widget>[
                         Text(
-                          convertToDisplay(value, isTimeBased),
+                          convertToDisplay(value, category.isTimeBased),
                           style: TextStyle(fontSize: 25.0),
                         ),
                         const Divider(
@@ -51,7 +50,7 @@ class GlobalProgressWidget extends StatelessWidget {
                           endIndent: 0,
                         ),
                         Text(
-                          convertToDisplay(goal, isTimeBased),
+                          convertToDisplay(category.goalAmount, category.isTimeBased),
                           style: TextStyle(
                             fontSize: 20.0,
                             color: Colors.grey,
@@ -68,13 +67,17 @@ class GlobalProgressWidget extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(0.0),
                       child: LinearPercentIndicator(
-                        animation: false,
-                        lineHeight: 20.0,
-                        percent: _getPercent(value, goal),
+                        animation: true,
+                        animateFromLastPercent: true,
+                        center: _getPercent(value, category.goalAmount) == 1.0 ? Text("DONE!", style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 5
+                        ),) : null,
+                        lineHeight: 25.0,
+                        percent: _getPercent(value, category.goalAmount),
                         linearStrokeCap: LinearStrokeCap.roundAll,
-                        progressColor: _getPercent(value, goal) == 1.0
-                            ? Colors.green
-                            : Colors.blue,
+                        progressColor: category.color,
                         backgroundColor: Color.fromRGBO(237, 237, 237, 1),
                       ),
                     ),

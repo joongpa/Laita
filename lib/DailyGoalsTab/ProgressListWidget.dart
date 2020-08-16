@@ -33,10 +33,8 @@ class ProgressListWidget extends StatelessWidget {
                 );
               },
               child: GlobalProgressWidget(
-                name: user.categories[index].name,
-                isTimeBased: user.categories[index].isTimeBased,
                 value: 0.0,
-                goal: user.categories[index].goalAmount ?? 0.0,
+                category: user.categories[index]
               ),
             );
           return Material(
@@ -50,10 +48,8 @@ class ProgressListWidget extends StatelessWidget {
                   );
                 },
                 child: GlobalProgressWidget(
-                  goal: user.categories[index].goalAmount ?? 0.0,
                   value: dailyInputEntry[daysAgo(0)].categoryHours[user.categories[index].name] ?? 0.0,
-                  isTimeBased: user.categories[index].isTimeBased,
-                  name: user.categories[index].name,
+                  category: user.categories[index],
                 ),
               ),
             ),

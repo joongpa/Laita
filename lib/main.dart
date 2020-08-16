@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
   bool visible = true;
 
-  final pageNames = ["Daily Goals", "Statistics", "Log"];
+  final pageNames = ["Daily Goals", "Media", "Statistics", "Log"];
 
   onItemTap(int index) {
     setState(() {
@@ -108,6 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
           index: selectedIndex,
           children: <Widget>[
             ProgressListWidget(),
+            Container(),
             StatisticsSummaryWidget(),
             MultiInputLog(),
           ],
@@ -117,10 +118,15 @@ class _MyHomePageState extends State<MyHomePage> {
       bottomNavigationBar: PageStorage(
         bucket: bucket,
         child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               title: Text('Daily Goals'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.movie),
+              title: Text('Media'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.show_chart),

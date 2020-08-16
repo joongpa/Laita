@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
+import 'package:miatracker/Models/input_entries_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import '../Map.dart';
 import 'GoalEntry.dart';
@@ -15,7 +16,6 @@ class DatabaseService {
   final String _goalEntries = 'goalEntries';
   final String _aggregateInputEntries = 'aggregateInputEntries';
 
-  Map<DateTime, List<Entry>> entries = Map<DateTime, List<Entry>>();
   Map<DateTime, DailyInputEntry> _aggregateEntries =
       Map<DateTime, DailyInputEntry>();
 
@@ -34,8 +34,8 @@ class DatabaseService {
       inputEntry.docID = docID;
       _updateAggregateData(user, inputEntry);
 
-      if (entries[daysAgo(0, inputEntry.dateTime)] != null) {
-        entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
+      if (InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)] != null) {
+        InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
       }
       return true;
     } catch (e) {
@@ -46,7 +46,7 @@ class DatabaseService {
 
   Future<bool> deleteInputEntry(AppUser user, InputEntry inputEntry) async {
     try {
-      entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
+      InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
       _updateAggregateData(user, inputEntry, isDelete: true);
       return true;
     } catch (e) {
@@ -69,7 +69,7 @@ class DatabaseService {
           '${goalEntry.dateTime} ${goalEntry.inputType} ${goalEntry.amount}';
       goalEntry.docID = docID;
       _updateAggregateGoalData(user, goalEntry);
-      entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
+      InputEntriesProvider.instance.entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
 
       await ref.document(docID).setData(goalEntry.toMap());
 
@@ -100,25 +100,17 @@ class DatabaseService {
     userRef.setData(user.toMap());
   }
 
-  Future<List<Entry>> getEntriesOnDay(AppUser user, DateTime day) async {
-    if (entries[day] == null) {
-      final temp = await _getEntriesAsFuture(user, dateTime: day);
-      entries[day] = temp;
-    }
-    return entries[day] ?? [];
-  }
-
-  Future<List<Entry>> _getEntriesAsFuture(AppUser user,
+  Future<List<Entry>> getEntriesAsFuture(String uid,
       {DateTime dateTime}) async {
     var inputRef = Firestore.instance
         .collection('users')
-        .document(user.uid)
+        .document(uid)
         .collection(_aggregateInputEntries)
         .document(daysAgo(0, dateTime).toString());
 
     var goalRef = Firestore.instance
         .collection('users')
-        .document(user.uid)
+        .document(uid)
         .collection(_goalEntries);
     List<Entry> tempList = [];
 
@@ -197,6 +189,10 @@ class DatabaseService {
         goalMap[element.name] = element.goalAmount;
       });
       goalMap[goalEntry.inputType] = goalEntry.amount;
+
+      try {
+        _aggregateEntries[daysAgo(0,goalEntry.dateTime)].goalAmounts[goalEntry.inputType] = goalEntry.amount;
+      } catch (e) {}
 
       dailyInputEntryRef.updateData({'goalAmounts':goalMap});
     } catch (e) {}
@@ -322,7 +318,6 @@ class DatabaseService {
   }
 
   clearCache() {
-    entries.clear();
     _aggregateEntries.clear();
   }
 }

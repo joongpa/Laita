@@ -23,10 +23,10 @@ class InputLog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<AppUser>(context);
+    final user = Provider.of<AppUser>(context, listen: false);
     if (user == null) return Container();
 
-    InputEntriesProvider.instance.getEntriesOnDay(user, dateTime);
+    InputEntriesProvider.instance.getEntriesOnDay(user.uid, dateTime);
     return ChangeNotifierProvider.value(
       value: InputEntriesProvider.instance,
       child: Consumer<InputEntriesProvider>(
