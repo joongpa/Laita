@@ -19,8 +19,8 @@ class DrawerMenu extends StatelessWidget {
         children: <Widget>[
           _createHeader(),
           _createDrawerItem(
-            icon: Icons.beenhere,
-            text: 'Goals',
+            icon: Icons.storage,
+            text: 'Categories',
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
@@ -41,7 +41,7 @@ class DrawerMenu extends StatelessWidget {
           ),
           Divider(),
           _createDrawerItem(
-            icon: Icons.contacts,
+            icon: Icons.exit_to_app,
             text: "Log out",
             onTap: () {
               AuthService.instance.signOut();

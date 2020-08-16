@@ -10,7 +10,6 @@ import 'DatePicker.dart';
 import '../Models/user.dart';
 
 class AddHours extends StatefulWidget {
-
   final AppUser user;
   final List<Category> categories;
   final int initialSelectionIndex;
@@ -38,11 +37,10 @@ class _AddHoursState extends State<AddHours> {
     try {
       _selectedCategory = widget.categories[widget.initialSelectionIndex];
       _selections = List.generate(8, (index) {
-        if(index == widget.initialSelectionIndex) return true;
+        if (index == widget.initialSelectionIndex) return true;
         return false;
       });
-    } catch (e) {
-    }
+    } catch (e) {}
     dateTime = DateTime.now();
   }
 
@@ -59,12 +57,10 @@ class _AddHoursState extends State<AddHours> {
               padding: const EdgeInsets.all(50.0),
               child: Text(
                 'To log your input, go to the "Goals" page under the drawer menu and add a new category. Good luck on your language learning journey!',
-                style: TextStyle(
-                  fontSize: 20
-                ),),
+                style: TextStyle(fontSize: 20),
+              ),
             ),
-          )
-      );
+          ));
     }
     return GestureDetector(
       onTap: () {
@@ -78,6 +74,9 @@ class _AddHoursState extends State<AddHours> {
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           title: Text("New Immersion Entry"),
+          leading: FlatButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Icon(Icons.close, color: Colors.white,),),
         ),
         body: Center(
           child: Padding(
@@ -87,9 +86,8 @@ class _AddHoursState extends State<AddHours> {
                 TextField(
                   maxLength: 140,
                   maxLines: 3,
-                  decoration: InputDecoration(
-                      labelText: "Description (optional)"
-                  ),
+                  decoration:
+                      InputDecoration(labelText: "Description (optional)"),
                   onChanged: (s) {
                     description = s;
                   },
@@ -103,11 +101,9 @@ class _AddHoursState extends State<AddHours> {
                     setState(() {
                       dateTime = dt;
                       if (constants.sameDay(dt, DateTime.now())) {
-                        final duration = Duration(hours: DateTime
-                            .now()
-                            .hour, minutes: DateTime
-                            .now()
-                            .minute);
+                        final duration = Duration(
+                            hours: DateTime.now().hour,
+                            minutes: DateTime.now().minute);
                         dateTime.add(duration);
                       }
                     });
@@ -116,22 +112,24 @@ class _AddHoursState extends State<AddHours> {
                 SizedBox(
                   height: 20,
                 ),
-                if(widget.categories.length != 0)
+                if (widget.categories.length != 0)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: ToggleButtons(
-                      children: List.generate(widget.categories.length, (index) =>
-                          choiceButton(widget.categories[index].name)),
+                      children: List.generate(
+                          widget.categories.length,
+                          (index) =>
+                              choiceButton(widget.categories[index].name)),
                       borderRadius: BorderRadius.circular(10),
                       selectedColor: Colors.white,
                       fillColor: Colors.red,
-                      isSelected: _selections.sublist(
-                          0, widget.categories.length),
+                      isSelected:
+                          _selections.sublist(0, widget.categories.length),
                       onPressed: (int index) {
                         setState(() {
                           for (int buttonIndex = 0;
-                          buttonIndex < _selections.length;
-                          buttonIndex++) {
+                              buttonIndex < _selections.length;
+                              buttonIndex++) {
                             if (buttonIndex == index) {
                               _selections[buttonIndex] = true;
                               _selectedCategory = widget.categories[index];
@@ -146,8 +144,7 @@ class _AddHoursState extends State<AddHours> {
                 SizedBox(
                   height: 20,
                 ),
-                if(_selectedCategory.isTimeBased)...
-                [
+                if (_selectedCategory.isTimeBased) ...[
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
@@ -223,7 +220,7 @@ class _AddHoursState extends State<AddHours> {
                     ],
                   ),
                 ],
-                if(!_selectedCategory.isTimeBased)...[
+                if (!_selectedCategory.isTimeBased) ...[
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
@@ -264,47 +261,54 @@ class _AddHoursState extends State<AddHours> {
                 SizedBox(
                   height: 20,
                 ),
-                if(!_selectedCategory.isTimeBased) Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    MaterialButton(
-                      onPressed: () {
-                        setState(() {
-                          if(hours > 0) hours--;
-                          if (hours != 0)
-                            buttonDisabled = false;
-                          else if (minutes == 0 && hours == 0)
-                            buttonDisabled = true;
-                        });
-                      },
-                      shape: CircleBorder(),
-                      color: Colors.blue,
-                      child: Text('-', style: TextStyle(
-                        fontSize: 40,
-                        color: Colors.white,
+                if (!_selectedCategory.isTimeBased)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      MaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            if (hours > 0) hours--;
+                            if (hours != 0)
+                              buttonDisabled = false;
+                            else if (minutes == 0 && hours == 0)
+                              buttonDisabled = true;
+                          });
+                        },
+                        shape: CircleBorder(),
+                        color: Colors.blue,
+                        child: Text(
+                          '-',
+                          style: TextStyle(
+                            fontSize: 40,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                        textAlign: TextAlign.center,),
-                    ),
-                    MaterialButton(
-                      onPressed: () {
-                        setState(() {
-                          if(hours < 20) hours++;
-                          if (hours != 0)
-                            buttonDisabled = false;
-                          else if (minutes == 0 && hours == 0)
-                            buttonDisabled = true;
-                        });
-                      },
-                      shape: CircleBorder(),
-                      color: Colors.blue,
-                      child: Text('+', style: TextStyle(
-                        fontSize: 40,
-                        color: Colors.white,
+                      MaterialButton(
+                        onPressed: () {
+                          setState(() {
+                            if (hours < 20) hours++;
+                            if (hours != 0)
+                              buttonDisabled = false;
+                            else if (minutes == 0 && hours == 0)
+                              buttonDisabled = true;
+                          });
+                        },
+                        shape: CircleBorder(),
+                        color: Colors.blue,
+                        child: Text(
+                          '+',
+                          style: TextStyle(
+                            fontSize: 40,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      textAlign: TextAlign.center,),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
                 SizedBox(height: 50),
                 _submitButton(widget.user, widget.categories),
               ],
@@ -315,22 +319,23 @@ class _AddHoursState extends State<AddHours> {
     );
   }
 
-  Widget _submitButton(AppUser user, List<Category> categories) =>
-      RaisedButton(
+  Widget _submitButton(AppUser user, List<Category> categories) => RaisedButton(
         child: Text(
           "Done",
           style: TextStyle(
             color: Colors.white,
           ),
         ),
-        onPressed: buttonDisabled ? null : () =>
-            _buttonAction(user, categories),
+        onPressed:
+            buttonDisabled ? null : () => _buttonAction(user, categories),
         color: Colors.lightBlue,
       );
 
   _buttonAction(AppUser user, List<Category> categories) {
-    double totalTime = hours + ((_selectedCategory.isTimeBased) ? minutes / 60 : 0);
-    InputEntry entry = InputEntry(description: description,
+    double totalTime =
+        hours + ((_selectedCategory.isTimeBased) ? minutes / 60 : 0);
+    InputEntry entry = InputEntry(
+        description: description,
         dateTime: dateTime,
         inputType: _selectedCategory.name,
         amount: totalTime);
@@ -338,8 +343,7 @@ class _AddHoursState extends State<AddHours> {
     Navigator.pop(context);
   }
 
-  Widget choiceButton(String text) =>
-      Padding(
+  Widget choiceButton(String text) => Padding(
         padding: EdgeInsets.all(10.0),
         child: Text(text),
       );

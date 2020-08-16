@@ -45,7 +45,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        title: Text("Daily Target"),
+        title: Text("Categories"),
       ),
       body: Column(
         children: <Widget>[

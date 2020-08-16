@@ -34,12 +34,9 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        StreamProvider<bool>.value(
-          value: AuthService.instance.loading
-        ),
+        StreamProvider<bool>.value(value: AuthService.instance.loading),
         StreamProvider<FirebaseUser>.value(
-          value: FirebaseAuth.instance.onAuthStateChanged
-        ),
+            value: FirebaseAuth.instance.onAuthStateChanged),
       ],
       child: MaterialApp(
         builder: (context, child) {
@@ -60,7 +57,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
 
   final String title;
 
@@ -102,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(pageNames[selectedIndex]),
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: IndexedStack(
@@ -146,13 +143,33 @@ class _MyHomePageState extends State<MyHomePage> {
         child: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddHours(user, user.categories)),
-            );
+            Navigator.of(context).push(_createRouteToAddHours(user));
           },
         ),
       ),
+    );
+  }
+
+  Route _createRouteToAddHours(AppUser user) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          AddHours(user, user.categories),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        var begin = Offset(0.0, 1.0);
+        var end = Offset.zero;
+        var curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end);
+        var curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: curve,
+        );
+
+        return SlideTransition(
+          position: tween.animate(curvedAnimation),
+          child: child,
+        );
+      },
     );
   }
 }
