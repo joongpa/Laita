@@ -264,6 +264,48 @@ class _AddHoursState extends State<AddHours> {
                 SizedBox(
                   height: 20,
                 ),
+                if(!_selectedCategory.isTimeBased) Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    MaterialButton(
+                      onPressed: () {
+                        setState(() {
+                          if(hours > 0) hours--;
+                          if (hours != 0)
+                            buttonDisabled = false;
+                          else if (minutes == 0 && hours == 0)
+                            buttonDisabled = true;
+                        });
+                      },
+                      shape: CircleBorder(),
+                      color: Colors.blue,
+                      child: Text('-', style: TextStyle(
+                        fontSize: 40,
+                        color: Colors.white,
+                      ),
+                        textAlign: TextAlign.center,),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        setState(() {
+                          if(hours < 20) hours++;
+                          if (hours != 0)
+                            buttonDisabled = false;
+                          else if (minutes == 0 && hours == 0)
+                            buttonDisabled = true;
+                        });
+                      },
+                      shape: CircleBorder(),
+                      color: Colors.blue,
+                      child: Text('+', style: TextStyle(
+                        fontSize: 40,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 50),
                 _submitButton(widget.user, widget.categories),
               ],
             ),

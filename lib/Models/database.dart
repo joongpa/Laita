@@ -278,6 +278,7 @@ class DatabaseService {
 
     var snap = await goalRef
         .where('dateTime', isLessThan: daysAgo(-1, inputEntry.dateTime))
+        .where('inputType', isEqualTo: inputEntry.inputType)
         .orderBy('dateTime')
         .limit(1)
         .getDocuments();
