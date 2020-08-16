@@ -248,7 +248,7 @@ class DatabaseService {
               successfulDeletion = agData.inputEntries.remove(inputEntry);
             } else
               agData.inputEntries.add(inputEntry);
-            
+
             if(successfulDeletion) {
               agData.categoryHours[inputEntry.inputType] =
                   (((isDelete) ? -1 : 1) * inputEntry.amount) +
