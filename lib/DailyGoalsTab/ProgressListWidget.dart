@@ -38,18 +38,16 @@ class ProgressListWidget extends StatelessWidget {
               ),
             );
           return Material(
-            child: Ink(
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    createSlideRoute(AddHours(user, user.categories, initialSelectionIndex: index)),
-                  );
-                },
-                child: GlobalProgressWidget(
-                  value: dailyInputEntry[daysAgo(0)].categoryHours[user.categories[index].name] ?? 0.0,
-                  category: user.categories[index],
-                ),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  createSlideRoute(AddHours(user, user.categories, initialSelectionIndex: index)),
+                );
+              },
+              child: GlobalProgressWidget(
+                value: dailyInputEntry[daysAgo(0)].categoryHours[user.categories[index].name] ?? 0.0,
+                category: user.categories[index],
               ),
             ),
           );

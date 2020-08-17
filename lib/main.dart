@@ -9,6 +9,7 @@ import 'package:miatracker/DrawerMenu.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
+import 'package:miatracker/Models/date_time_property.dart';
 import 'package:miatracker/Models/shared_preferences.dart';
 import 'package:miatracker/StatsTab/stats_settings_page.dart';
 import 'Map.dart';
@@ -25,6 +26,9 @@ import 'anti_scroll_glow.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferencesHelper.instance.init();
+  DateTimeProperty.changeInDay().listen((event) {
+    if(event) InputHoursUpdater.instance.resumeUpdate();
+  });
   runApp(MyApp());
 }
 
@@ -43,18 +47,23 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<SharedPreferencesHelper>.value(
             value: SharedPreferencesHelper.instance),
       ],
-      child: MaterialApp(
-        builder: (context, child) {
-          return ScrollConfiguration(
-            behavior: MyBehavior(),
-            child: child,
+      child: StreamBuilder(
+        stream: InputHoursUpdater.instance.updateStream$,
+        builder: (context, snapshot) {
+          return MaterialApp(
+            builder: (context, child) {
+              return ScrollConfiguration(
+                behavior: MyBehavior(),
+                child: child,
+              );
+            },
+            title: 'MIA Tracker',
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+            home: SignInPage(),
           );
-        },
-        title: 'MIA Tracker',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: SignInPage(),
+        }
       ),
     );
   }
@@ -84,15 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
       else
         visible = true;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance
-        .addObserver(LifecycleEventHandler(resumeCallBack: () async {
-      InputHoursUpdater.ihu.resumeUpdate();
-    }));
   }
 
   @override
