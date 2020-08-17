@@ -21,7 +21,7 @@ class _StatsSettingsPageState extends State<StatsSettingsPage> {
         children: [
           SwitchListTile(
             value: SharedPreferencesHelper.instance.showAccuracyAsFraction,
-            title: Text('Show accuracy as fraction of days'),
+            title: Text('Show accuracy as a fraction of days'),
             onChanged: (value) {
               setState(() {
                 SharedPreferencesHelper.instance.showAccuracyAsFraction = value;

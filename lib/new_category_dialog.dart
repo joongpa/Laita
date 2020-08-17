@@ -92,6 +92,7 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
             Category category = Category(
                 name: _newCategoryDialogController.text,
                 isTimeBased: isTimeBased,
+                isCompleted: false,
                 addDate: DateTime.now(),
                 color: Global.defaultColors[widget.index],
                 lifetimeAmount: 0,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/shared_preferences.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 
@@ -20,10 +21,17 @@ class _FullGraphWidgetState extends State<FullGraphWidget> {
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
-    if (user == null || user.categories == null) return Container();
+    var pref = Provider.of<SharedPreferencesHelper>(context);
+    if (user == null || user.categories == null || user.categories.length == 0) return Container();
 
     List<Category> categories = user.categories
         .where((element) => element.isTimeBased == widget.isTimeBased)
+        .toList();
+
+    categories = categories
+        .where((category) =>
+            !category.isCompleted ||
+            pref.showCompletedCategoriesInGraph)
         .toList();
 
     return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[

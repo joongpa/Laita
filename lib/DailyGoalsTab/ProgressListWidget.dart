@@ -16,12 +16,14 @@ class ProgressListWidget extends StatelessWidget {
     var user = Provider.of<AppUser>(context);
     var dailyInputEntry = Provider.of<Map<DateTime, DailyInputEntry>>(context);
 
-    if (user == null || user.categories == null) return Container();
+    if (user == null || user.categories == null || user.categories.length == 0) return Container();
+
+    var incompleteCategories = user.categories.where((category) => !category.isCompleted).toList();
 
     return ListView.builder(
-        itemCount: user.categories.length + 1,
+        itemCount: incompleteCategories.length + 1,
         itemBuilder: (context, index) {
-          if (index == user.categories.length)
+          if (index == incompleteCategories.length)
             return SizedBox(height: 100);
 
           if (dailyInputEntry == null || dailyInputEntry[daysAgo(0)] == null)
@@ -29,12 +31,12 @@ class ProgressListWidget extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  createSlideRoute(AddHours(user, user.categories, initialSelectionIndex: index)),
+                  createSlideRoute(AddHours(user, incompleteCategories, initialSelectionIndex: index)),
                 );
               },
               child: GlobalProgressWidget(
                 value: 0.0,
-                category: user.categories[index]
+                category: incompleteCategories[index]
               ),
             );
           return Material(
@@ -42,12 +44,12 @@ class ProgressListWidget extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  createSlideRoute(AddHours(user, user.categories, initialSelectionIndex: index)),
+                  createSlideRoute(AddHours(user, incompleteCategories, initialSelectionIndex: index)),
                 );
               },
               child: GlobalProgressWidget(
-                value: dailyInputEntry[daysAgo(0)].categoryHours[user.categories[index].name] ?? 0.0,
-                category: user.categories[index],
+                value: dailyInputEntry[daysAgo(0)].categoryHours[incompleteCategories[index].name] ?? 0.0,
+                category: incompleteCategories[index],
               ),
             ),
           );

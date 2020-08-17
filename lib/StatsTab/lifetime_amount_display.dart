@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
+import 'package:miatracker/Models/shared_preferences.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
@@ -10,7 +11,14 @@ class LifetimeAmountDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
     DailyInputEntry firstEntry = Provider.of<DailyInputEntry>(context);
-    if (user == null) return Container();
+    var pref = Provider.of<SharedPreferencesHelper>(context);
+    if (user == null || user.categories == null || user.categories.length == 0) return Container();
+
+    var incompleteCategories = user.categories
+        .where((category) =>
+    !category.isCompleted ||
+        pref.showCompletedCategoriesInLifetimeSummary)
+        .toList();
 
     DateTime startDate;
     if(firstEntry == null)
@@ -23,13 +31,13 @@ class LifetimeAmountDisplay extends StatelessWidget {
           alignment: WrapAlignment.center,
           spacing: 5,
           runSpacing: 20,
-          children: List.generate(user.categories.length, (index) {
+          children: List.generate(incompleteCategories.length, (index) {
             return Column(
               children: <Widget>[
                 Container(
                   width: 80,
                   child: Text(
-                    user.categories[index].name,
+                    incompleteCategories[index].name,
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -40,9 +48,9 @@ class LifetimeAmountDisplay extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 _getWidget(_convertToDisplay(
-                    math.max(0,user.categories[index].lifetimeAmount),
-                    user.categories[index].isTimeBased),
-                    user.categories[index].isTimeBased),
+                    math.max(0,incompleteCategories[index].lifetimeAmount),
+                    incompleteCategories[index].isTimeBased),
+                    incompleteCategories[index].isTimeBased),
               ],
             );
           }),
