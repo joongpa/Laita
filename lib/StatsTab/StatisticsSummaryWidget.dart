@@ -52,34 +52,30 @@ class StatisticsSummaryWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Container(
-                  height: 390,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Expanded(
-                          child: PageView(
-                            children: <Widget>[
-                              FullGraphWidget(
-                                isTimeBased: true,
-                              ),
-                              FullGraphWidget(
-                                isTimeBased: false,
-                              ),
-                            ],
-                          ),
-                        ),
-                        //DateTraverser(),
-                        Row(
-                          children: [
-                            Expanded(child: TimeFramePicker()),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Container(
+                        height: 340,
+                        child: PageView(
+                          children: <Widget>[
+                            FullGraphWidget(
+                              isTimeBased: true,
+                            ),
+                            FullGraphWidget(
+                              isTimeBased: false,
+                            ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      //DateTraverser(),
+                      Row(
+                        children: [Expanded(child: TimeFramePicker())],
+                      ),
+                    ],
                   ),
                 ),
               ),

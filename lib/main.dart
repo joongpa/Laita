@@ -9,6 +9,9 @@ import 'package:miatracker/DrawerMenu.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
+import 'package:miatracker/Models/shared_preferences.dart';
+import 'package:miatracker/StatsTab/stats_settings_page.dart';
+import 'Map.dart';
 import 'Models/category.dart';
 import 'Models/auth.dart';
 import 'package:miatracker/signInPage.dart';
@@ -21,7 +24,7 @@ import 'anti_scroll_glow.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  SharedPreferencesHelper.instance.init();
   runApp(MyApp());
 }
 
@@ -37,6 +40,8 @@ class MyApp extends StatelessWidget {
         StreamProvider<bool>.value(value: AuthService.instance.loading),
         StreamProvider<FirebaseUser>.value(
             value: FirebaseAuth.instance.onAuthStateChanged),
+        ChangeNotifierProvider<SharedPreferencesHelper>.value(
+            value: SharedPreferencesHelper.instance),
       ],
       child: MaterialApp(
         builder: (context, child) {
@@ -99,6 +104,11 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(pageNames[selectedIndex]),
         automaticallyImplyLeading: false,
+        leading: (selectedIndex == 2) ? FlatButton(
+          child: Icon(Icons.tune, color: Colors.white),
+          onPressed: () =>
+              Navigator.of(context).push(createSlideRoute(StatsSettingsPage())),
+        ) : null,
       ),
       body: Center(
         child: IndexedStack(
@@ -143,33 +153,14 @@ class _MyHomePageState extends State<MyHomePage> {
         child: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
-            Navigator.of(context).push(_createRouteToAddHours(user));
+            Navigator.of(context).push(createSlideRoute(AddHours(
+              user,
+              user.categories,
+              initialSelectionIndex: 0,
+            )));
           },
         ),
       ),
-    );
-  }
-
-  Route _createRouteToAddHours(AppUser user) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          AddHours(user, user.categories),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        var begin = Offset(0.0, 1.0);
-        var end = Offset.zero;
-        var curve = Curves.ease;
-
-        var tween = Tween(begin: begin, end: end);
-        var curvedAnimation = CurvedAnimation(
-          parent: animation,
-          curve: curve,
-        );
-
-        return SlideTransition(
-          position: tween.animate(curvedAnimation),
-          child: child,
-        );
-      },
     );
   }
 }

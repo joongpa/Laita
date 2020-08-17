@@ -5,6 +5,7 @@ import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/category.dart';
+import 'package:miatracker/Models/shared_preferences.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +19,7 @@ class SingleAccuracyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final entries = Provider.of<Map<DateTime, DailyInputEntry>>(context);
+    final pref = Provider.of<SharedPreferencesHelper>(context);
 
     if (entries == null) return Container();
 
@@ -37,27 +39,30 @@ class SingleAccuracyWidget extends StatelessWidget {
       }
     });
 
-    String value =
-        (100 * successes.length.toDouble() / countedDays).round().toString();
-    return _getWidget(value);
-  }
+    String value;
+    String denom = '% ';
+    double fontSize = 20;
+    if(pref.showAccuracyAsFraction) {
+      value = '${successes.length}';
+      denom = '/$countedDays';
+      fontSize = 50/denom.length;
+    } else value = (100 * successes.length.toDouble() / countedDays).round().toString();
 
-  Widget _getWidget(String text) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              text,
+              value,
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 30,
               ),
             ),
-            Text('%', style: TextStyle(color: Colors.grey, fontSize: 20)),
+            Text(denom, style: TextStyle(color: Colors.grey, fontSize: fontSize)),
           ],
         ),
         Text('met goal', style: TextStyle(color: Colors.grey, fontSize: 15)),

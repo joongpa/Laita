@@ -68,15 +68,15 @@ class InputChart extends StatelessWidget {
         lineTouchData: LineTouchData(
           enabled: false,
         ),
-        maxY: math.max((maxValue * 2).ceilToDouble()/2 + .25, 1.25),
+        maxY: math.max(maxValue.ceilToDouble() + 0.05, 1.05),
           gridData: FlGridData(
-              show: true, drawHorizontalLine: true, horizontalInterval: getTicksFromMaxValue(maxValue)),
+              show: true, drawHorizontalLine: true, horizontalInterval: getIntervalFromMaxValue(maxValue)),
           titlesData: FlTitlesData(
             bottomTitles: _getXAxis(series, dateTimes.dateStartEndTimes),
             leftTitles: SideTitles(
               reservedSize: isTimeBased ? 25 : 10,
               showTitles: true,
-              interval: getTicksFromMaxValue(maxValue),
+              interval: getIntervalFromMaxValue(maxValue),
               getTitles: (value) {
                 return convertToDisplay(value, isTimeBased);
               },
@@ -93,10 +93,10 @@ class InputChart extends StatelessWidget {
     );
   }
 
-  double getTicksFromMaxValue(double maxValue) {
+  double getIntervalFromMaxValue(double maxValue) {
     if(!isTimeBased) return 1;
     if(maxValue >= 5) return 1;
-    else if(maxValue >= 4) return 0.5;
+    else if(maxValue >= 2) return 0.5;
     else return 0.25;
   }
 

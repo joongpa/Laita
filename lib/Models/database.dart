@@ -9,6 +9,7 @@ import '../Map.dart';
 import 'GoalEntry.dart';
 import 'InputEntry.dart';
 import 'user.dart';
+import 'dart:math' as math;
 
 class DatabaseService {
   DatabaseService._();
@@ -34,8 +35,11 @@ class DatabaseService {
       inputEntry.docID = docID;
       _updateAggregateData(user, inputEntry);
 
-      if (InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)] != null) {
-        InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)].add(inputEntry);
+      if (InputEntriesProvider
+              .instance.entries[daysAgo(0, inputEntry.dateTime)] !=
+          null) {
+        InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)]
+            .add(inputEntry);
       }
       return true;
     } catch (e) {
@@ -46,7 +50,8 @@ class DatabaseService {
 
   Future<bool> deleteInputEntry(AppUser user, InputEntry inputEntry) async {
     try {
-      InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)].remove(inputEntry);
+      InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)]
+          .remove(inputEntry);
       _updateAggregateData(user, inputEntry, isDelete: true);
       return true;
     } catch (e) {
@@ -69,7 +74,8 @@ class DatabaseService {
           '${goalEntry.dateTime} ${goalEntry.inputType} ${goalEntry.amount}';
       goalEntry.docID = docID;
       _updateAggregateGoalData(user, goalEntry);
-      InputEntriesProvider.instance.entries[daysAgo(0, goalEntry.dateTime)].add(goalEntry);
+      InputEntriesProvider.instance.entries[daysAgo(0, goalEntry.dateTime)]
+          .add(goalEntry);
 
       await ref.document(docID).setData(goalEntry.toMap());
 
@@ -191,10 +197,11 @@ class DatabaseService {
       goalMap[goalEntry.inputType] = goalEntry.amount;
 
       try {
-        _aggregateEntries[daysAgo(0,goalEntry.dateTime)].goalAmounts[goalEntry.inputType] = goalEntry.amount;
+        _aggregateEntries[daysAgo(0, goalEntry.dateTime)]
+            .goalAmounts[goalEntry.inputType] = goalEntry.amount;
       } catch (e) {}
 
-      dailyInputEntryRef.updateData({'goalAmounts':goalMap});
+      dailyInputEntryRef.setData({'goalAmounts': goalMap}, merge: true);
     } catch (e) {}
   }
 
@@ -219,14 +226,14 @@ class DatabaseService {
           } catch (e) {}
 
           if (freshSnap == null && !isDelete) {
-            double amount = await _getGoalOfInputEntry(user.uid, inputEntry);
+            double amount = await _getGoalOfInputEntry(user, inputEntry);
             final newDailyInputEntry = DailyInputEntry(
               dateTime: inputEntry.dateTime,
               categoryHours: <String, dynamic>{
                 inputEntry.inputType: inputEntry.amount
               },
               goalAmounts: <String, dynamic>{
-                inputEntry.inputType: amount,
+                inputEntry.inputType: amount
               },
               inputEntries: [inputEntry],
             );
@@ -245,31 +252,37 @@ class DatabaseService {
             } else
               agData.inputEntries.add(inputEntry);
 
-            if(successfulDeletion) {
+            agData.goalAmounts[inputEntry.inputType] ??= await _getGoalOfInputEntry(user, inputEntry);
+
+            if (successfulDeletion) {
               agData.categoryHours[inputEntry.inputType] =
                   (((isDelete) ? -1 : 1) * inputEntry.amount) +
                       (agData.categoryHours[inputEntry.inputType] ?? 0.0);
+
+              agData.categoryHours[inputEntry.inputType] = aboveZero(agData.categoryHours[inputEntry.inputType]);
             }
 
-            if (sameDay(inputEntry.dateTime, DateTime.now())) {
-              agData.goalAmounts[inputEntry.inputType] =
-                  categoryFromName(inputEntry.inputType, user.categories)
-                      .goalAmount;
-            }
             _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
 
             await transaction.set(docRef, agData.toMap());
           }
-          _updateLifetimeAmounts(user.uid, inputEntry, isDelete: isDelete, notPhantomDelete: successfulDeletion);
+          _updateLifetimeAmounts(user.uid, inputEntry,
+              isDelete: isDelete, notPhantomDelete: successfulDeletion);
         },
       );
     });
   }
 
-  Future<double> _getGoalOfInputEntry(String uid, InputEntry inputEntry) async {
+  Future<double> _getGoalOfInputEntry(
+      AppUser user, InputEntry inputEntry) async {
+
+    if (sameDay(inputEntry.dateTime, DateTime.now())) {
+      return categoryFromName(inputEntry.inputType, user.categories).goalAmount;
+    }
+
     var goalRef = Firestore.instance
         .collection('users')
-        .document(uid)
+        .document(user.uid)
         .collection('goalEntries');
 
     var snap = await goalRef
@@ -301,6 +314,10 @@ class DatabaseService {
         if (notPhantomDelete) {
           categoryFromName(inputEntry.inputType, user.categories)
               .lifetimeAmount += ((isDelete) ? -1 : 1) * inputEntry.amount;
+
+          categoryFromName(inputEntry.inputType, user.categories)
+              .lifetimeAmount = aboveZero(categoryFromName(inputEntry.inputType, user.categories)
+              .lifetimeAmount);
         }
       } catch (e) {}
       await transaction.update(docRef, user.toMap());
@@ -319,5 +336,9 @@ class DatabaseService {
 
   clearCache() {
     _aggregateEntries.clear();
+  }
+
+  double aboveZero(double num) {
+    return math.max(num, 0);
   }
 }

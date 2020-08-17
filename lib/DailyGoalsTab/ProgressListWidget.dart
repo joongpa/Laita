@@ -29,7 +29,7 @@ class ProgressListWidget extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddHours(user, user.categories, initialSelectionIndex: index)),
+                  createSlideRoute(AddHours(user, user.categories, initialSelectionIndex: index)),
                 );
               },
               child: GlobalProgressWidget(
@@ -40,11 +40,10 @@ class ProgressListWidget extends StatelessWidget {
           return Material(
             child: Ink(
               child: InkWell(
-                splashColor: Colors.lightBlue,
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddHours(user, user.categories, initialSelectionIndex: index)),
+                    createSlideRoute(AddHours(user, user.categories, initialSelectionIndex: index)),
                   );
                 },
                 child: GlobalProgressWidget(

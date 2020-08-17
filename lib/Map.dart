@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'DailyGoalsTab/AddHours.dart';
 import 'Models/user.dart';
 
 String getMonth(int month) {
@@ -117,6 +118,28 @@ double parseTime(String input) {
 
   return hours.toDouble() + minutes.toDouble()/60;
 
+}
+
+Route createSlideRoute(Widget widget) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => widget,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = Offset(0.0, 1.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end);
+      var curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: curve,
+      );
+
+      return SlideTransition(
+        position: tween.animate(curvedAnimation),
+        child: child,
+      );
+    },
+  );
 }
 
 
