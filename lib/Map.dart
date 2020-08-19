@@ -2,7 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'DailyGoalsTab/AddHours.dart';
+import 'Models/media.dart';
 import 'Models/user.dart';
+
+enum SortType {
+  lastUpdated, mostHours, newest, oldest
+}
+
+extension SortTypeExtension on SortType {
+  String get name => {
+    SortType.lastUpdated : 'Last Updated',
+    SortType.mostHours: 'Most Hours',
+    SortType.newest: 'Newest',
+    SortType.oldest: 'Oldest',
+  }[this];
+}
 
 String getMonth(int month) {
   Map<int, String> months = {
@@ -154,5 +168,9 @@ class Global {
     Colors.deepPurple,
     Colors.pink
   ];
+}
+
+String generateDescription(Media media, {int episodesWatched = 0, int currentEpisode = 0}) {
+  return '${media.name} ${currentEpisode - episodesWatched + 1}-$currentEpisode';
 }
 

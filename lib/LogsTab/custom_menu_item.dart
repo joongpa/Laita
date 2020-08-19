@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:miatracker/Models/user.dart';
 
-class CustomMenuItem extends PopupMenuEntry<Category> {
-  final Category category;
+class CustomMenuItem<T> extends PopupMenuEntry {
+  final T value;
   final Text text;
   final onPressed;
 
-  CustomMenuItem({this.category, this.text, this.onPressed}) : super();
+  CustomMenuItem({this.value, this.text, this.onPressed}) : super();
 
   @override
   _CustomMenuItemState createState() => _CustomMenuItemState();
@@ -15,7 +14,7 @@ class CustomMenuItem extends PopupMenuEntry<Category> {
   double get height => 100;
 
   @override
-  bool represents(value) => category == value;
+  bool represents(value) => this.value == value;
 }
 
 class _CustomMenuItemState extends State<CustomMenuItem> {

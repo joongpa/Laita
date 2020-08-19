@@ -18,9 +18,15 @@ class GoalsPageWidget extends StatefulWidget {
 }
 
 class _GoalsPageWidgetState extends State<GoalsPageWidget> {
-  Map<Category, TextEditingController> controllersMap;
+  List<TextEditingController> controllerList;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TapDownDetails tapDownDetails;
+
+  @override
+  void initState() {
+    controllerList = List.generate(8, (index) => TextEditingController());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +41,9 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
         ),
       );
 
-    final controllers = List.generate(user.categories.length, (i) {
-      var controller = TextEditingController();
-      controller.text = convertToDisplay(
-          user.categories[i].goalAmount ?? 0, user.categories[i].isTimeBased);
-      return controller;
-    });
-    controllersMap = Map.fromIterables(user.categories, controllers);
+    for(int i = 0; i < user.categories.length; i++) {
+      controllerList[i].text = convertToDisplay(user.categories[i].goalAmount, user.categories[i].isTimeBased);
+    }
 
     return Scaffold(
       resizeToAvoidBottomPadding: false,
@@ -139,7 +141,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                           position: RelativeRect.fromLTRB(tapDownDetails.globalPosition.dx, tapDownDetails.globalPosition.dy, tapDownDetails.globalPosition.dx, tapDownDetails.globalPosition.dy),
                           items: [
                             CustomMenuItem(
-                              category: user.categories[index],
+                              value: user.categories[index],
                               text: (user.categories[index].isCompleted) ? Text('Mark "${user.categories[index].name}" as in Progress') : Text('Mark "${user.categories[index].name}" as Complete'),
                               onPressed: () {
                                 setState(() {
@@ -148,7 +150,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                               },
                             ),
                             CustomMenuItem(
-                              category: user.categories[index],
+                              value: user.categories[index],
                               text: Text('Delete "${user.categories[index].name}"', style: TextStyle(color: Colors.red),),
                               onPressed: () async {
                                 bool approved = await asyncConfirmDialog(context, title: 'Confirm Delete', description: 'Delete category? Logs of this category will be hidden and will not be visible in the home page or graphs.');
@@ -176,8 +178,7 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                             Expanded(
                               flex: 4,
                               child: TextFormField(
-                                controller:
-                                    controllersMap[user.categories[index]],
+                                controller: controllerList[index],
                                 keyboardType: TextInputType.datetime,
                                 decoration: InputDecoration(
                                   labelText:
@@ -284,21 +285,21 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                       ),
                       onPressed: () {
                         if (_formKey.currentState.validate()) {
-                          controllersMap.forEach((k, v) {
+                          for(int i = 0; i < user.categories.length; i++) {
                             try {
-                              final value = (k.isTimeBased)
-                                  ? parseTime(v.text)
-                                  : double.tryParse(v.text);
+                              final value = (user.categories[i].isTimeBased)
+                                  ? parseTime(controllerList[i].text)
+                                  : double.tryParse(controllerList[i].text);
                               if (value != null) {
                                 DatabaseService.instance.addGoalEntry(
                                     user,
                                     GoalEntry.now(
-                                        inputType: k.name, amount: value));
+                                        inputType: user.categories[i].name, amount: value));
                               }
                             } on FormatException {
                               print("get yeeted on by doubles");
                             }
-                          });
+                          }
                           DatabaseService.instance.editUser(user);
                           Navigator.pop(context);
                         }
@@ -315,9 +316,9 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
 
   @override
   void dispose() {
-    if (controllersMap != null)
-      controllersMap.forEach((k, v) {
-        v.dispose();
+    if (controllerList != null)
+      controllerList.forEach((controller) {
+        controller.dispose();
       });
     super.dispose();
   }

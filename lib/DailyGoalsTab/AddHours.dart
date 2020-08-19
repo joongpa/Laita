@@ -11,10 +11,9 @@ import '../Models/user.dart';
 
 class AddHours extends StatefulWidget {
   final AppUser user;
-  final List<Category> categories;
   final int initialSelectionIndex;
 
-  AddHours(this.user, this.categories, {this.initialSelectionIndex = 0});
+  AddHours(this.user, {this.initialSelectionIndex = 0});
 
   @override
   _AddHoursState createState() => _AddHoursState();
@@ -35,7 +34,7 @@ class _AddHoursState extends State<AddHours> {
   void initState() {
     super.initState();
     try {
-      _selectedCategory = widget.categories[widget.initialSelectionIndex];
+      _selectedCategory = widget.user.categories[widget.initialSelectionIndex];
       _selections = List.generate(8, (index) {
         if (index == widget.initialSelectionIndex) return true;
         return false;
@@ -80,7 +79,7 @@ class _AddHoursState extends State<AddHours> {
         ),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 10, 10, 10),
+            padding: const EdgeInsets.fromLTRB(20.0, 10, 20, 10),
             child: Column(
               children: <Widget>[
                 TextField(
@@ -112,19 +111,19 @@ class _AddHoursState extends State<AddHours> {
                 SizedBox(
                   height: 20,
                 ),
-                if (widget.categories.length != 0)
+                if (widget.user.categories.length != 0)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: ToggleButtons(
                       children: List.generate(
-                          widget.categories.length,
+                          widget.user.categories.length,
                           (index) =>
-                              choiceButton(widget.categories[index].name)),
+                              choiceButton(widget.user.categories[index].name)),
                       borderRadius: BorderRadius.circular(10),
                       selectedColor: Colors.white,
                       fillColor: Colors.red,
                       isSelected:
-                          _selections.sublist(0, widget.categories.length),
+                          _selections.sublist(0, widget.user.categories.length),
                       onPressed: (int index) {
                         setState(() {
                           for (int buttonIndex = 0;
@@ -132,7 +131,7 @@ class _AddHoursState extends State<AddHours> {
                               buttonIndex++) {
                             if (buttonIndex == index) {
                               _selections[buttonIndex] = true;
-                              _selectedCategory = widget.categories[index];
+                              _selectedCategory = widget.user.categories[index];
                             } else {
                               _selections[buttonIndex] = false;
                             }
@@ -310,7 +309,7 @@ class _AddHoursState extends State<AddHours> {
                     ],
                   ),
                 SizedBox(height: 50),
-                _submitButton(widget.user, widget.categories),
+                _submitButton(widget.user, widget.user.categories),
               ],
             ),
           ),

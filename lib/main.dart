@@ -7,6 +7,8 @@ import 'package:miatracker/DailyGoalsTab/AddHours.dart';
 import 'package:miatracker/DailyGoalsTab/ProgressListWidget.dart';
 import 'package:miatracker/DrawerMenu.dart';
 import 'package:flutter/services.dart';
+import 'package:miatracker/Media/media_display_page.dart';
+import 'package:miatracker/Media/new_media_page.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/date_time_property.dart';
@@ -81,17 +83,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final bucket = PageStorageBucket();
   int selectedIndex = 0;
-  bool visible = true;
 
   final pageNames = ["Daily Goals", "Media", "Statistics", "Log"];
 
   onItemTap(int index) {
     setState(() {
       selectedIndex = index;
-      if (index != 0)
-        visible = false;
-      else
-        visible = true;
     });
   }
 
@@ -115,7 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
           index: selectedIndex,
           children: <Widget>[
             ProgressListWidget(),
-            Container(),
+            MediaDisplayPage(),
             StatisticsSummaryWidget(),
             MultiInputLog(),
           ],
@@ -146,19 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
           currentIndex: selectedIndex,
           onTap: onItemTap,
-        ),
-      ),
-      floatingActionButton: Visibility(
-        visible: visible,
-        child: FloatingActionButton(
-          child: const Icon(Icons.add),
-          onPressed: () {
-            Navigator.of(context).push(createSlideRoute(AddHours(
-              user,
-              user.categories,
-              initialSelectionIndex: 0,
-            )));
-          },
         ),
       ),
     );

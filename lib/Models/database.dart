@@ -8,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import '../Map.dart';
 import 'GoalEntry.dart';
 import 'InputEntry.dart';
+import 'media.dart';
 import 'user.dart';
 import 'dart:math' as math;
 
@@ -16,6 +17,7 @@ class DatabaseService {
 
   final String _goalEntries = 'goalEntries';
   final String _aggregateInputEntries = 'aggregateInputEntries';
+  final String _media = 'media';
 
   Map<DateTime, DailyInputEntry> _aggregateEntries =
       Map<DateTime, DailyInputEntry>();
@@ -232,9 +234,7 @@ class DatabaseService {
               categoryHours: <String, dynamic>{
                 inputEntry.inputType: inputEntry.amount
               },
-              goalAmounts: <String, dynamic>{
-                inputEntry.inputType: amount
-              },
+              goalAmounts: <String, dynamic>{inputEntry.inputType: amount},
               inputEntries: [inputEntry],
             );
             _aggregateEntries[daysAgo(0, inputEntry.dateTime)] =
@@ -252,14 +252,16 @@ class DatabaseService {
             } else
               agData.inputEntries.add(inputEntry);
 
-            agData.goalAmounts[inputEntry.inputType] ??= await _getGoalOfInputEntry(user, inputEntry);
+            agData.goalAmounts[inputEntry.inputType] ??=
+                await _getGoalOfInputEntry(user, inputEntry);
 
             if (successfulDeletion) {
               agData.categoryHours[inputEntry.inputType] =
                   (((isDelete) ? -1 : 1) * inputEntry.amount) +
                       (agData.categoryHours[inputEntry.inputType] ?? 0.0);
 
-              agData.categoryHours[inputEntry.inputType] = aboveZero(agData.categoryHours[inputEntry.inputType]);
+              agData.categoryHours[inputEntry.inputType] =
+                  aboveZero(agData.categoryHours[inputEntry.inputType]);
             }
 
             _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
@@ -268,6 +270,8 @@ class DatabaseService {
           }
           _updateLifetimeAmounts(user.uid, inputEntry,
               isDelete: isDelete, notPhantomDelete: successfulDeletion);
+          if (successfulDeletion)
+            updateMediaWithInputEntry(user, inputEntry, isDelete: isDelete);
         },
       );
     });
@@ -275,7 +279,6 @@ class DatabaseService {
 
   Future<double> _getGoalOfInputEntry(
       AppUser user, InputEntry inputEntry) async {
-
     if (sameDay(inputEntry.dateTime, DateTime.now())) {
       return categoryFromName(inputEntry.inputType, user.categories).goalAmount;
     }
@@ -316,8 +319,9 @@ class DatabaseService {
               .lifetimeAmount += ((isDelete) ? -1 : 1) * inputEntry.amount;
 
           categoryFromName(inputEntry.inputType, user.categories)
-              .lifetimeAmount = aboveZero(categoryFromName(inputEntry.inputType, user.categories)
-              .lifetimeAmount);
+                  .lifetimeAmount =
+              aboveZero(categoryFromName(inputEntry.inputType, user.categories)
+                  .lifetimeAmount);
         }
       } catch (e) {}
       await transaction.update(docRef, user.toMap());
@@ -332,6 +336,108 @@ class DatabaseService {
 
     return ref.orderBy('dateTime').limit(1).snapshots().map((singleList) =>
         DailyInputEntry.fromMap(singleList.documents.first.data));
+  }
+
+  void addMedia(AppUser user, Media media) {
+    var collectionRef = Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection(_media);
+    var id = DateTime.now().microsecondsSinceEpoch;
+    media.id = id;
+    collectionRef.document(id.toString()).setData(media.toMap(), merge: true);
+  }
+
+  void updateMedia(AppUser user, Media media) {
+    var docRef = Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection(_media)
+        .document(media.id.toString());
+    docRef.setData(media.toMap(), merge: true);
+  }
+
+  void deleteMedia(AppUser user, Media media) {
+    var docRef = Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection(_media)
+        .document(media.id.toString());
+    docRef.delete();
+  }
+
+  void updateMediaWithInputEntry(AppUser user, InputEntry inputEntry,
+      {bool isDelete}) {
+    if (inputEntry.mediaID == null) return;
+
+    var docRef = Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection(_media)
+        .document(inputEntry.mediaID.toString());
+
+    docRef.get().then((value) async {
+      if (value == null || value.data == null) return;
+      var newMedia = Media.fromMap(value.data);
+
+      if (isDelete) {
+        newMedia.totalTime -= inputEntry.amount;
+        newMedia.episodeWatchCount -= inputEntry.episodesWatched;
+      } else {
+        newMedia.totalTime += inputEntry.amount;
+        newMedia.episodeWatchCount += inputEntry.episodesWatched;
+      }
+      newMedia.totalTime = math.max(newMedia.totalTime, 0);
+      newMedia.episodeWatchCount = math.max(newMedia.episodeWatchCount, 0);
+      docRef.setData(newMedia.toMap(), merge: true);
+    });
+  }
+
+  //TODO pagination
+  Stream<List<Media>> mediaStream(AppUser user,
+      {Category category, SortType sortType = SortType.lastUpdated}) {
+    var collectionRef = Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection(_media);
+
+    var field;
+    bool isDescending;
+
+    switch (sortType) {
+      case SortType.lastUpdated:
+        field = 'lastUpDate';
+        isDescending = true;
+        break;
+      case SortType.mostHours:
+        field = 'totalTime';
+        isDescending = true;
+        break;
+      case SortType.newest:
+        field = 'startDate';
+        isDescending = true;
+        break;
+      case SortType.oldest:
+        field = 'startDate';
+        isDescending = false;
+        break;
+    }
+
+    if (category == null)
+      return collectionRef
+          .orderBy(field, descending: isDescending)
+          .snapshots()
+          .map((list) => list.documents
+              .map((media) => Media.fromMap(media.data))
+              .toList());
+    else
+      return collectionRef
+          .orderBy(field, descending: isDescending)
+          .where('categoryName', isEqualTo: category.name)
+          .snapshots()
+          .map((list) => list.documents
+              .map((media) => Media.fromMap(media.data))
+              .toList());
   }
 
   clearCache() {

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Map.dart';
@@ -20,40 +21,29 @@ class ProgressListWidget extends StatelessWidget {
 
     var incompleteCategories = user.categories.where((category) => !category.isCompleted).toList();
 
-    return ListView.builder(
-        itemCount: incompleteCategories.length + 1,
-        itemBuilder: (context, index) {
-          if (index == incompleteCategories.length)
-            return SizedBox(height: 100);
+    return Padding(
+      padding: EdgeInsets.only(top: 12),
+      child: ListView.builder(
+          itemCount: incompleteCategories.length + 1,
+          itemBuilder: (context, index) {
+            if (index == incompleteCategories.length)
+              return SizedBox(height: 100);
 
-          if (dailyInputEntry == null || dailyInputEntry[daysAgo(0)] == null)
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  createSlideRoute(AddHours(user, incompleteCategories, initialSelectionIndex: index)),
-                );
-              },
-              child: GlobalProgressWidget(
+            if (dailyInputEntry == null || dailyInputEntry[daysAgo(0)] == null)
+              return GlobalProgressWidget(
+                user: user,
                 value: 0.0,
-                category: incompleteCategories[index]
-              ),
-            );
-          return Material(
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  createSlideRoute(AddHours(user, incompleteCategories, initialSelectionIndex: index)),
-                );
-              },
-              child: GlobalProgressWidget(
-                value: dailyInputEntry[daysAgo(0)].categoryHours[incompleteCategories[index].name] ?? 0.0,
                 category: incompleteCategories[index],
-              ),
-            ),
-          );
-        });
+                index: index,
+              );
+            return GlobalProgressWidget(
+              user: user,
+              value: dailyInputEntry[daysAgo(0)].categoryHours[incompleteCategories[index].name] ?? 0.0,
+              category: incompleteCategories[index],
+              index: index,
+            );
+          }),
+    );
 
   }
 }
