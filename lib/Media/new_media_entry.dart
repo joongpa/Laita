@@ -28,22 +28,20 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
   double minutes = 0.0;
   bool buttonDisabled = true;
 
-  var startController = TextEditingController();
   var endController = TextEditingController();
+
   var newWatchCount = 0;
 
   @override
   void initState() {
     super.initState();
     newWatchCount = widget.media.episodeWatchCount;
-    startController.text = widget.media.episodeWatchCount.toString();
     endController.text = widget.media.episodeWatchCount.toString();
     dateTime = DateTime.now();
   }
 
   @override
   void dispose() {
-    startController.dispose();
     endController.dispose();
     super.dispose();
   }
@@ -75,35 +73,27 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextFormField(
-                            controller: startController,
-                            keyboardType: TextInputType.datetime,
-                            decoration: InputDecoration(labelText: 'From Ep/Ch #'),
-                            onFieldSubmitted: (value) {
-                              setState(() {
-                                widget.media.episodeWatchCount = int.tryParse(value) ?? widget.media.episodeWatchCount;
-                                newWatchCount = math.max<int>(newWatchCount, widget.media.episodeWatchCount);
-                                endController.text = newWatchCount.toString();
-                                recalculateTime();
-                              });
-                            },
-                            validator: (value) {
-                              widget.media.episodeWatchCount = int.tryParse(value);
-                              if (widget.media.episodeWatchCount == null)
-                                return 'Invalid';
-                              else
-                                return null;
-                            },
+                          RichText(
+                            text: TextSpan(
+                              text: 'From Ep/Ch ',
+                              style: TextStyle(color: Colors.grey),
+                              children: [
+                                TextSpan(
+                                  text: '${widget.media.episodeWatchCount}',
+                                  style: TextStyle(color: Colors.black, fontSize: 17)
+                                )
+                              ]
+                            ),
                           ),
                           TextFormField(
                             controller: endController,
                             keyboardType: TextInputType.datetime,
                             decoration: InputDecoration(labelText: 'To Ep/Ch #'),
                             onFieldSubmitted: (value) {
+                              newWatchCount = int.tryParse(value) ?? newWatchCount;
+                              newWatchCount = math.max<int>(newWatchCount, widget.media.episodeWatchCount);
+                              endController.text = newWatchCount.toString();
                               setState(() {
-                                newWatchCount = int.tryParse(value) ?? newWatchCount;
-                                widget.media.episodeWatchCount = math.min<int>(newWatchCount, widget.media.episodeWatchCount);
-                                startController.text = widget.media.episodeWatchCount.toString();
                                 recalculateTime();
                               });
                             },
@@ -304,7 +294,7 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
         description: constants.generateDescription(widget.media, episodesWatched: newWatchCount - widget.media.episodeWatchCount, currentEpisode: newWatchCount),
         inputType: widget.media.categoryName,
         amount: sum,
-        dateTime: DateTime.now(),
+        dateTime: dateTime,
         mediaID: widget.media.id,
       ));
       widget.media.lastUpDate = DateTime.now();
