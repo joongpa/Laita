@@ -96,18 +96,18 @@ class _MediaDisplayPageState extends State<MediaDisplayPage> {
                                 items: user.categories
                                     .where((element) => element.isTimeBased)
                                     .map((category) =>
-                                        DropdownMenuItem<Category>(
-                                          value: category,
-                                          child: Text(
-                                            category.name,
-                                            style: TextStyle(fontSize: 15),
-                                          ),
-                                        ))
+                                    DropdownMenuItem<Category>(
+                                      value: category,
+                                      child: Text(
+                                        category.name,
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                    ))
                                     .toList()
-                                      ..add(DropdownMenuItem<Category>(
-                                        value: null,
-                                        child: Text('All'),
-                                      )),
+                                  ..add(DropdownMenuItem<Category>(
+                                    value: null,
+                                    child: Text('All'),
+                                  )),
                                 onChanged: (value) {
                                   setState(() {
                                     _selectedCategory = value;
@@ -127,7 +127,8 @@ class _MediaDisplayPageState extends State<MediaDisplayPage> {
                               DropdownButton(
                                 value: _selectedSortValue,
                                 items: SortType.values
-                                    .map((e) => DropdownMenuItem<SortType>(
+                                    .map((e) =>
+                                    DropdownMenuItem<SortType>(
                                         value: e,
                                         child: Text(e.name,
                                             style: TextStyle(fontSize: 15))))
@@ -146,80 +147,110 @@ class _MediaDisplayPageState extends State<MediaDisplayPage> {
 
                     return Card(
                         child: InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(createSlideRoute(
-                            NewMediaEntry(user,
-                                media: snapshot.data[index - 1])));
-                      },
-                      onTapDown: (details) {
-                        tapDownDetails = details;
-                      },
-                      onLongPress: () {
-                        showMenu(
-                          context: context,
-                          position: RelativeRect.fromLTRB(
-                              tapDownDetails.globalPosition.dx - 150,
-                              tapDownDetails.globalPosition.dy - 40,
-                              tapDownDetails.globalPosition.dx,
-                              tapDownDetails.globalPosition.dy),
-                          items: [
-                            CustomMenuItem(
-                              value: snapshot.data[index - 1],
-                              text: (snapshot.data[index-1].isDropped) ? Text('Un-drop') : Text('Drop'),
-                              onPressed: () {
-                                snapshot.data[index-1].isDropped = !snapshot.data[index-1].isDropped;
-                                DatabaseService.instance.updateMedia(user, snapshot.data[index-1]);
-                              },
-                            ),
-                            CustomMenuItem(
-                              value: snapshot.data[index - 1],
-                              text: (snapshot.data[index-1].isCompleted) ? Text('Mark as in progress') : Text('Mark as complete'),
-                              onPressed: (snapshot.data[index-1].episodeCount != null) ? null : () {
-                                snapshot.data[index-1].isCompleted = !snapshot.data[index-1].isCompleted;
-                                DatabaseService.instance.updateMedia(user, snapshot.data[index-1]);
-                              },
-                            ),
-                            CustomMenuItem(
-                              value: snapshot.data[index - 1],
-                              text: Text('Edit'),
-                              onPressed: () {
-                                Navigator.of(context)
-                                    .push(createSlideRoute(EditMediaPage(
-                                  user: user,
-                                  media: snapshot.data[index - 1],
-                                )));
-                              },
-                            ),
-                            CustomMenuItem(
-                              value: snapshot.data[index - 1],
-                              text: Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                              onPressed: () async {
-                                bool approved = await asyncConfirmDialog(
-                                    context,
-                                    title: 'Confirm Delete',
-                                    description:
+                          onTap: () {
+                            Navigator.of(context).push(createSlideRoute(
+                                NewMediaEntry(user,
+                                    media: snapshot.data[index - 1])));
+                          },
+                          onTapDown: (details) {
+                            tapDownDetails = details;
+                          },
+                          onLongPress: () {
+                            showMenu(
+                              context: context,
+                              position: RelativeRect.fromLTRB(
+                                  tapDownDetails.globalPosition.dx - 150,
+                                  tapDownDetails.globalPosition.dy - 40,
+                                  tapDownDetails.globalPosition.dx,
+                                  tapDownDetails.globalPosition.dy),
+                              items: [
+                                CustomMenuItem(
+                                  value: snapshot.data[index - 1],
+                                  text: (snapshot.data[index - 1].isDropped)
+                                      ? Text('Un-drop')
+                                      : Text('Drop'),
+                                  onPressed: () {
+                                    snapshot.data[index - 1].isDropped =
+                                    !snapshot.data[index - 1].isDropped;
+                                    DatabaseService.instance.updateMedia(
+                                        user, snapshot.data[index - 1]);
+                                  },
+                                ),
+                                CustomMenuItem(
+                                  value: snapshot.data[index - 1],
+                                  text: (snapshot.data[index - 1].isCompleted)
+                                      ? Text('Mark as in progress')
+                                      : Text('Mark as complete'),
+                                  onPressed: (snapshot.data[index - 1]
+                                      .episodeCount != null) ? null : () {
+                                    snapshot.data[index - 1].isCompleted =
+                                    !snapshot.data[index - 1].isCompleted;
+                                    DatabaseService.instance.updateMedia(
+                                        user, snapshot.data[index - 1]);
+                                  },
+                                ),
+                                CustomMenuItem(
+                                  value: snapshot.data[index - 1],
+                                  text: Text('Edit'),
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .push(createSlideRoute(EditMediaPage(
+                                      user: user,
+                                      media: snapshot.data[index - 1],
+                                    )));
+                                  },
+                                ),
+                                CustomMenuItem(
+                                  value: snapshot.data[index - 1],
+                                  text: Text(
+                                    'Delete',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  onPressed: () async {
+                                    bool approved = await asyncConfirmDialog(
+                                        context,
+                                        title: 'Confirm Delete',
+                                        description:
                                         'Delete media? Logs and statistics will remain the same.');
-                                if (approved) {
-                                  DatabaseService.instance.deleteMedia(
-                                      user, snapshot.data[index - 1]);
-                                }
-                              },
-                            )
-                          ],
-                        );
-                      },
-                      child: ListTile(
-                        title: Text(snapshot.data[index - 1].name),
-                        leading: Text(snapshot.data[index - 1].episodeWatchCount
-                            .toString()),
-                        trailing: Text(convertToStatsDisplay(
-                            snapshot.data[index - 1].totalTime)),
-                        subtitle: Text(snapshot.data[index - 1].categoryName),
-                      ),
-                    ));
+                                    if (approved) {
+                                      DatabaseService.instance.deleteMedia(
+                                          user, snapshot.data[index - 1]);
+                                    }
+                                  },
+                                )
+                              ],
+                            );
+                          },
+                          child: ListTile(
+                              title: Text(snapshot.data[index - 1].name),
+                              trailing: Text(snapshot.data[index - 1]
+                                  .episodeWatchCount
+                                  .toString(), textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),),
+                              subtitle: Text('Total time: ${convertToStatsDisplay(
+                                  snapshot.data[index - 1].totalTime)}'),
+                              leading: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    snapshot.data[index - 1].categoryName,
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Container(
+                                      color: categoryFromName(
+                                          snapshot.data[index - 1].categoryName,
+                                          user.categories)
+                                          .color,
+                                      width: 40,
+                                      height: 10)
+                                ],
+                              ),
+                          ),
+                        ));
                   },
                 );
               }),
@@ -230,9 +261,9 @@ class _MediaDisplayPageState extends State<MediaDisplayPage> {
               child: MaterialButton(
                 onPressed: () =>
                     Navigator.of(context).push(createSlideRoute(NewMediaPage(
-                  user: user,
-                  initialCategory: _selectedCategory,
-                ))),
+                      user: user,
+                      initialCategory: _selectedCategory,
+                    ))),
                 shape: RoundedRectangleBorder(
                     side: BorderSide(width: 2, color: Colors.grey),
                     borderRadius: BorderRadius.all(Radius.circular(20))),
