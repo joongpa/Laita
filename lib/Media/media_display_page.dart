@@ -39,129 +39,129 @@ class _MediaDisplayPageState extends State<MediaDisplayPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Stack(
-        alignment: Alignment.center,
+        alignment: Alignment.topCenter,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Wrap(
-                spacing: 10,
-                runSpacing: 0,
-                alignment: WrapAlignment.start,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Category', textAlign: TextAlign.left),
-                      SizedBox(width: 10),
-                      DropdownButton(
-                        value: _selectedCategory,
-                        items: user.categories
-                            .where((element) => element.isTimeBased)
-                            .map((category) => DropdownMenuItem<Category>(
+          StreamBuilder<List<Media>>(
+              stream: DatabaseService.instance
+                  .mediaStream(user, category: _selectedCategory, sortType: _selectedSortValue),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return Center(child: CircularProgressIndicator());
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: snapshot.data.length + 1,
+                  itemBuilder: (context, index) {
+                    if(index == snapshot.data.length) return Container(height: 100);
+
+                    if(index == 0) {
+                      return Wrap(
+                        spacing: 10,
+                        runSpacing: 0,
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('Category', textAlign: TextAlign.left),
+                              SizedBox(width: 10),
+                              DropdownButton(
+                                value: _selectedCategory,
+                                items: user.categories
+                                    .where((element) => element.isTimeBased)
+                                    .map((category) => DropdownMenuItem<Category>(
                                   value: category,
                                   child: Text(
                                     category.name,
                                     style: TextStyle(fontSize: 15),
                                   ),
                                 ))
-                            .toList()
-                              ..add(DropdownMenuItem<Category>(
-                                value: null,
-                                child: Text('All'),
-                              )),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCategory = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Sort by',
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(width: 10),
-                      DropdownButton(
-                        value: _selectedSortValue,
-                        items: SortType.values
-                            .map((e) => DropdownMenuItem<SortType>(
-                                value: e,
-                                child: Text(e.name, style: TextStyle(fontSize: 15))))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedSortValue = value;
-                          });
-                        },
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              StreamBuilder<List<Media>>(
-                  stream: DatabaseService.instance
-                      .mediaStream(user, category: _selectedCategory, sortType: _selectedSortValue),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData)
-                      return Center(child: CircularProgressIndicator());
-
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(createSlideRoute(NewMediaEntry(user, media: snapshot.data[index])));
-                            },
-                            onTapDown: (details) {
-                              tapDownDetails = details;
-                            },
-                            onLongPress: () {
-                              showMenu(
-                                context: context,
-                                position: RelativeRect.fromLTRB(tapDownDetails.globalPosition.dx, tapDownDetails.globalPosition.dy, tapDownDetails.globalPosition.dx, tapDownDetails.globalPosition.dy),
-                                items: [
-                                  CustomMenuItem(
-                                    value: snapshot.data[index],
-                                    text: Text('Edit'),
-                                    onPressed: () {
-                                      Navigator.of(context).push(createSlideRoute(EditMediaPage(user: user, media: snapshot.data[index],)));
-                                    },
-                                  ),
-                                  CustomMenuItem(
-                                    value: snapshot.data[index],
-                                    text: Text('Delete', style: TextStyle(color: Colors.red),),
-                                    onPressed: () async {
-                                      bool approved = await asyncConfirmDialog(context, title: 'Confirm Delete', description: 'Delete media? Logs and statistics will remain the same.');
-                                      if(approved) {
-                                        DatabaseService.instance
-                                            .deleteMedia(user, snapshot.data[index]);
-                                      }
-                                    },
-                                  )
-                                ],
-                              );
-                            },
-                            child: ListTile(
-                              title: Text(snapshot.data[index].name),
-                              leading: Text(snapshot.data[index].episodeWatchCount.toString()),
-                              trailing: Text(convertToStatsDisplay(snapshot.data[index].totalTime)),
-                              subtitle: Text(snapshot.data[index].categoryName),
-                            ),
+                                    .toList()
+                                  ..add(DropdownMenuItem<Category>(
+                                    value: null,
+                                    child: Text('All'),
+                                  )),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedCategory = value;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Sort by',
+                                textAlign: TextAlign.left,
+                              ),
+                              SizedBox(width: 10),
+                              DropdownButton(
+                                value: _selectedSortValue,
+                                items: SortType.values
+                                    .map((e) => DropdownMenuItem<SortType>(
+                                    value: e,
+                                    child: Text(e.name, style: TextStyle(fontSize: 15))))
+                                    .toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedSortValue = value;
+                                  });
+                                },
+                              ),
+                            ],
                           )
-                        );
-                      },
+                        ],
+                      );
+                    }
+
+                    return Card(
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.of(context).push(createSlideRoute(NewMediaEntry(user, media: snapshot.data[index-1])));
+                          },
+                          onTapDown: (details) {
+                            tapDownDetails = details;
+                          },
+                          onLongPress: () {
+                            showMenu(
+                              context: context,
+                              position: RelativeRect.fromLTRB(tapDownDetails.globalPosition.dx - 150, tapDownDetails.globalPosition.dy - 40, tapDownDetails.globalPosition.dx, tapDownDetails.globalPosition.dy),
+                              items: [
+                                CustomMenuItem(
+                                  value: snapshot.data[index-1],
+                                  text: Text('Edit'),
+                                  onPressed: () {
+                                    Navigator.of(context).push(createSlideRoute(EditMediaPage(user: user, media: snapshot.data[index-1],)));
+                                  },
+                                ),
+                                CustomMenuItem(
+                                  value: snapshot.data[index-1],
+                                  text: Text('Delete', style: TextStyle(color: Colors.red),),
+                                  onPressed: () async {
+                                    bool approved = await asyncConfirmDialog(context, title: 'Confirm Delete', description: 'Delete media? Logs and statistics will remain the same.');
+                                    if(approved) {
+                                      DatabaseService.instance
+                                          .deleteMedia(user, snapshot.data[index-1]);
+                                    }
+                                  },
+                                )
+                              ],
+                            );
+                          },
+                          child: ListTile(
+                            title: Text(snapshot.data[index-1].name),
+                            leading: Text(snapshot.data[index-1].episodeWatchCount.toString()),
+                            trailing: Text(convertToStatsDisplay(snapshot.data[index-1].totalTime)),
+                            subtitle: Text(snapshot.data[index-1].categoryName),
+                          ),
+                        )
                     );
-                  }),
-            ],
-          ),
+                  },
+                );
+              }),
           Padding(
             padding: const EdgeInsets.only(bottom: 15),
             child: Align(

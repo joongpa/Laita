@@ -159,8 +159,9 @@ class _NewMediaPageState extends State<NewMediaPage> {
                             categoryName: _selectedCategory.name,
                           );
                           DatabaseService.instance.addMedia(widget.user, media);
+                          Navigator.of(context).pop();
 
-                          if (initialEpisodeWatchCount > 0 &&
+                          if ((initialEpisodeWatchCount ?? 0) > 0 &&
                               timePerEpisode != 0) {
                             DatabaseService.instance.addInputEntry(
                                 widget.user,
@@ -173,7 +174,6 @@ class _NewMediaPageState extends State<NewMediaPage> {
                                     inputType: _selectedCategory.name,
                                     description: generateDescription(media, episodesWatched: initialEpisodeWatchCount, currentEpisode: initialEpisodeWatchCount)));
                           }
-                          Navigator.of(context).pop();
                         }
                       },
                 color: Colors.blue,

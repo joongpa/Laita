@@ -62,7 +62,7 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
           child: Column(
             children: <Widget>[
               Text(
-                '${widget.media.name}',
+                '${widget.media.name} (+${newWatchCount - widget.media.episodeWatchCount})',
                 style: TextStyle(fontSize: 21),
               ),
               Form(
