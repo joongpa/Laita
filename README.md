@@ -1,13 +1,8 @@
 MIA Input Tracker Todo List (Not in any particular order of importance)
 
-- Allow categories to be "completed"
-- Code refactoring
-    - Use themes (and dark mode)
 - Add Page
     - Add tick labels to sliders
-    - Add + and - buttons for quantity-based categories
 - Statistics page
-    - Improve graph scaling and space
     - add page indicator
     - streaks for meeting daily goals
 - First time user landing page
