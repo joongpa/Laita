@@ -1,6 +1,7 @@
 class Media {
   int id;
   String name;
+  String nameCaseInsensitive;
   String categoryName;
   int episodeWatchCount;
   int episodeCount;
@@ -26,6 +27,7 @@ class Media {
       this.isCompleted = false,
       this.isDropped = false}) {
     totalTime ??= timePerUnit * episodeWatchCount.toDouble();
+    nameCaseInsensitive = name.toLowerCase();
   }
 
   factory Media.fromMap(Map<String,dynamic> map) => Media(
@@ -46,6 +48,7 @@ class Media {
   Map<String,dynamic> toMap() => {
     'id': id,
     'name': name,
+    'nameCaseInsensitive': nameCaseInsensitive,
     'categoryName': categoryName,
     'episodeWatchCount': episodeWatchCount,
     'episodeCount': episodeCount,

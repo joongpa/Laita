@@ -6,12 +6,13 @@ import 'Models/media.dart';
 import 'Models/user.dart';
 
 enum SortType {
-  lastUpdated, mostHours, newest, oldest
+  lastUpdated, alphabetical, mostHours, newest, oldest
 }
 
 extension SortTypeExtension on SortType {
   String get name => {
     SortType.lastUpdated : 'Last Updated',
+    SortType.alphabetical: 'Alphabetical',
     SortType.mostHours: 'Most Hours',
     SortType.newest: 'Newest',
     SortType.oldest: 'Oldest',

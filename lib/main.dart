@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/DailyGoalsTab/AddHours.dart';
 import 'package:miatracker/DailyGoalsTab/ProgressListWidget.dart';
@@ -13,6 +14,7 @@ import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/date_time_property.dart';
 import 'package:miatracker/Models/shared_preferences.dart';
+import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/StatsTab/stats_settings_page.dart';
 import 'Map.dart';
 import 'Models/category.dart';
@@ -80,11 +82,21 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin{
+  TabController _tabController;
   final bucket = PageStorageBucket();
   int selectedIndex = 0;
 
   final pageNames = ["Daily Goals", "Media", "Statistics", "Log"];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      TabChangeNotifier.instance.index = _tabController.index;
+    });
+  }
 
   onItemTap(int index) {
     setState(() {
@@ -99,7 +111,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(pageNames[selectedIndex]),
+        title: (selectedIndex == 1) ? TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'In Progress',),
+            Tab(text: 'Completed'),
+            Tab(text: 'Dropped'),
+          ],
+        ) : Text(pageNames[selectedIndex]),
         automaticallyImplyLeading: false,
         leading: (selectedIndex == 2) ? FlatButton(
           child: Icon(Icons.tune, color: Colors.white),

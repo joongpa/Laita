@@ -22,7 +22,7 @@ class _CustomMenuItemState extends State<CustomMenuItem> {
   Widget build(BuildContext context) {
     return FlatButton(
       child: widget.text,
-      onPressed: () {
+      onPressed: (widget.onPressed == null) ? null : () {
         Navigator.pop(context);
         widget.onPressed();
       },

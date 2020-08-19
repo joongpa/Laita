@@ -387,6 +387,8 @@ class DatabaseService {
         newMedia.totalTime += inputEntry.amount;
         newMedia.episodeWatchCount += inputEntry.episodesWatched;
       }
+      if(newMedia.episodeCount != null)
+        newMedia.isCompleted = newMedia.episodeWatchCount >= newMedia.episodeCount;
       newMedia.totalTime = math.max(newMedia.totalTime, 0);
       newMedia.episodeWatchCount = math.max(newMedia.episodeWatchCount, 0);
       docRef.setData(newMedia.toMap(), merge: true);
@@ -395,7 +397,10 @@ class DatabaseService {
 
   //TODO pagination
   Stream<List<Media>> mediaStream(AppUser user,
-      {Category category, SortType sortType = SortType.lastUpdated}) {
+      {Category category,
+      SortType sortType = SortType.lastUpdated,
+      bool showComplete = false,
+      bool showDropped = false}) {
     var collectionRef = Firestore.instance
         .collection('users')
         .document(user.uid)
@@ -413,6 +418,10 @@ class DatabaseService {
         field = 'totalTime';
         isDescending = true;
         break;
+      case SortType.alphabetical:
+        field = 'nameCaseInsensitive';
+        isDescending = false;
+        break;
       case SortType.newest:
         field = 'startDate';
         isDescending = true;
@@ -426,6 +435,8 @@ class DatabaseService {
     if (category == null)
       return collectionRef
           .orderBy(field, descending: isDescending)
+          .where('isCompleted', isEqualTo: showComplete)
+          .where('isDropped', isEqualTo: showDropped)
           .snapshots()
           .map((list) => list.documents
               .map((media) => Media.fromMap(media.data))
@@ -434,6 +445,8 @@ class DatabaseService {
       return collectionRef
           .orderBy(field, descending: isDescending)
           .where('categoryName', isEqualTo: category.name)
+          .where('isCompleted', isEqualTo: showComplete)
+          .where('isDropped', isEqualTo: showDropped)
           .snapshots()
           .map((list) => list.documents
               .map((media) => Media.fromMap(media.data))

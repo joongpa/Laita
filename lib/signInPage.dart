@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/database.dart';
+import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'Models/GoalEntry.dart';
 import 'Models/InputEntry.dart';
 import 'Models/category.dart';
@@ -69,6 +70,9 @@ class SignInPage extends StatelessWidget {
               initialData: {},
               value: DatabaseService.instance.dailyInputEntriesStream(user.uid,
                   startDate: daysAgo(0), endDate: daysAgo(-1)),
+            ),
+            ChangeNotifierProvider<TabChangeNotifier>.value(
+              value: TabChangeNotifier.instance,
             )
           ],
           child: MyHomePage(
