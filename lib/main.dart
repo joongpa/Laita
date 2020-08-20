@@ -115,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
           controller: _tabController,
           tabs: [
             Tab(text: 'In Progress',),
-            Tab(text: 'Completed'),
+            Tab(text: 'Complete'),
             Tab(text: 'Dropped'),
           ],
         ) : Text(pageNames[selectedIndex]),

@@ -21,29 +21,26 @@ class ProgressListWidget extends StatelessWidget {
 
     var incompleteCategories = user.categories.where((category) => !category.isCompleted).toList();
 
-    return Padding(
-      padding: EdgeInsets.only(top: 12),
-      child: ListView.builder(
-          itemCount: incompleteCategories.length + 1,
-          itemBuilder: (context, index) {
-            if (index == incompleteCategories.length)
-              return SizedBox(height: 100);
+    return ListView.builder(
+        itemCount: incompleteCategories.length + 1,
+        itemBuilder: (context, index) {
+          if (index == incompleteCategories.length)
+            return SizedBox(height: 100);
 
-            if (dailyInputEntry == null || dailyInputEntry[daysAgo(0)] == null)
-              return GlobalProgressWidget(
-                user: user,
-                value: 0.0,
-                category: incompleteCategories[index],
-                index: index,
-              );
+          if (dailyInputEntry == null || dailyInputEntry[daysAgo(0)] == null)
             return GlobalProgressWidget(
               user: user,
-              value: dailyInputEntry[daysAgo(0)].categoryHours[incompleteCategories[index].name] ?? 0.0,
+              value: 0.0,
               category: incompleteCategories[index],
               index: index,
             );
-          }),
-    );
+          return GlobalProgressWidget(
+            user: user,
+            value: dailyInputEntry[daysAgo(0)].categoryHours[incompleteCategories[index].name] ?? 0.0,
+            category: incompleteCategories[index],
+            index: index,
+          );
+        });
 
   }
 }

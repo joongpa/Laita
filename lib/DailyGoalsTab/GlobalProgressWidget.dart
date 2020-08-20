@@ -28,7 +28,7 @@ class GlobalProgressWidget extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(20)),
       ),
       elevation: 5,
-      margin: EdgeInsets.fromLTRB(8,0,8,15),
+      margin: (index == 0) ? EdgeInsets.fromLTRB(8,8,8,15) : EdgeInsets.fromLTRB(8,0,8,15),
       child: InkWell(
         onTap: () {
           Navigator.push(

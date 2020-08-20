@@ -123,7 +123,10 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              MaterialButton(
+                              RawMaterialButton(
+                                constraints: BoxConstraints(),
+                                padding: EdgeInsets.all(10),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 onPressed: () {
                                   if(newWatchCount > widget.media.episodeWatchCount) {
                                     setState(() {
@@ -134,17 +137,14 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
                                   }
                                 },
                                 shape: CircleBorder(),
-                                color: Colors.blue,
-                                child: Text(
-                                  '-',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                                fillColor: Colors.blue,
+                                child: Icon(Icons.remove, color: Colors.white,)
                               ),
-                              MaterialButton(
+                              SizedBox(width: 50),
+                              RawMaterialButton(
+                                padding: EdgeInsets.all(10),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                constraints: BoxConstraints(),
                                 onPressed: () {
                                   if (widget.media.episodeCount == null || newWatchCount < widget.media.episodeCount) {
                                     setState(() {
@@ -155,15 +155,8 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
                                   }
                                 },
                                 shape: CircleBorder(),
-                                color: Colors.blue,
-                                child: Text(
-                                  '+',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                                fillColor: Colors.blue,
+                                child: Icon(Icons.add, color: Colors.white,)
                               ),
                             ],
                           ),

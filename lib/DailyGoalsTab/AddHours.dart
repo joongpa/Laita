@@ -276,14 +276,7 @@ class _AddHoursState extends State<AddHours> {
                         },
                         shape: CircleBorder(),
                         color: Colors.blue,
-                        child: Text(
-                          '-',
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        child: Icon(Icons.remove, color: Colors.white, size: 40,)
                       ),
                       MaterialButton(
                         onPressed: () {
@@ -297,14 +290,7 @@ class _AddHoursState extends State<AddHours> {
                         },
                         shape: CircleBorder(),
                         color: Colors.blue,
-                        child: Text(
-                          '+',
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        child: Icon(Icons.add, color: Colors.white, size: 40)
                       ),
                     ],
                   ),
