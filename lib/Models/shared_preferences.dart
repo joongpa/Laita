@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:miatracker/Models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Map.dart';
 
 class SharedPreferencesHelper extends ChangeNotifier{
   SharedPreferencesHelper._();
@@ -10,10 +13,20 @@ class SharedPreferencesHelper extends ChangeNotifier{
   String _showAccuracyAsFraction = 'showAccuracyAsFraction';
   String _showCompletedCategoriesInLifetimeSummary = 'showCompletedCategoriesInLifetimeSummary';
   String _showCompletedCategoriesInGraph = 'showCompletedCategoriesInGraph';
+  String _selectedSortValue = 'selectedSortValue';
 
   bool get showAccuracyAsFraction => _pref.get(_showAccuracyAsFraction);
   bool get showCompletedCategoriesInLifetimeSummary => _pref.get(_showCompletedCategoriesInLifetimeSummary) ?? true;
   bool get showCompletedCategoriesInGraph => _pref.get(_showCompletedCategoriesInGraph) ?? false;
+
+  SortType get selectedSortValue {
+    String sortType = _pref.get(_selectedSortValue);
+    try {
+      return SortType.values.where((sort) => sort.name == sortType).first;
+    } catch (e) {
+      return null;
+    }
+  }
 
   set showAccuracyAsFraction(bool value) {
     _pref.setBool(_showAccuracyAsFraction, value);
@@ -28,6 +41,10 @@ class SharedPreferencesHelper extends ChangeNotifier{
   set showCompletedCategoriesInGraph(bool value) {
     _pref.setBool(_showCompletedCategoriesInGraph, value);
     notifyListeners();
+  }
+
+  set selectedSortType(SortType sortType) {
+    _pref.setString(_selectedSortValue, sortType.name);
   }
 
   init() async {

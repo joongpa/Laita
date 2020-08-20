@@ -172,6 +172,7 @@ class Global {
 }
 
 String generateDescription(Media media, {int episodesWatched = 0, int currentEpisode = 0}) {
+  if(episodesWatched <= 1) return '${media.name} $currentEpisode';
   return '${media.name} ${currentEpisode - episodesWatched + 1}-$currentEpisode';
 }
 
