@@ -8,6 +8,7 @@ import 'Models/user.dart';
 
 class NewCategoryDialog extends StatefulWidget {
   final int index;
+
   NewCategoryDialog(this.index);
 
   @override
@@ -30,20 +31,28 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
               decoration: InputDecoration(hintText: "Name of category"),
               inputFormatters: [
                 LengthLimitingTextInputFormatter(10),
-              ]
-          ),
+              ]),
           SizedBox(
             height: 20,
           ),
           Text(
-            'Select type of input',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            'Select type of category',
+            style: TextStyle(fontSize: 20),
           ),
           SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("Quantity"),
+              RichText(
+                text: TextSpan(children: [
+                  TextSpan(
+                      text: 'Quantity',
+                      style: TextStyle(color: Colors.black, fontSize: 20)),
+                  TextSpan(
+                      text: '\n# (1, 2, 3...)',
+                      style: TextStyle(color: Colors.grey, fontSize: 15))
+                ]),
+              ),
               Switch(
                 value: isTimeBased,
                 inactiveThumbColor: Colors.white,
@@ -56,7 +65,16 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
                   });
                 },
               ),
-              Text("Time"),
+              RichText(
+                text: TextSpan(children: [
+                  TextSpan(
+                      text: 'Time',
+                      style: TextStyle(color: Colors.black, fontSize: 20)),
+                  TextSpan(
+                      text: '\nHH:mm',
+                      style: TextStyle(color: Colors.grey, fontSize: 15))
+                ]),
+              ),
             ],
           ),
         ],
@@ -74,6 +92,7 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
             Category category = Category(
                 name: _newCategoryDialogController.text,
                 isTimeBased: isTimeBased,
+                isCompleted: false,
                 addDate: DateTime.now(),
                 color: Global.defaultColors[widget.index],
                 lifetimeAmount: 0,

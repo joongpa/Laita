@@ -5,17 +5,16 @@ import 'dart:math' as math;
 import 'InputEntry.dart';
 
 class DailyInputEntry {
-  String docID;
   DateTime dateTime;
   Map<String, dynamic> categoryHours;
   Map<String, dynamic> goalAmounts;
   List<InputEntry> inputEntries;
 
-  DailyInputEntry({this.docID, this.dateTime, this.categoryHours, this.goalAmounts, this.inputEntries}) {
+  DailyInputEntry({this.dateTime, this.categoryHours, this.goalAmounts, this.inputEntries}) {
     this.dateTime = daysAgo(0, dateTime);
   }
 
-  factory DailyInputEntry.fromMap(Map<String, dynamic> map, [String docID]) {
+  factory DailyInputEntry.fromMap(Map<String, dynamic> map) {
     if(map == null) return null;
 
     List<InputEntry> tempList = [];
@@ -24,10 +23,9 @@ class DailyInputEntry {
     } catch (e) {}
 
     return DailyInputEntry(
-    docID: docID,
     dateTime: (map['dateTime'] != null) ? map['dateTime'].toDate() : null,
-    categoryHours: map['categoryHours'],
-    goalAmounts: map['goalAmounts'],
+    categoryHours: map['categoryHours'] ?? {},
+    goalAmounts: map['goalAmounts'] ?? {},
     inputEntries: tempList,
   );
   }
@@ -39,7 +37,6 @@ class DailyInputEntry {
     } catch (e) {print(e);}
 
     return {
-    "docID": docID,
     "dateTime": dateTime,
     "categoryHours": categoryHours,
     'goalAmounts': goalAmounts,

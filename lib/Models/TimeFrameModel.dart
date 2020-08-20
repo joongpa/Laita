@@ -38,14 +38,18 @@ class TimeFrameModel extends ChangeNotifier{
   ];
 
   TimeFrameModel._() {
-    TimeSpan.values.forEach((timeSpan) {
-      final Map<TimeSpan, DateTime> map = {timeSpan : daysAgo(-1, DateTime.now())};
-      _displayDates.addAll(map);
-    });
+    refresh();
   }
 
   factory TimeFrameModel() {
     return _model;
+  }
+
+  void refresh() {
+    TimeSpan.values.forEach((timeSpan) {
+      final Map<TimeSpan, DateTime> map = {timeSpan : daysAgo(-1, DateTime.now())};
+      _displayDates.addAll(map);
+    });
   }
 
   void shiftTimeFramePast() {

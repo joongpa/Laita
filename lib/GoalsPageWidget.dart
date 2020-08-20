@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:miatracker/LogsTab/custom_menu_item.dart';
 import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'dart:math' as math;
@@ -17,35 +18,37 @@ class GoalsPageWidget extends StatefulWidget {
 }
 
 class _GoalsPageWidgetState extends State<GoalsPageWidget> {
-  Map<Category, TextEditingController> controllersMap;
+  List<TextEditingController> controllerList;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TapDownDetails tapDownDetails;
+
+  @override
+  void initState() {
+    controllerList = List.generate(8, (index) => TextEditingController());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     AppUser user = Provider.of<AppUser>(context);
-    if(user == null) return Scaffold(
-      appBar: AppBar(
-        title: Text("Something went wrong"),
-      ),
-      body: Center(
-        child: Text(
-          '$user'
+    if (user == null)
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Something went wrong"),
         ),
-      ),
-    );
+        body: Center(
+          child: Text('$user'),
+        ),
+      );
 
-    final controllers = List.generate(
-        user.categories.length, (i) {
-          var controller = TextEditingController();
-          controller.text = convertToDisplay(user.categories[i].goalAmount ?? 0, user.categories[i].isTimeBased);
-          return controller;
-        });
-    controllersMap = Map.fromIterables(user.categories, controllers);
+    for(int i = 0; i < user.categories.length; i++) {
+      controllerList[i].text = convertToDisplay(user.categories[i].goalAmount, user.categories[i].isTimeBased);
+    }
 
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        title: Text("Daily Target"),
+        title: Text("Categories"),
       ),
       body: Column(
         children: <Widget>[
@@ -113,116 +116,145 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                           ],
                         ),
                         onPressed: () async {
-                          Category category = await showDialog(context: context, child: NewCategoryDialog(index)) ?? Category();
-                          if (category.name != null && category.name != '' && category.isTimeBased != null)
-                            DatabaseService.instance.updateCategories(user, category:category, isDelete: false);
+                          Category category = await showDialog(
+                                  context: context,
+                                  child: NewCategoryDialog(index)) ??
+                              Category();
+                          if (category.name != null &&
+                              category.name != '' &&
+                              category.isTimeBased != null)
+                            DatabaseService.instance.updateCategories(user,
+                                category: category, isDelete: false);
                         },
                       ),
                     );
                   }
-                  return Padding(
-                    padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0),
-                    child: Dismissible(
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        alignment: AlignmentDirectional.centerEnd,
-                        color: Colors.red,
-                        child: const Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                        ),
-                      ),
-                      confirmDismiss: (direction) async {
-                        return await asyncConfirmDialog(context,
-                            title: 'Confirm Delete',
-                            description:
-                            'Delete category? Logs of this category will remain but will not be visible in the home page or graphs.');
+                  return Material(
+                    color: (user.categories[index].isCompleted) ? Colors.grey[300] : null,
+                    child: InkWell(
+                      onTapDown: (details) {
+                        tapDownDetails = details;
                       },
-                      onDismissed: (direction) async {
-                        DatabaseService.instance
-                            .updateCategories(user, category: user.categories[index], isDelete: true);
-                      },
-                      key: UniqueKey(),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            flex: 6,
-                            child: Text(
-                              "${user.categories[index].name}",
-                            ),
-                          ),
-                          Expanded(
-                            flex: 4,
-                            child: TextFormField(
-                              controller:
-                              controllersMap[user.categories[index]],
-                              keyboardType: TextInputType.datetime,
-                              decoration: InputDecoration(
-                                labelText: (user.categories[index].isTimeBased) ? 'HH:mm' : '#',
-                              ),
-                              validator: (value) {
-                                var result;
-                                if(user.categories[index].isTimeBased) {
-                                  result = parseTime(value);
-                                } else {
-                                  result = int.tryParse(value);
-                                }
-                                if(result == null) return 'Invalid';
-                                else return null;
+                      onLongPress: () {
+                        showMenu(
+                          context: context,
+                          position: RelativeRect.fromLTRB(tapDownDetails.globalPosition.dx, tapDownDetails.globalPosition.dy, tapDownDetails.globalPosition.dx, tapDownDetails.globalPosition.dy),
+                          items: [
+                            CustomMenuItem(
+                              value: user.categories[index],
+                              text: (user.categories[index].isCompleted) ? Text('Mark "${user.categories[index].name}" as in Progress') : Text('Mark "${user.categories[index].name}" as Complete'),
+                              onPressed: () {
+                                setState(() {
+                                  user.categories[index].isCompleted = !user.categories[index].isCompleted;
+                                });
                               },
                             ),
-                          ),
-                          Expanded(
-                            flex: 4,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 26),
-                              child: InkWell(
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        actionsPadding: EdgeInsets.all(10),
-                                        content: SingleChildScrollView(
-                                          child: BlockPicker(
-                                            pickerColor: user.categories[index].color ?? Global.defaultColors[index],
-                                            onColorChanged: (value) {
-                                              setState(() {
-                                                user.categories[index].color = value;
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
+                            CustomMenuItem(
+                              value: user.categories[index],
+                              text: Text('Delete "${user.categories[index].name}"', style: TextStyle(color: Colors.red),),
+                              onPressed: () async {
+                                bool approved = await asyncConfirmDialog(context, title: 'Confirm Delete', description: 'Delete category? Logs of this category will be hidden and will not be visible in the home page or graphs.');
+                                if(approved) {
+                                  DatabaseService.instance
+                                    .updateCategories(user, category: user.categories[index], isDelete: true);
+                                }
+                              },
+                            )
+                          ],
+                        );
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Expanded(
+                              flex: 6,
+                              child: Text(
+                                "${user.categories[index].name}",
+                              ),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: TextFormField(
+                                controller: controllerList[index],
+                                keyboardType: TextInputType.datetime,
+                                decoration: InputDecoration(
+                                  labelText:
+                                      (user.categories[index].isTimeBased)
+                                          ? 'HH:mm'
+                                          : '#',
+                                ),
+                                validator: (value) {
+                                  var result;
+                                  if (user.categories[index].isTimeBased) {
+                                    result = parseTime(value);
+                                  } else {
+                                    result = int.tryParse(value);
+                                  }
+                                  if (result == null)
+                                    return 'Invalid';
+                                  else
+                                    return null;
                                 },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: user.categories[index].color ?? Global.defaultColors[index],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 0.0, horizontal: 26),
+                                child: InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          actionsPadding: EdgeInsets.all(10),
+                                          content: SingleChildScrollView(
+                                            child: BlockPicker(
+                                              pickerColor: user
+                                                      .categories[index]
+                                                      .color ??
+                                                  Global.defaultColors[index],
+                                              onColorChanged: (value) {
+                                                setState(() {
+                                                  user.categories[index].color =
+                                                      value;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: user.categories[index].color ??
+                                          Global.defaultColors[index],
+                                    ),
+                                    height: 50,
                                   ),
-                                  height: 50,
                                 ),
                               ),
-                              ),
                             ),
-                          Expanded(
-                            flex: 4,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                (user.categories[index].isTimeBased
-                                    ? 'Time'
-                                    : 'Quantity'),
-                                textAlign: TextAlign.center,
+                            Expanded(
+                              flex: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  (user.categories[index].isTimeBased
+                                      ? 'Time'
+                                      : 'Quantity'),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                            ),
-                          )
-                        ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -252,20 +284,22 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
                         ),
                       ),
                       onPressed: () {
-                        if(_formKey.currentState.validate()) {
-                          controllersMap.forEach((k, v) {
+                        if (_formKey.currentState.validate()) {
+                          for(int i = 0; i < user.categories.length; i++) {
                             try {
-                              final value = (k.isTimeBased) ? parseTime(v.text) : double.tryParse(v.text);
+                              final value = (user.categories[i].isTimeBased)
+                                  ? parseTime(controllerList[i].text)
+                                  : double.tryParse(controllerList[i].text);
                               if (value != null) {
                                 DatabaseService.instance.addGoalEntry(
                                     user,
                                     GoalEntry.now(
-                                        inputType: k.name, amount: value));
+                                        inputType: user.categories[i].name, amount: value));
                               }
                             } on FormatException {
                               print("get yeeted on by doubles");
                             }
-                          });
+                          }
                           DatabaseService.instance.editUser(user);
                           Navigator.pop(context);
                         }
@@ -282,9 +316,9 @@ class _GoalsPageWidgetState extends State<GoalsPageWidget> {
 
   @override
   void dispose() {
-    if(controllersMap != null)
-      controllersMap.forEach((k, v) {
-        v.dispose();
+    if (controllerList != null)
+      controllerList.forEach((controller) {
+        controller.dispose();
       });
     super.dispose();
   }

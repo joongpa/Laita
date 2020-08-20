@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'DailyGoalsTab/AddHours.dart';
+import 'Models/media.dart';
 import 'Models/user.dart';
+
+enum SortType {
+  lastUpdated, alphabetical, mostHours, newest, oldest
+}
+
+extension SortTypeExtension on SortType {
+  String get name => {
+    SortType.lastUpdated : 'Last Updated',
+    SortType.alphabetical: 'Alphabetical',
+    SortType.mostHours: 'Most Hours',
+    SortType.newest: 'Newest',
+    SortType.oldest: 'Oldest',
+  }[this];
+}
 
 String getMonth(int month) {
   Map<int, String> months = {
@@ -119,6 +135,28 @@ double parseTime(String input) {
 
 }
 
+Route createSlideRoute(Widget widget) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => widget,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = Offset(0.0, 1.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end);
+      var curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: curve,
+      );
+
+      return SlideTransition(
+        position: tween.animate(curvedAnimation),
+        child: child,
+      );
+    },
+  );
+}
+
 
 class Global {
   static List<Color> defaultColors = [
@@ -131,5 +169,10 @@ class Global {
     Colors.deepPurple,
     Colors.pink
   ];
+}
+
+String generateDescription(Media media, {int episodesWatched = 0, int currentEpisode = 0}) {
+  if(episodesWatched <= 1) return '${media.name} $currentEpisode';
+  return '${media.name} ${currentEpisode - episodesWatched + 1}-$currentEpisode';
 }
 

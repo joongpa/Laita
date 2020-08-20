@@ -23,23 +23,32 @@ class InputLog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<AppUser>(context);
+    final user = Provider.of<AppUser>(context, listen: false);
     if (user == null) return Container();
 
-    InputEntriesProvider.instance.getEntriesOnDay(user, dateTime);
+    InputEntriesProvider.instance.getEntriesOnDay(user.uid, dateTime);
     return ChangeNotifierProvider.value(
       value: InputEntriesProvider.instance,
       child: Consumer<InputEntriesProvider>(
         builder: (context, value, child) {
-          if(value.isLoading) return Center(child: CircularProgressIndicator());
-          if(value.entries[dateTime] == null || value.entries[dateTime].length == 0) return Container();
+          if (value.isLoading)
+            return Center(child: CircularProgressIndicator());
+          if (value.entries[dateTime] == null) return Container();
 
           return ListView.builder(
-              itemCount: value.entries[dateTime].length,
+              itemCount: value.entries[dateTime].length + 1,
               itemBuilder: (context, index) {
-                if (index >= value.entries[dateTime].length) return Center(child: Container());
+                if (index >= value.entries[dateTime].length)
+                  return Center(
+                      child: Container(
+                    height: 100,
+                  ));
 
                 final entry = value.entries[dateTime][index];
+                final category =
+                    categoryFromName(entry.inputType, user.categories);
+
+                if (category == null) return Container();
 
                 String subtitleText = '';
                 if (entry is InputEntry) {
@@ -50,29 +59,29 @@ class InputLog extends StatelessWidget {
                 if (entry is GoalEntry) {
                   return Card(
                       child: Container(
-                        color: Color.fromRGBO(235, 235, 235, 1),
-                        child: ListTile(
-                          subtitle: Text(subtitleText),
-                          leading: Text(
-                            entry.inputType,
-                            style: TextStyle(
-                              color: Color.fromRGBO(140, 140, 140, 1),
-                            ),
-                          ),
-                          title: Text(
-                            '$goalText${convertToDisplay(entry.amount, (categoryFromName(entry.inputType, user.categories) ?? Category(isTimeBased: false)).isTimeBased)}',
-                            style: TextStyle(
-                              color: Color.fromRGBO(140, 140, 140, 1),
-                            ),
-                          ),
-                          trailing: Text(
-                            entry.time,
-                            style: TextStyle(
-                              color: Color.fromRGBO(140, 140, 140, 1),
-                            ),
-                          ),
+                    color: Color.fromRGBO(235, 235, 235, 1),
+                    child: ListTile(
+                      subtitle: Text(subtitleText),
+                      leading: Text(
+                        entry.inputType,
+                        style: TextStyle(
+                          color: Color.fromRGBO(140, 140, 140, 1),
                         ),
-                      ));
+                      ),
+                      title: Text(
+                        '$goalText${convertToDisplay(entry.amount, category.isTimeBased)}',
+                        style: TextStyle(
+                          color: Color.fromRGBO(140, 140, 140, 1),
+                        ),
+                      ),
+                      trailing: Text(
+                        entry.time,
+                        style: TextStyle(
+                          color: Color.fromRGBO(140, 140, 140, 1),
+                        ),
+                      ),
+                    ),
+                  ));
                 }
 
                 return Dismissible(
@@ -91,39 +100,39 @@ class InputLog extends StatelessWidget {
                     return await asyncConfirmDialog(context,
                         title: "Confirm Delete",
                         description:
-                        'Delete entry? This action cannot be undone');
+                            'Delete entry? This action cannot be undone');
                   },
                   onDismissed: (dis) {
                     value.remove(user, entry);
                   },
                   child: Card(
                       child: ListTile(
-                        subtitle: Text(subtitleText),
-                        leading: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              entry.inputType,
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Container(
-                                color: categoryFromName(
-                                    entry.inputType, user.categories)
-                                    .color,
-                                width: 40,
-                                height: 10)
-                          ],
+                    subtitle: Text(subtitleText),
+                    leading: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          entry.inputType,
                         ),
-                        title: Text(
-                            '${convertToDisplay(entry.amount, (categoryFromName(entry.inputType, user.categories) ?? Category(isTimeBased: false)).isTimeBased)}'),
-                        trailing: Text(entry.time),
-                      )),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                            color: categoryFromName(
+                                    entry.inputType, user.categories)
+                                .color,
+                            width: 40,
+                            height: 10)
+                      ],
+                    ),
+                    title: Text(
+                        '${convertToDisplay(entry.amount, category.isTimeBased)}'),
+                    trailing: Text(entry.time),
+                  )),
                 );
               });
         },
-      ),);
-
+      ),
+    );
   }
 }

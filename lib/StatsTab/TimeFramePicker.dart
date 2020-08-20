@@ -18,7 +18,6 @@ class _TimeFramePickerState extends State<TimeFramePicker> {
     return Padding(
       padding: const EdgeInsets.only(left: 10),
       child: Stack(
-
         alignment: Alignment.centerLeft,
         children: [
           Transform.scale(
@@ -30,7 +29,7 @@ class _TimeFramePickerState extends State<TimeFramePicker> {
                 _choiceButton(TimeSpan.Month.name),
                 _choiceButton(TimeSpan.Week.name)
               ],
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(5),
               selectedColor: Colors.white,
               fillColor: Colors.red,
               isSelected: _selections,

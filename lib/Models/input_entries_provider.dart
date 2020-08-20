@@ -10,26 +10,24 @@ class InputEntriesProvider extends ChangeNotifier {
   static InputEntriesProvider instance = InputEntriesProvider._();
 
   bool isLoading = true;
-  Map<DateTime,List<Entry>> _entries = Map<DateTime,List<Entry>>();
-  Map<DateTime,List<Entry>> get entries => _entries;
+  Map<DateTime,List<Entry>> entries = Map<DateTime,List<Entry>>();
 
-  getEntriesOnDay(AppUser user, DateTime dateTime) async {
-    if(_entries[dateTime] == null) {
+  getEntriesOnDay(String uid, DateTime dateTime) async {
+    if(entries[dateTime] == null) {
       isLoading = true;
       notifyListeners();
-      _entries[dateTime] = await DatabaseService.instance.getEntriesOnDay(user, dateTime);
+      entries[dateTime] = await DatabaseService.instance.getEntriesAsFuture(uid, dateTime: dateTime);
       isLoading = false;
       notifyListeners();
-    } else _entries[dateTime] = await DatabaseService.instance.getEntriesOnDay(user, dateTime);
+    }
   }
 
   void remove(AppUser user, InputEntry inputEntry) {
-    _entries.remove(inputEntry);
     DatabaseService.instance.deleteInputEntry(user, inputEntry);
   }
 
   void clear() {
-    _entries.clear();
+    entries.clear();
     DatabaseService.instance.clearCache();
   }
 

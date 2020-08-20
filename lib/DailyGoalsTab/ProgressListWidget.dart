@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Map.dart';
@@ -16,49 +17,33 @@ class ProgressListWidget extends StatelessWidget {
     var user = Provider.of<AppUser>(context);
     var dailyInputEntry = Provider.of<Map<DateTime, DailyInputEntry>>(context);
 
-    if (user == null || user.categories == null) return Container();
+    if (user == null || user.categories == null || user.categories.length == 0) return Container();
 
-    return ListView.builder(
-        itemCount: user.categories.length + 1,
-        itemBuilder: (context, index) {
-          if (index == user.categories.length)
-            return SizedBox(height: 100);
+    var incompleteCategories = user.categories.where((category) => !category.isCompleted).toList();
 
-          if (dailyInputEntry == null || dailyInputEntry[daysAgo(0)] == null)
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddHours(user, user.categories, initialSelectionIndex: index)),
-                );
-              },
-              child: GlobalProgressWidget(
-                name: user.categories[index].name,
-                isTimeBased: user.categories[index].isTimeBased,
+    return Padding(
+      padding: EdgeInsets.only(top: 12),
+      child: ListView.builder(
+          itemCount: incompleteCategories.length + 1,
+          itemBuilder: (context, index) {
+            if (index == incompleteCategories.length)
+              return SizedBox(height: 100);
+
+            if (dailyInputEntry == null || dailyInputEntry[daysAgo(0)] == null)
+              return GlobalProgressWidget(
+                user: user,
                 value: 0.0,
-                goal: user.categories[index].goalAmount ?? 0.0,
-              ),
+                category: incompleteCategories[index],
+                index: index,
+              );
+            return GlobalProgressWidget(
+              user: user,
+              value: dailyInputEntry[daysAgo(0)].categoryHours[incompleteCategories[index].name] ?? 0.0,
+              category: incompleteCategories[index],
+              index: index,
             );
-          return Material(
-            child: Ink(
-              child: InkWell(
-                splashColor: Colors.lightBlue,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AddHours(user, user.categories, initialSelectionIndex: index)),
-                  );
-                },
-                child: GlobalProgressWidget(
-                  goal: user.categories[index].goalAmount ?? 0.0,
-                  value: dailyInputEntry[daysAgo(0)].categoryHours[user.categories[index].name] ?? 0.0,
-                  isTimeBased: user.categories[index].isTimeBased,
-                  name: user.categories[index].name,
-                ),
-              ),
-            ),
-          );
-        });
+          }),
+    );
 
   }
 }

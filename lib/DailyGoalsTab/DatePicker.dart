@@ -4,6 +4,7 @@ import 'package:miatracker/Map.dart';
 
 class DatePicker extends StatelessWidget {
   static const _YEAR = 365;
+
   const DatePicker({Key key, this.selectedDate, this.onChanged})
       : super(key: key);
   final DateTime selectedDate;
@@ -34,9 +35,7 @@ class DatePicker extends StatelessWidget {
           child: InkWell(
               onTap: () => _selectDate(context),
               child: InputDecorator(
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                  ),
+                  decoration: InputDecoration(border: OutlineInputBorder()),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.min,
@@ -49,7 +48,7 @@ class DatePicker extends StatelessWidget {
                             )),
                         Padding(
                           padding:
-                          const EdgeInsets.only(left: 12.0, right: 12.0),
+                              const EdgeInsets.only(left: 12.0, right: 12.0),
                           child: Icon(Icons.today),
                         )
                       ]))))

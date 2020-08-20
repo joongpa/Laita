@@ -43,16 +43,18 @@ class Category {
   String name;
   DateTime addDate;
   bool isTimeBased;
+  bool isCompleted;
   double goalAmount;
   double lifetimeAmount;
   Color color;
 
-  Category({this.name, this.addDate, this.isTimeBased, this.goalAmount=0, this.color, this.lifetimeAmount=0});
+  Category({this.name, this.addDate, this.isTimeBased, this.isCompleted, this.goalAmount=0, this.color, this.lifetimeAmount=0});
 
   factory Category.fromMap(Map<String, dynamic> map) => Category(
         name: map['name'],
         addDate: map['addDate'].toDate(),
         isTimeBased: map['isTimeBased'],
+        isCompleted: map['isCompleted'],
         goalAmount: (map['goalAmount'] ?? 0).toDouble(),
         color: Color(map['color'] ?? 0).withOpacity(1),
         lifetimeAmount: (map['lifetimeAmount'] ?? 0).toDouble(),
@@ -62,6 +64,7 @@ class Category {
         'name': name,
         'addDate': addDate,
         'isTimeBased': isTimeBased,
+        'isCompleted': isCompleted,
         'goalAmount': goalAmount,
         'color': color.value,
         'lifetimeAmount': lifetimeAmount,
@@ -82,6 +85,7 @@ class Category {
     return (
       name == other.name &&
       isTimeBased == other.isTimeBased &&
+      isCompleted == other.isCompleted &&
       goalAmount == other.goalAmount &&
       color == other.color
     );
