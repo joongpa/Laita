@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:miatracker/Media/media_selection_model.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/input_entries_provider.dart';
@@ -18,6 +19,29 @@ class DatabaseService {
   final String _goalEntries = 'goalEntries';
   final String _aggregateInputEntries = 'aggregateInputEntries';
   final String _media = 'media';
+
+  static final itemsPerPage = 15;
+
+  Map<String,DocumentSnapshot> _lastDocuments = Map<String,DocumentSnapshot>();
+  Map<String, bool> _hasMoreMedia = {
+    'In Progress': true,
+    'Complete': true,
+    'Dropped': true
+  };
+  Map<String, List<List<Media>>> _allPagedResults =
+      Map<String, List<List<Media>>>();
+
+  Map<String,bool> get hasMoreMedia => _hasMoreMedia;
+
+  var _mediaSubjects = {
+    'In Progress': BehaviorSubject<List<Media>>.seeded([]),
+    'Complete': BehaviorSubject<List<Media>>.seeded([]),
+    'Dropped': BehaviorSubject<List<Media>>.seeded([]),
+  };
+
+  Stream<List<Media>> mediaStream(String type) {
+    return _mediaSubjects[type].stream;
+  }
 
   Map<DateTime, DailyInputEntry> _aggregateEntries =
       Map<DateTime, DailyInputEntry>();
@@ -387,20 +411,40 @@ class DatabaseService {
         newMedia.totalTime += inputEntry.amount;
         newMedia.episodeWatchCount += inputEntry.episodesWatched;
       }
-      if(newMedia.episodeCount != null)
-        newMedia.isCompleted = newMedia.episodeWatchCount >= newMedia.episodeCount;
+      if (newMedia.episodeCount != null)
+        newMedia.isCompleted =
+            newMedia.episodeWatchCount >= newMedia.episodeCount;
       newMedia.totalTime = math.max(newMedia.totalTime, 0);
       newMedia.episodeWatchCount = math.max(newMedia.episodeWatchCount, 0);
       docRef.setData(newMedia.toMap(), merge: true);
     });
   }
 
-  //TODO pagination
-  Stream<List<Media>> mediaStream(AppUser user,
+  void refreshMedia(AppUser user, String type,
       {Category category,
-      SortType sortType = SortType.lastUpdated,
+      SortType sortType,
       bool showComplete = false,
       bool showDropped = false}) {
+    _allPagedResults[type].clear();
+    _hasMoreMedia[type] = true;
+    _lastDocuments[type] = null;
+    requestMedia(user, type,
+        category: category,
+        sortType: sortType,
+        showComplete: showComplete,
+        showDropped: showDropped);
+  }
+
+  void requestMedia(AppUser user, String type,
+      {Category category,
+      SortType sortType,
+      bool showComplete = false,
+      bool showDropped = false}) {
+    if (type == null) return;
+
+    if (_allPagedResults[type] == null)
+      _allPagedResults[type] = List<List<Media>>();
+
     var collectionRef = Firestore.instance
         .collection('users')
         .document(user.uid)
@@ -432,25 +476,57 @@ class DatabaseService {
         break;
     }
 
-    if (category == null)
-      return collectionRef
-          .orderBy(field, descending: isDescending)
-          .where('isCompleted', isEqualTo: showComplete)
-          .where('isDropped', isEqualTo: showDropped)
-          .snapshots()
-          .map((list) => list.documents
-              .map((media) => Media.fromMap(media.data))
-              .toList());
-    else
-      return collectionRef
-          .orderBy(field, descending: isDescending)
-          .where('categoryName', isEqualTo: category.name)
-          .where('isCompleted', isEqualTo: showComplete)
-          .where('isDropped', isEqualTo: showDropped)
-          .snapshots()
-          .map((list) => list.documents
-              .map((media) => Media.fromMap(media.data))
-              .toList());
+    var pageMediaQuery = (category != null)
+        ? collectionRef
+            .orderBy(field, descending: isDescending)
+            .where('categoryName', isEqualTo: category.name)
+            .where('isCompleted', isEqualTo: showComplete)
+            .where('isDropped', isEqualTo: showDropped)
+            .limit(itemsPerPage)
+        : collectionRef
+            .orderBy(field, descending: isDescending)
+            .where('isCompleted', isEqualTo: showComplete)
+            .where('isDropped', isEqualTo: showDropped)
+            .limit(itemsPerPage);
+
+    if (_lastDocuments[type] != null) {
+      pageMediaQuery = pageMediaQuery.startAfterDocument(_lastDocuments[type]);
+    }
+    if (!_hasMoreMedia[type]) return;
+
+    var currentRequestIndex = _allPagedResults[type].length;
+
+    pageMediaQuery.snapshots().listen((mediaSnapshot) {
+      if (MediaSelectionModel.instance.selectedCategory == category && MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
+        if (mediaSnapshot.documents.isNotEmpty) {
+          var media = mediaSnapshot.documents
+              .map((snapshot) => Media.fromMap(snapshot.data))
+              .toList();
+
+          print('${(category != null) ? category.name : 'null'} $sortType' );
+
+          var pageExists = currentRequestIndex < _allPagedResults[type].length;
+          if (pageExists) {
+            _allPagedResults[type][currentRequestIndex] = media;
+          } else {
+            _allPagedResults[type].add(media);
+          }
+
+          var allMedia = _allPagedResults[type].fold<List<Media>>(List<Media>(),
+              (initialValue, element) => initialValue..addAll(element));
+
+          _mediaSubjects[type].add(allMedia);
+
+          if (currentRequestIndex == _allPagedResults[type].length - 1) {
+            _lastDocuments[type] = mediaSnapshot.documents.last;
+          }
+          _hasMoreMedia[type] = media.length >= itemsPerPage;
+        } else {
+          if (currentRequestIndex == 0) _mediaSubjects[type].add([]);
+          _hasMoreMedia[type] = false;
+        }
+      }
+    });
   }
 
   clearCache() {

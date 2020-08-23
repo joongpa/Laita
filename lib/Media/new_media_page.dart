@@ -7,6 +7,8 @@ import 'package:miatracker/Models/media.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 
+import 'media_selection_model.dart';
+
 class NewMediaPage extends StatefulWidget {
   final Category initialCategory;
   final AppUser user;
@@ -159,6 +161,9 @@ class _NewMediaPageState extends State<NewMediaPage> {
                             categoryName: _selectedCategory.name,
                           );
                           DatabaseService.instance.addMedia(widget.user, media);
+                          MediaSelectionModel.instance.setSelectedSortType(SortType.lastUpdated, 'In Progress');
+                          MediaSelectionModel.instance.setSelectedSortType(SortType.lastUpdated, 'Complete');
+                          MediaSelectionModel.instance.setSelectedSortType(SortType.lastUpdated, 'Dropped');
                           Navigator.of(context).pop();
 
                           if ((initialEpisodeWatchCount ?? 0) > 0 &&

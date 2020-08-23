@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Map.dart';
+import 'package:miatracker/Media/media_selection_model.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
@@ -73,7 +74,9 @@ class SignInPage extends StatelessWidget {
             ),
             ChangeNotifierProvider<TabChangeNotifier>.value(
               value: TabChangeNotifier.instance,
-            )
+            ),
+            ChangeNotifierProvider<MediaSelectionModel>.value(
+                value: MediaSelectionModel.instance)
           ],
           child: MyHomePage(
             title: "Immersion Tracker",
