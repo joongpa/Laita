@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:miatracker/Models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Map.dart';
 
 class SharedPreferencesHelper extends ChangeNotifier{
   SharedPreferencesHelper._();
