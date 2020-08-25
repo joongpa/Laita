@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -57,15 +58,18 @@ class DrawerMenu extends StatelessWidget {
     return DrawerHeader(
         margin: EdgeInsets.zero,
         padding: EdgeInsets.zero,
-        decoration: BoxDecoration(),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [Colors.blue, Colors.black]),
+        ),
         child: Stack(children: <Widget>[
           Positioned(
               bottom: 12.0,
               left: 16.0,
-              child: Text("Immersion Tracker",
+              child: Text("LAITA",
                   style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20.0,
+                      fontFamily: 'Times New Roman',
+                      color: Colors.white,
+                      fontSize: 35.0,
                       fontWeight: FontWeight.w500))),
         ]));
   }
