@@ -26,7 +26,7 @@ class StatisticsPageWidget extends StatelessWidget {
     dates.sort();
 
     var countedDays = daysBetween(dates.first, dates.last);
-    countedDays = (countedDays == 0) ? 1 : countedDays;
+    countedDays = readjustTimeFrame(countedDays);
 
     double hours;
     if(entries.length == 0)

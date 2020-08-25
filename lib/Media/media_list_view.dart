@@ -74,13 +74,7 @@ class _MediaListViewState extends State<MediaListView> {
             itemCount: snapshot.data.length + 2,
             itemBuilder: (context, index) {
               if (index == snapshot.data.length + 1) {
-                if(DatabaseService.instance.hasMoreMedia[widget.watchStatus]) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                else return Container(height: 70);
+                return Container(height: 70);
               }
 
               if (index == 0) {
@@ -196,7 +190,7 @@ class _MediaListViewState extends State<MediaListView> {
                             : () {
                                 snapshot.data[index - 1].isCompleted =
                                     !snapshot.data[index - 1].isCompleted;
-                                snapshot.data[index-1].isDropped = !snapshot.data[index - 1].isCompleted;
+                                snapshot.data[index-1].isDropped = false;
 
                                 if (snapshot.data[index - 1].isCompleted) {
                                   snapshot.data[index - 1].lastUpDate =
@@ -244,18 +238,33 @@ class _MediaListViewState extends State<MediaListView> {
                   padding: const EdgeInsets.all(8.0),
                   child: ListTile(
                     title: Text(snapshot.data[index - 1].name),
-                    trailing: Text(
-                      snapshot.data[index - 1].episodeWatchCount.toString(),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          snapshot.data[index - 1].episodeWatchCount.toString(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        if(snapshot.data[index-1].episodeCount != null)
+                          Text(
+                            '/${snapshot.data[index-1].episodeCount}',
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey
+                            ),
+                          ),
+                      ],
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            '${getDate(snapshot.data[index - 1].lastUpDate)}'),
+                            'Created ${getDate(snapshot.data[index - 1].startDate)}'),
                         Text(
                             'Total time: ${convertToStatsDisplay(snapshot.data[index - 1].totalTime)}')
                       ],

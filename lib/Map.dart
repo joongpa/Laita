@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:miatracker/Models/TimeFrameModel.dart';
 
 import 'DailyGoalsTab/AddHours.dart';
 import 'Models/media.dart';
 import 'Models/user.dart';
+import 'dart:math' as math;
 
 enum SortType {
   lastUpdated, alphabetical, mostHours, newest, oldest
@@ -174,5 +176,23 @@ class Global {
 String generateDescription(Media media, {int episodesWatched = 0, int currentEpisode = 0}) {
   if(episodesWatched <= 1) return '${media.name} $currentEpisode';
   return '${media.name} ${currentEpisode - episodesWatched + 1}-$currentEpisode';
+}
+
+int readjustTimeFrame(int value) {
+  int timeSpan = getClosestTimeFrame(value);
+  if(value - timeSpan != 0) return timeSpan;
+  return value;
+}
+
+int getClosestTimeFrame(int value) {
+  int timeSpanValue;
+  int minDif = 10000;
+  TimeSpan.values.forEach((timeSpan) {
+    if((value - timeSpan.value).abs() < minDif) {
+      timeSpanValue = timeSpan.value;
+      minDif = (value - timeSpan.value).abs();
+    }
+  });
+  return timeSpanValue;
 }
 

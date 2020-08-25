@@ -17,6 +17,8 @@ environment:
   sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
+  flutter_signin_button: ^1.0.0
+  firebase_crashlytics: ^0.1.4+1
   shared_preferences: ^0.5.8
   fl_chart: ^0.11.0
   google_sign_in: ^4.5.1

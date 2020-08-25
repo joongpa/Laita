@@ -503,8 +503,6 @@ class DatabaseService {
               .map((snapshot) => Media.fromMap(snapshot.data))
               .toList();
 
-          print('${(category != null) ? category.name : 'null'} $sortType' );
-
           var pageExists = currentRequestIndex < _allPagedResults[type].length;
           if (pageExists) {
             _allPagedResults[type][currentRequestIndex] = media;

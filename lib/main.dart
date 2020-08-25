@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +17,7 @@ import 'package:miatracker/Models/date_time_property.dart';
 import 'package:miatracker/Models/shared_preferences.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/StatsTab/stats_settings_page.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'Map.dart';
 import 'Models/category.dart';
 import 'Models/auth.dart';
@@ -28,12 +30,17 @@ import 'StatsTab/StatisticsSummaryWidget.dart';
 import 'anti_scroll_glow.dart';
 
 void main() async {
+  Crashlytics.instance.enableInDevMode = true;
+  FlutterError.onError = Crashlytics.instance.recordFlutterError;
+
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferencesHelper.instance.init();
   DateTimeProperty.changeInDay().listen((event) {
     if(event) InputHoursUpdater.instance.resumeUpdate();
   });
-  runApp(MyApp());
+  runZoned(() {
+    runApp(MyApp());
+  }, onError: Crashlytics.instance.recordError);
 }
 
 class MyApp extends StatelessWidget {

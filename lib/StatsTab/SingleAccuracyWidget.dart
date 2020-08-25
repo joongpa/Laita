@@ -27,7 +27,7 @@ class SingleAccuracyWidget extends StatelessWidget {
     dates.sort();
 
     var countedDays = daysBetween(dates.first, dates.last);
-    countedDays = (countedDays == 0) ? 1 : countedDays;
+    countedDays = readjustTimeFrame(countedDays);
 
     var successes = entries.values.toSet().where((element) {
       try {
