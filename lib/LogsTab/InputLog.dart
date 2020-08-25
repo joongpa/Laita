@@ -109,7 +109,7 @@ class InputLog extends StatelessWidget {
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
-                    subtitle: Text(subtitleText, maxLines: 4, overflow: TextOverflow.ellipsis,),
+                    subtitle: Text(subtitleText.trim(), maxLines: 4, overflow: TextOverflow.ellipsis,),
                     leading: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
