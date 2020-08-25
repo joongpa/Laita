@@ -496,35 +496,38 @@ class DatabaseService {
 
     var currentRequestIndex = _allPagedResults[type].length;
 
-    pageMediaQuery.snapshots().listen((mediaSnapshot) {
-      if (MediaSelectionModel.instance.selectedCategory == category && MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
-        if (mediaSnapshot.documents.isNotEmpty) {
-          var media = mediaSnapshot.documents
-              .map((snapshot) => Media.fromMap(snapshot.data))
-              .toList();
+    if (MediaSelectionModel.instance.selectedCategory == category && MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
+      pageMediaQuery.snapshots().listen((mediaSnapshot) {
+        if (MediaSelectionModel.instance.selectedCategory == category && MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
+          //print('I just ran');
+          if (mediaSnapshot.documents.isNotEmpty) {
+            var media = mediaSnapshot.documents
+                .map((snapshot) => Media.fromMap(snapshot.data))
+                .toList();
 
-          var pageExists = currentRequestIndex < _allPagedResults[type].length;
-          if (pageExists) {
-            _allPagedResults[type][currentRequestIndex] = media;
+            var pageExists = currentRequestIndex < _allPagedResults[type].length;
+            if (pageExists) {
+              _allPagedResults[type][currentRequestIndex] = media;
+            } else {
+              _allPagedResults[type].add(media);
+            }
+
+            var allMedia = _allPagedResults[type].fold<List<Media>>(List<Media>(),
+                (initialValue, element) => initialValue..addAll(element));
+
+            _mediaSubjects[type].add(allMedia);
+
+            if (currentRequestIndex == _allPagedResults[type].length - 1) {
+              _lastDocuments[type] = mediaSnapshot.documents.last;
+            }
+            _hasMoreMedia[type] = media.length >= itemsPerPage;
           } else {
-            _allPagedResults[type].add(media);
+            if (currentRequestIndex == 0) _mediaSubjects[type].add([]);
+            _hasMoreMedia[type] = false;
           }
-
-          var allMedia = _allPagedResults[type].fold<List<Media>>(List<Media>(),
-              (initialValue, element) => initialValue..addAll(element));
-
-          _mediaSubjects[type].add(allMedia);
-
-          if (currentRequestIndex == _allPagedResults[type].length - 1) {
-            _lastDocuments[type] = mediaSnapshot.documents.last;
-          }
-          _hasMoreMedia[type] = media.length >= itemsPerPage;
-        } else {
-          if (currentRequestIndex == 0) _mediaSubjects[type].add([]);
-          _hasMoreMedia[type] = false;
         }
-      }
-    });
+      });
+    }
   }
 
   clearCache() {

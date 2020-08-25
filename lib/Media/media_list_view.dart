@@ -28,6 +28,7 @@ class MediaListView extends StatefulWidget {
 class _MediaListViewState extends State<MediaListView> {
   var _scrollController = ScrollController();
   var tapDownDetails;
+  bool moreDataCalled = false;
 
   @override
   void initState() {
@@ -62,13 +63,17 @@ class _MediaListViewState extends State<MediaListView> {
             controller: _scrollController..addListener(() {
               var threshold = 0.95 * _scrollController.position.maxScrollExtent;
 
-              if(_scrollController.position.pixels > threshold)
-                DatabaseService.instance.requestMedia(
-                    user, widget.watchStatus,
-                    sortType: mediaSelector.selectedSortTypes[widget.watchStatus],
-                    category: mediaSelector.selectedCategory,
-                    showComplete: widget.showComplete,
-                    showDropped: widget.showDropped);
+              if(_scrollController.position.pixels > threshold) {
+                if (!moreDataCalled) {
+                  DatabaseService.instance.requestMedia(
+                      user, widget.watchStatus,
+                      sortType: mediaSelector.selectedSortTypes[widget.watchStatus],
+                      category: mediaSelector.selectedCategory,
+                      showComplete: widget.showComplete,
+                      showDropped: widget.showDropped);
+                }
+                moreDataCalled = true;
+              } else moreDataCalled = false;
             }),
             shrinkWrap: true,
             itemCount: snapshot.data.length + 2,

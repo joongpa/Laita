@@ -4,6 +4,7 @@ import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/media.dart';
+import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 
@@ -162,8 +163,6 @@ class _NewMediaPageState extends State<NewMediaPage> {
                           );
                           DatabaseService.instance.addMedia(widget.user, media);
                           MediaSelectionModel.instance.setSelectedSortType(SortType.lastUpdated, 'In Progress');
-                          MediaSelectionModel.instance.setSelectedSortType(SortType.lastUpdated, 'Complete');
-                          MediaSelectionModel.instance.setSelectedSortType(SortType.lastUpdated, 'Dropped');
                           Navigator.of(context).pop();
 
                           if ((initialEpisodeWatchCount ?? 0) > 0 &&
