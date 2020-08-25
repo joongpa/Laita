@@ -58,30 +58,33 @@ class InputLog extends StatelessWidget {
 
                 if (entry is GoalEntry) {
                   return Card(
-                      child: Container(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
                     color: Color.fromRGBO(235, 235, 235, 1),
                     child: ListTile(
-                      subtitle: Text(subtitleText),
-                      leading: Text(
-                        entry.inputType,
-                        style: TextStyle(
-                          color: Color.fromRGBO(140, 140, 140, 1),
+                        subtitle: Text(subtitleText),
+                        leading: Text(
+                          entry.inputType,
+                          style: TextStyle(
+                            color: Color.fromRGBO(140, 140, 140, 1),
+                          ),
                         ),
-                      ),
-                      title: Text(
-                        '$goalText${convertToDisplay(entry.amount, category.isTimeBased)}',
-                        style: TextStyle(
-                          color: Color.fromRGBO(140, 140, 140, 1),
+                        title: Text(
+                          '$goalText${convertToDisplay(entry.amount, category.isTimeBased)}',
+                          style: TextStyle(
+                            color: Color.fromRGBO(140, 140, 140, 1),
+                          ),
                         ),
-                      ),
-                      trailing: Text(
-                        entry.time,
-                        style: TextStyle(
-                          color: Color.fromRGBO(140, 140, 140, 1),
+                        trailing: Text(
+                          entry.time,
+                          style: TextStyle(
+                            color: Color.fromRGBO(140, 140, 140, 1),
+                          ),
                         ),
-                      ),
                     ),
-                  ));
+                  ),
+                      ));
                 }
 
                 return Dismissible(
@@ -107,7 +110,7 @@ class InputLog extends StatelessWidget {
                   },
                   child: Card(
                       child: ListTile(
-                    subtitle: Text(subtitleText, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                    subtitle: Text(subtitleText, maxLines: 3, overflow: TextOverflow.ellipsis,),
                     leading: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
