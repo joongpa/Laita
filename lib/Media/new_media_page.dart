@@ -163,6 +163,11 @@ class _NewMediaPageState extends State<NewMediaPage> {
                           );
                           DatabaseService.instance.addMedia(widget.user, media);
                           MediaSelectionModel.instance.setSelectedSortType(SortType.lastUpdated, 'In Progress');
+                          DatabaseService.instance.refreshMedia(
+                              widget.user, 'In Progress',
+                              showDropped: false,
+                              showComplete: false,
+                              sortType: SortType.lastUpdated);
                           Navigator.of(context).pop();
 
                           if ((initialEpisodeWatchCount ?? 0) > 0 &&
