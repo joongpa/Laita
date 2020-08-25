@@ -38,9 +38,8 @@ void main() async {
   DateTimeProperty.changeInDay().listen((event) {
     if(event) InputHoursUpdater.instance.resumeUpdate();
   });
-  runZoned(() {
-    runApp(MyApp());
-  }, onError: Crashlytics.instance.recordError);
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
