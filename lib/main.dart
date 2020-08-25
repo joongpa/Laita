@@ -105,6 +105,12 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     });
   }
 
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   onItemTap(int index) {
     setState(() {
       selectedIndex = index;

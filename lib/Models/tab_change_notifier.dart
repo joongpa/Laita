@@ -5,7 +5,7 @@ class TabChangeNotifier extends ChangeNotifier {
   TabChangeNotifier._();
   static final instance = TabChangeNotifier._();
 
-  int _index;
+  int _index = 0;
 
   int get index => _index;
 

@@ -5,6 +5,7 @@ import 'package:miatracker/Media/media_selection_model.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/input_entries_provider.dart';
+import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:rxdart/rxdart.dart';
 import '../Map.dart';
 import 'GoalEntry.dart';
@@ -532,6 +533,7 @@ class DatabaseService {
 
   clearCache() {
     _aggregateEntries.clear();
+    TabChangeNotifier.instance.index = null;
   }
 
   double aboveZero(double num) {
