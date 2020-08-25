@@ -107,7 +107,7 @@ class InputLog extends StatelessWidget {
                   },
                   child: Card(
                       child: ListTile(
-                    subtitle: Text(subtitleText),
+                    subtitle: Text(subtitleText, maxLines: 1, overflow: TextOverflow.ellipsis,),
                     leading: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
