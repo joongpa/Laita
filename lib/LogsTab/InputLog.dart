@@ -58,33 +58,30 @@ class InputLog extends StatelessWidget {
 
                 if (entry is GoalEntry) {
                   return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
+                      child: Container(
                     color: Color.fromRGBO(235, 235, 235, 1),
                     child: ListTile(
-                        subtitle: Text(subtitleText),
-                        leading: Text(
-                          entry.inputType,
-                          style: TextStyle(
-                            color: Color.fromRGBO(140, 140, 140, 1),
-                          ),
+                      subtitle: Text(subtitleText),
+                      leading: Text(
+                        entry.inputType,
+                        style: TextStyle(
+                          color: Color.fromRGBO(140, 140, 140, 1),
                         ),
-                        title: Text(
-                          '$goalText${convertToDisplay(entry.amount, category.isTimeBased)}',
-                          style: TextStyle(
-                            color: Color.fromRGBO(140, 140, 140, 1),
-                          ),
+                      ),
+                      title: Text(
+                        '$goalText${convertToDisplay(entry.amount, category.isTimeBased)}',
+                        style: TextStyle(
+                          color: Color.fromRGBO(140, 140, 140, 1),
                         ),
-                        trailing: Text(
-                          entry.time,
-                          style: TextStyle(
-                            color: Color.fromRGBO(140, 140, 140, 1),
-                          ),
+                      ),
+                      trailing: Text(
+                        entry.time,
+                        style: TextStyle(
+                          color: Color.fromRGBO(140, 140, 140, 1),
                         ),
+                      ),
                     ),
-                  ),
-                      ));
+                  ));
                 }
 
                 return Dismissible(
@@ -109,29 +106,32 @@ class InputLog extends StatelessWidget {
                     value.remove(user, entry);
                   },
                   child: Card(
-                      child: ListTile(
-                    subtitle: Text(subtitleText, maxLines: 3, overflow: TextOverflow.ellipsis,),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                    subtitle: Text(subtitleText, maxLines: 4, overflow: TextOverflow.ellipsis,),
                     leading: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          entry.inputType,
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                            color: categoryFromName(
-                                    entry.inputType, user.categories)
-                                .color,
-                            width: 40,
-                            height: 10)
-                      ],
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            entry.inputType,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Container(
+                              color: categoryFromName(
+                                      entry.inputType, user.categories)
+                                  .color,
+                              width: 40,
+                              height: 10)
+                        ],
                     ),
                     title: Text(
-                        '${convertToDisplay(entry.amount, category.isTimeBased)}'),
+                          '${convertToDisplay(entry.amount, category.isTimeBased)}'),
                     trailing: Text(entry.time),
-                  )),
+                  ),
+                      )),
                 );
               });
         },
