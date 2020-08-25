@@ -106,32 +106,35 @@ class InputLog extends StatelessWidget {
                     value.remove(user, entry);
                   },
                   child: Card(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                    subtitle: Text(subtitleText.trim(), maxLines: 4, overflow: TextOverflow.ellipsis,),
-                    leading: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            entry.inputType,
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Container(
-                              color: categoryFromName(
-                                      entry.inputType, user.categories)
-                                  .color,
-                              width: 40,
-                              height: 10)
-                        ],
+                      child: ListTile(
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(subtitleText.trim(), maxLines: 4, overflow: TextOverflow.ellipsis,),
                     ),
-                    title: Text(
+                    leading: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          entry.inputType,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                            color: categoryFromName(
+                                    entry.inputType, user.categories)
+                                .color,
+                            width: 40,
+                            height: 10)
+                      ],
+                    ),
+                    title: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
                           '${convertToDisplay(entry.amount, category.isTimeBased)}'),
+                    ),
                     trailing: Text(entry.time),
-                  ),
-                      )),
+                  )),
                 );
               });
         },
