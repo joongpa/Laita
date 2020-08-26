@@ -107,7 +107,7 @@ class SignInPage extends StatelessWidget {
                 value: MediaSelectionModel.instance)
           ],
           child: MyHomePage(
-            title: "Immersion Tracker",
+            title: "LAITA",
           ));
     }
   }

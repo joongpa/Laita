@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
                 child: child,
               );
             },
-            title: 'MIA Tracker',
+            title: 'LAITA',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
