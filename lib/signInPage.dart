@@ -88,7 +88,8 @@ class SignInPage extends StatelessWidget {
           ),
         ),
       );
-    } else
+    } else {
+
       return MultiProvider(
           providers: [
             StreamProvider<AppUser>.value(
@@ -108,5 +109,6 @@ class SignInPage extends StatelessWidget {
           child: MyHomePage(
             title: "Immersion Tracker",
           ));
+    }
   }
 }
