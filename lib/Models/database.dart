@@ -421,22 +421,37 @@ class DatabaseService {
     });
   }
 
-  void refreshMedia(AppUser user, String type,
+  void _resetMedia() {
+    _allPagedResults['In Progress'].clear();
+    _hasMoreMedia['In Progress'] = true;
+    _lastDocuments['In Progress'] = null;
+
+    _allPagedResults['Complete'].clear();
+    _hasMoreMedia['Complete'] = true;
+    _lastDocuments['Complete'] = null;
+
+    _allPagedResults['Dropped'].clear();
+    _hasMoreMedia['Dropped'] = true;
+    _lastDocuments['Dropped'] = null;
+  }
+
+  void refreshMedia(String uid, String type,
       {Category category,
       SortType sortType,
       bool showComplete = false,
       bool showDropped = false}) {
-    _allPagedResults[type].clear();
+    if(_allPagedResults[type] != null)
+      _allPagedResults[type].clear();
     _hasMoreMedia[type] = true;
     _lastDocuments[type] = null;
-    requestMedia(user, type,
+    requestMedia(uid, type,
         category: category,
         sortType: sortType,
         showComplete: showComplete,
         showDropped: showDropped);
   }
 
-  void requestMedia(AppUser user, String type,
+  void requestMedia(String uid, String type,
       {Category category,
       SortType sortType,
       bool showComplete = false,
@@ -448,7 +463,7 @@ class DatabaseService {
 
     var collectionRef = Firestore.instance
         .collection('users')
-        .document(user.uid)
+        .document(uid)
         .collection(_media);
 
     var field;
@@ -500,7 +515,6 @@ class DatabaseService {
     if (MediaSelectionModel.instance.selectedCategory == category && MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
       pageMediaQuery.snapshots().listen((mediaSnapshot) {
         if (MediaSelectionModel.instance.selectedCategory == category && MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
-          //print('I just ran');
           if (mediaSnapshot.documents.isNotEmpty) {
             var media = mediaSnapshot.documents
                 .map((snapshot) => Media.fromMap(snapshot.data))
@@ -534,6 +548,7 @@ class DatabaseService {
   clearCache() {
     _aggregateEntries.clear();
     TabChangeNotifier.instance.index = null;
+    _resetMedia();
   }
 
   double aboveZero(double num) {

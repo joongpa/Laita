@@ -107,7 +107,10 @@ class InputLog extends StatelessWidget {
                   },
                   child: Card(
                       child: ListTile(
-                    subtitle: Text(subtitleText),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(subtitleText.trim(), maxLines: 4, overflow: TextOverflow.ellipsis,),
+                    ),
                     leading: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -125,8 +128,11 @@ class InputLog extends StatelessWidget {
                             height: 10)
                       ],
                     ),
-                    title: Text(
-                        '${convertToDisplay(entry.amount, category.isTimeBased)}'),
+                    title: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                          '${convertToDisplay(entry.amount, category.isTimeBased)}'),
+                    ),
                     trailing: Text(entry.time),
                   )),
                 );

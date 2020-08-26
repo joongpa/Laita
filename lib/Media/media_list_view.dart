@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/LogsTab/ConfirmDialog.dart';
 import 'package:miatracker/LogsTab/custom_menu_item.dart';
 import 'package:miatracker/Media/media_selection_model.dart';
-import 'package:miatracker/Models/creation_aware_list_item.dart';
+import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/media.dart';
 import 'package:miatracker/Models/shared_preferences.dart';
@@ -25,16 +25,29 @@ class MediaListView extends StatefulWidget {
   _MediaListViewState createState() => _MediaListViewState();
 }
 
-class _MediaListViewState extends State<MediaListView> {
+class _MediaListViewState extends State<MediaListView> with WidgetsBindingObserver {
   var _scrollController = ScrollController();
   var tapDownDetails;
   bool moreDataCalled = false;
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      var user = Provider.of<AppUser>(context, listen: false);
+      DatabaseService.instance.refreshMedia(user.uid, widget.watchStatus,
+          sortType: MediaSelectionModel.instance.selectedSortTypes[widget.watchStatus],
+          showDropped: widget.showDropped,
+          showComplete: widget.showComplete);
+    }
+  }
+
+  @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
     var user = Provider.of<AppUser>(context, listen: false);
-    DatabaseService.instance.requestMedia(user, widget.watchStatus,
+    DatabaseService.instance.requestMedia(user.uid, widget.watchStatus,
         sortType: MediaSelectionModel.instance.selectedSortTypes[widget.watchStatus],
         showDropped: widget.showDropped,
         showComplete: widget.showComplete);
@@ -42,6 +55,7 @@ class _MediaListViewState extends State<MediaListView> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
   }
@@ -66,7 +80,7 @@ class _MediaListViewState extends State<MediaListView> {
               if(_scrollController.position.pixels > threshold) {
                 if (!moreDataCalled) {
                   DatabaseService.instance.requestMedia(
-                      user, widget.watchStatus,
+                      user.uid, widget.watchStatus,
                       sortType: mediaSelector.selectedSortTypes[widget.watchStatus],
                       category: mediaSelector.selectedCategory,
                       showComplete: widget.showComplete,
@@ -113,7 +127,7 @@ class _MediaListViewState extends State<MediaListView> {
                           onChanged: (value) {
                             mediaSelector.selectedCategory = value;
                             DatabaseService.instance.refreshMedia(
-                                user, widget.watchStatus,
+                                user.uid, widget.watchStatus,
                                 showDropped: widget.showDropped,
                                 showComplete: widget.showComplete,
                                 sortType: mediaSelector.selectedSortTypes[widget.watchStatus],
@@ -141,7 +155,7 @@ class _MediaListViewState extends State<MediaListView> {
                           onChanged: (value) {
                             mediaSelector.setSelectedSortType(value, widget.watchStatus);
                             DatabaseService.instance.refreshMedia(
-                                user, widget.watchStatus,
+                                user.uid, widget.watchStatus,
                                 showDropped: widget.showDropped,
                                 showComplete: widget.showComplete,
                                 sortType: mediaSelector.selectedSortTypes[widget.watchStatus],
