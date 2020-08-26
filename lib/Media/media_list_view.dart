@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/LogsTab/ConfirmDialog.dart';
 import 'package:miatracker/LogsTab/custom_menu_item.dart';
 import 'package:miatracker/Media/media_selection_model.dart';
+import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/media.dart';
 import 'package:miatracker/Models/shared_preferences.dart';
@@ -33,7 +34,7 @@ class _MediaListViewState extends State<MediaListView> {
   void initState() {
     super.initState();
     var user = Provider.of<AppUser>(context, listen: false);
-    DatabaseService.instance.requestMedia(user.uid, widget.watchStatus,
+    DatabaseService.instance.refreshMedia(user.uid, widget.watchStatus,
         sortType: MediaSelectionModel.instance.selectedSortTypes[widget.watchStatus],
         showDropped: widget.showDropped,
         showComplete: widget.showComplete);

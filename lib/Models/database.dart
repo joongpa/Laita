@@ -440,7 +440,8 @@ class DatabaseService {
       SortType sortType,
       bool showComplete = false,
       bool showDropped = false}) {
-    _allPagedResults[type].clear();
+    if(_allPagedResults[type] != null)
+      _allPagedResults[type].clear();
     _hasMoreMedia[type] = true;
     _lastDocuments[type] = null;
     requestMedia(uid, type,
@@ -530,7 +531,6 @@ class DatabaseService {
                 (initialValue, element) => initialValue..addAll(element));
 
             _mediaSubjects[type].add(allMedia);
-            print('broadcast');
 
             if (currentRequestIndex == _allPagedResults[type].length - 1) {
               _lastDocuments[type] = mediaSnapshot.documents.last;
