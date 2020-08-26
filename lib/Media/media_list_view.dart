@@ -25,16 +25,29 @@ class MediaListView extends StatefulWidget {
   _MediaListViewState createState() => _MediaListViewState();
 }
 
-class _MediaListViewState extends State<MediaListView> {
+class _MediaListViewState extends State<MediaListView> with WidgetsBindingObserver {
   var _scrollController = ScrollController();
   var tapDownDetails;
   bool moreDataCalled = false;
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      var user = Provider.of<AppUser>(context, listen: false);
+      DatabaseService.instance.refreshMedia(user.uid, widget.watchStatus,
+          sortType: MediaSelectionModel.instance.selectedSortTypes[widget.watchStatus],
+          showDropped: widget.showDropped,
+          showComplete: widget.showComplete);
+    }
+  }
+
+  @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
     var user = Provider.of<AppUser>(context, listen: false);
-    DatabaseService.instance.refreshMedia(user.uid, widget.watchStatus,
+    DatabaseService.instance.requestMedia(user.uid, widget.watchStatus,
         sortType: MediaSelectionModel.instance.selectedSortTypes[widget.watchStatus],
         showDropped: widget.showDropped,
         showComplete: widget.showComplete);
@@ -42,6 +55,7 @@ class _MediaListViewState extends State<MediaListView> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
   }
