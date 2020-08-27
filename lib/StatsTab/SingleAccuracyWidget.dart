@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:miatracker/Models/DailyInputEntryPacket.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
 import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
@@ -18,18 +19,16 @@ class SingleAccuracyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final entries = Provider.of<Map<DateTime, DailyInputEntry>>(context);
+    final entries = Provider.of<DailyInputEntryPacket>(context);
     final pref = Provider.of<SharedPreferencesHelper>(context);
 
-    if (entries == null) return Container();
+    if (entries == null ||
+        entries.dailyInputEntries == null) return Container();
 
-    var dates = entries.keys.toList();
-    dates.sort();
-
-    var countedDays = daysBetween(dates.first, dates.last);
+    var countedDays = daysBetween(entries.startDate, entries.endDate);
     countedDays = readjustTimeFrame(countedDays);
 
-    var successes = entries.values.toSet().where((element) {
+    var successes = entries.dailyInputEntries.values.toSet().where((element) {
       try {
         return roundTo2Decimals(element.categoryHours[inputType.name]) >=
                 element.goalAmounts[inputType.name] &&
@@ -42,11 +41,13 @@ class SingleAccuracyWidget extends StatelessWidget {
     String value;
     String denom = '% ';
     double fontSize = 20;
-    if(pref.showAccuracyAsFraction) {
+    if (pref.showAccuracyAsFraction) {
       value = '${successes.length}';
       denom = '/$countedDays';
-      fontSize = 50/denom.length;
-    } else value = (100 * successes.length.toDouble() / countedDays).round().toString();
+      fontSize = 50 / denom.length;
+    } else
+      value =
+          (100 * successes.length.toDouble() / countedDays).round().toString();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -62,7 +63,8 @@ class SingleAccuracyWidget extends StatelessWidget {
                 fontSize: 30,
               ),
             ),
-            Text(denom, style: TextStyle(color: Colors.grey, fontSize: fontSize)),
+            Text(denom,
+                style: TextStyle(color: Colors.grey, fontSize: fontSize)),
           ],
         ),
         Text('met goal', style: TextStyle(color: Colors.grey, fontSize: 15)),

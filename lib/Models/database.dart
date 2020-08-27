@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:miatracker/Media/media_selection_model.dart';
+import 'package:miatracker/Models/DailyInputEntryPacket.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/input_entries_provider.dart';
@@ -167,16 +169,17 @@ class DatabaseService {
     return tempList;
   }
 
-  Stream<Map<DateTime, DailyInputEntry>> getDailyInputEntriesOnDays(String uid,
+  Stream<DailyInputEntryPacket> getDailyInputEntriesOnDays(String uid,
       {@required DateTime startDate, @required DateTime endDate}) async* {
     if (_aggregateEntries[startDate] == null) {
       _aggregateEntries.addAll(await dailyInputEntriesStream(uid,
               startDate: startDate, endDate: endDate)
           .first);
     }
-    yield Map.from(_aggregateEntries)
+    var map = Map<DateTime,DailyInputEntry>.from(_aggregateEntries)
       ..removeWhere(
-          (date, value) => date.isBefore(startDate) || date.isAfter(endDate));
+          (date, value) => date.isBefore(daysAgo(0, startDate)) || date.isAfter(daysAgo(1, endDate)));
+    yield DailyInputEntryPacket(startDate: startDate, endDate: endDate, dailyInputEntries: map);
   }
 
   Stream<Map<DateTime, DailyInputEntry>> dailyInputEntriesStream(String uid,
@@ -198,11 +201,7 @@ class DatabaseService {
           list.documents
               .map((doc) => DailyInputEntry.fromMap(doc.data))
               .toList());
-      map[startDate] ??= DailyInputEntry(
-          dateTime: startDate, categoryHours: {}, goalAmounts: {});
-      map[endDate] ??= DailyInputEntry(
-          dateTime: endDate, categoryHours: {}, goalAmounts: {});
-      return map;
+      return map ?? {};
     });
   }
 
