@@ -233,7 +233,7 @@ class DatabaseService {
   }
 
   void _updateAggregateData(AppUser user, InputEntry inputEntry,
-      {bool isDelete = false}) {
+      {bool isDelete = false}) async {
     String docID = daysAgo(0, inputEntry.dateTime).toString();
     bool successfulDeletion = true;
 
@@ -243,63 +243,63 @@ class DatabaseService {
         .collection(_aggregateInputEntries)
         .document(docID);
 
-    docRef.get().then((value) {
-      Firestore.instance.runTransaction(
-        (transaction) async {
-          DocumentSnapshot freshSnap;
+    var value = await docRef.get();
+    await Firestore.instance.runTransaction(
+          (transaction) async {
+        DocumentSnapshot freshSnap;
 
-          try {
-            if (value.exists) freshSnap = await transaction.get(docRef);
-          } catch (e) {}
+        try {
+          if (value.exists) freshSnap = await transaction.get(docRef);
+        } catch (e) {}
 
-          if (freshSnap == null && !isDelete) {
-            double amount = await _getGoalOfInputEntry(user, inputEntry);
-            final newDailyInputEntry = DailyInputEntry(
-              dateTime: inputEntry.dateTime,
-              categoryHours: <String, dynamic>{
-                inputEntry.inputType: inputEntry.amount
-              },
-              goalAmounts: <String, dynamic>{inputEntry.inputType: amount},
-              inputEntries: [inputEntry],
-            );
-            _aggregateEntries[daysAgo(0, inputEntry.dateTime)] =
-                newDailyInputEntry;
+        if (freshSnap == null && !isDelete) {
+          double amount = await _getGoalOfInputEntry(user, inputEntry);
+          final newDailyInputEntry = DailyInputEntry(
+            dateTime: inputEntry.dateTime,
+            categoryHours: <String, dynamic>{
+              inputEntry.inputType: inputEntry.amount
+            },
+            goalAmounts: <String, dynamic>{inputEntry.inputType: amount},
+            inputEntries: [inputEntry],
+          );
+          _aggregateEntries[daysAgo(0, inputEntry.dateTime)] =
+              newDailyInputEntry;
 
-            await transaction.set(
-              docRef,
-              newDailyInputEntry.toMap(),
-            );
-          } else {
-            final agData = DailyInputEntry.fromMap(freshSnap.data);
+          await transaction.set(
+            docRef,
+            newDailyInputEntry.toMap(),
+          );
+        } else {
+          final agData = DailyInputEntry.fromMap(freshSnap.data);
 
-            if (isDelete) {
-              successfulDeletion = agData.inputEntries.remove(inputEntry);
-            } else
-              agData.inputEntries.add(inputEntry);
+          if (isDelete) {
+            successfulDeletion = agData.inputEntries.remove(inputEntry);
+          } else
+            agData.inputEntries.add(inputEntry);
 
-            agData.goalAmounts[inputEntry.inputType] ??=
-                await _getGoalOfInputEntry(user, inputEntry);
+          agData.goalAmounts[inputEntry.inputType] ??=
+          await _getGoalOfInputEntry(user, inputEntry);
 
-            if (successfulDeletion) {
-              agData.categoryHours[inputEntry.inputType] =
-                  (((isDelete) ? -1 : 1) * inputEntry.amount) +
-                      (agData.categoryHours[inputEntry.inputType] ?? 0.0);
+          if (successfulDeletion) {
+            agData.categoryHours[inputEntry.inputType] =
+                (((isDelete) ? -1 : 1) * inputEntry.amount) +
+                    (agData.categoryHours[inputEntry.inputType] ?? 0.0);
 
-              agData.categoryHours[inputEntry.inputType] =
-                  aboveZero(agData.categoryHours[inputEntry.inputType]);
-            }
-
-            _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
-
-            await transaction.set(docRef, agData.toMap());
+            agData.categoryHours[inputEntry.inputType] =
+                aboveZero(agData.categoryHours[inputEntry.inputType]);
           }
-          _updateLifetimeAmounts(user.uid, inputEntry,
-              isDelete: isDelete, notPhantomDelete: successfulDeletion);
-          if (successfulDeletion)
-            updateMediaWithInputEntry(user, inputEntry, isDelete: isDelete);
-        },
-      );
-    });
+
+          _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
+
+          await transaction.set(docRef, agData.toMap());
+        }
+        _updateLifetimeAmounts(user.uid, inputEntry,
+            isDelete: isDelete, notPhantomDelete: successfulDeletion);
+      },
+    );
+
+    if (successfulDeletion)
+      updateMediaWithInputEntry(user, inputEntry, isDelete: isDelete);
   }
 
   Future<double> _getGoalOfInputEntry(
