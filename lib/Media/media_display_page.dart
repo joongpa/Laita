@@ -1,17 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:miatracker/DailyGoalsTab/AddHours.dart';
-import 'package:miatracker/LogsTab/ConfirmDialog.dart';
-import 'package:miatracker/LogsTab/custom_menu_item.dart';
-import 'package:miatracker/Media/edit_media_page.dart';
 import 'package:miatracker/Media/media_list_view.dart';
-import 'package:miatracker/Media/media_selection_model.dart';
-import 'package:miatracker/Media/new_media_entry.dart';
 import 'package:miatracker/Media/new_media_page.dart';
-import 'package:miatracker/Models/database.dart';
-import 'package:miatracker/Models/media.dart';
-import 'package:miatracker/Models/shared_preferences.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';

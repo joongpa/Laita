@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
 
-import 'DailyGoalsTab/AddHours.dart';
 import 'Models/media.dart';
 import 'Models/user.dart';
-import 'dart:math' as math;
 
 enum SortType {
   lastUpdated, alphabetical, mostHours, newest, oldest

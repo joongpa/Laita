@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/LogsTab/ConfirmDialog.dart';
 import 'package:miatracker/LogsTab/custom_menu_item.dart';
 import 'package:miatracker/Media/media_selection_model.dart';
-import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/media.dart';
-import 'package:miatracker/Models/shared_preferences.dart';
-import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 

@@ -1,15 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Map.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
-import 'package:miatracker/Models/category.dart';
-import 'package:miatracker/Models/database.dart';
 import 'package:provider/provider.dart';
 import '../Models/user.dart';
-import 'AddHours.dart';
 import 'GlobalProgressWidget.dart';
 
 class ProgressListWidget extends StatelessWidget {

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:miatracker/Models/InputHoursUpdater.dart';
 
 import '../Map.dart';
 import 'InputLog.dart';

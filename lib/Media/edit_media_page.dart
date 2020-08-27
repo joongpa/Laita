@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/Map.dart';
-import 'package:miatracker/Models/InputEntry.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/media.dart';
 import 'package:miatracker/Models/user.dart';
-import 'package:provider/provider.dart';
 
 class EditMediaPage extends StatefulWidget {
   final AppUser user;
