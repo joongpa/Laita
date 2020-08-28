@@ -90,6 +90,7 @@ class DatabaseService {
   }
 
   Future<bool> addGoalEntry(AppUser user, GoalEntry goalEntry) async {
+    var userRef = Firestore.instance.collection('users').document(user.uid);
     var ref = Firestore.instance
         .collection('users')
         .document(user.uid)
@@ -97,7 +98,7 @@ class DatabaseService {
 
     try {
       int index = user.categories.indexOf(Category(name: goalEntry.inputType));
-      if (index >= 0 && user.categories[index].goalAmount == goalEntry.amount)
+      if (index < 0 || user.categories[index].goalAmount == goalEntry.amount)
         return false;
 
       final docID =
@@ -105,7 +106,9 @@ class DatabaseService {
       goalEntry.docID = docID;
       InputEntriesProvider.instance.entries[daysAgo(0, goalEntry.dateTime)]
           .add(goalEntry);
+      categoryFromName(goalEntry.inputType, user.categories).goalAmount = goalEntry.amount;
 
+      await userRef.updateData(user.toMap());
       await ref.document(docID).setData(goalEntry.toMap());
 
       return true;
