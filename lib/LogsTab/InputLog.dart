@@ -9,6 +9,7 @@ import '../Models/user.dart';
 
 import '../Models/InputEntry.dart';
 import '../Map.dart';
+import 'custom_menu_item.dart';
 
 class InputLog extends StatelessWidget {
   final durationFormat = NumberFormat("0.0");
@@ -79,26 +80,24 @@ class InputLog extends StatelessWidget {
                   ));
                 }
 
-                return Dismissible(
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    alignment: AlignmentDirectional.centerEnd,
-                    color: Colors.red,
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
-                  ),
-                  key: UniqueKey(),
-                  confirmDismiss: (disDirection) async {
-                    return await asyncConfirmDialog(context,
-                        title: "Confirm Delete",
-                        description:
-                            'Delete entry? This action cannot be undone');
-                  },
-                  onDismissed: (dis) {
-                    value.remove(user, entry);
+                return PopupMenuButton(
+                  itemBuilder: (context) {
+                    return [CustomMenuItem(
+                      value: entry,
+                      text: Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      onPressed: () async {
+                        bool approved = await asyncConfirmDialog(context,
+                            title: 'Confirm Delete',
+                            description:
+                            'Delete entry? This action cannot be undone.');
+                        if (approved) {
+                          value.remove(user, entry);
+                        }
+                      },
+                    )];
                   },
                   child: Card(
                       child: ListTile(
