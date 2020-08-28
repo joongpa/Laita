@@ -269,11 +269,11 @@ class DatabaseService {
         if(mediaRef != null && successfulDeletion) {
           Media media = Media.fromMap((await transaction.get(mediaRef)).data);
           media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
-          await transaction.set(mediaRef, media.toMap());
+          transaction.set(mediaRef, media.toMap());
         }
 
-        await transaction.set(userRef, user.toMap());
-        await transaction.set(docRef, agData.toMap());
+        transaction.set(userRef, user.toMap());
+        transaction.set(docRef, agData.toMap());
       },
     );
   }
