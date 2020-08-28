@@ -25,7 +25,8 @@ class DatabaseService {
 
   static final itemsPerPage = 15;
 
-  Map<String,DocumentSnapshot> _lastDocuments = Map<String,DocumentSnapshot>();
+  Map<String, DocumentSnapshot> _lastDocuments =
+      Map<String, DocumentSnapshot>();
   Map<String, bool> _hasMoreMedia = {
     'In Progress': true,
     'Complete': true,
@@ -34,7 +35,7 @@ class DatabaseService {
   Map<String, List<List<Media>>> _allPagedResults =
       Map<String, List<List<Media>>>();
 
-  Map<String,bool> get hasMoreMedia => _hasMoreMedia;
+  Map<String, bool> get hasMoreMedia => _hasMoreMedia;
 
   var _mediaSubjects = {
     'In Progress': BehaviorSubject<List<Media>>.seeded([]),
@@ -176,10 +177,12 @@ class DatabaseService {
               startDate: startDate, endDate: endDate)
           .first);
     }
-    var map = Map<DateTime,DailyInputEntry>.from(_aggregateEntries)
-      ..removeWhere(
-          (date, value) => date.isBefore(daysAgo(0, startDate)) || date.isAfter(daysAgo(1, endDate)));
-    yield DailyInputEntryPacket(startDate: startDate, endDate: endDate, dailyInputEntries: map);
+    var map = Map<DateTime, DailyInputEntry>.from(_aggregateEntries)
+      ..removeWhere((date, value) =>
+          date.isBefore(daysAgo(0, startDate)) ||
+          date.isAfter(daysAgo(1, endDate)));
+    yield DailyInputEntryPacket(
+        startDate: startDate, endDate: endDate, dailyInputEntries: map);
   }
 
   Stream<Map<DateTime, DailyInputEntry>> dailyInputEntriesStream(String uid,
@@ -232,7 +235,7 @@ class DatabaseService {
   }
 
   void _updateAggregateData(AppUser user, InputEntry inputEntry,
-      {bool isDelete = false}) async {
+      {bool isDelete = false}) {
     String docID = daysAgo(0, inputEntry.dateTime).toString();
     bool successfulDeletion = true;
 
@@ -242,63 +245,65 @@ class DatabaseService {
         .collection(_aggregateInputEntries)
         .document(docID);
 
-    var value = await docRef.get();
-    await Firestore.instance.runTransaction(
+    docRef.get().then((value) => Firestore.instance.runTransaction(
           (transaction) async {
-        DocumentSnapshot freshSnap;
+            DocumentSnapshot freshSnap;
+            
 
-        try {
-          if (value.exists) freshSnap = await transaction.get(docRef);
-        } catch (e) {}
+            try {
+              if (value.exists) freshSnap = await transaction.get(docRef);
+            } catch (e) {}
 
-        if (freshSnap == null && !isDelete) {
-          double amount = await _getGoalOfInputEntry(user, inputEntry);
-          final newDailyInputEntry = DailyInputEntry(
-            dateTime: inputEntry.dateTime,
-            categoryHours: <String, dynamic>{
-              inputEntry.inputType: inputEntry.amount
-            },
-            goalAmounts: <String, dynamic>{inputEntry.inputType: amount},
-            inputEntries: [inputEntry],
-          );
-          _aggregateEntries[daysAgo(0, inputEntry.dateTime)] =
-              newDailyInputEntry;
+            if (freshSnap == null && !isDelete) {
+              double amount = await _getGoalOfInputEntry(user, inputEntry);
+              final newDailyInputEntry = DailyInputEntry(
+                dateTime: inputEntry.dateTime,
+                categoryHours: <String, dynamic>{
+                  inputEntry.inputType: inputEntry.amount
+                },
+                goalAmounts: <String, dynamic>{inputEntry.inputType: amount},
+                inputEntries: [inputEntry],
+              );
+              _aggregateEntries[daysAgo(0, inputEntry.dateTime)] =
+                  newDailyInputEntry;
 
-          await transaction.set(
-            docRef,
-            newDailyInputEntry.toMap(),
-          );
-        } else {
-          final agData = DailyInputEntry.fromMap(freshSnap.data);
+              await transaction.set(
+                docRef,
+                newDailyInputEntry.toMap(),
+              );
+            } else {
+              final agData = DailyInputEntry.fromMap(freshSnap.data);
 
-          if (isDelete) {
-            successfulDeletion = agData.inputEntries.remove(inputEntry);
-          } else
-            agData.inputEntries.add(inputEntry);
+              if (isDelete) {
+                successfulDeletion = agData.inputEntries.remove(inputEntry);
+              } else
+                agData.inputEntries.add(inputEntry);
 
-          agData.goalAmounts[inputEntry.inputType] ??=
-          await _getGoalOfInputEntry(user, inputEntry);
+              agData.goalAmounts[inputEntry.inputType] ??=
+                  await _getGoalOfInputEntry(user, inputEntry);
 
-          if (successfulDeletion) {
-            agData.categoryHours[inputEntry.inputType] =
-                (((isDelete) ? -1 : 1) * inputEntry.amount) +
-                    (agData.categoryHours[inputEntry.inputType] ?? 0.0);
+              if (successfulDeletion) {
+                agData.categoryHours[inputEntry.inputType] =
+                    (((isDelete) ? -1 : 1) * inputEntry.amount) +
+                        (agData.categoryHours[inputEntry.inputType] ?? 0.0);
 
-            agData.categoryHours[inputEntry.inputType] =
-                aboveZero(agData.categoryHours[inputEntry.inputType]);
-          }
+                agData.categoryHours[inputEntry.inputType] =
+                    aboveZero(agData.categoryHours[inputEntry.inputType]);
+              }
 
-          _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
+              _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
 
-          await transaction.set(docRef, agData.toMap());
-        }
-        _updateLifetimeAmounts(user.uid, inputEntry,
-            isDelete: isDelete, notPhantomDelete: successfulDeletion);
-      },
-    );
+              await transaction.set(docRef, agData.toMap());
+            }
 
-    if (successfulDeletion)
-      updateMediaWithInputEntry(user, inputEntry, isDelete: isDelete);
+            _updateLifetimeAmounts(user.uid, inputEntry,
+                isDelete: isDelete, notPhantomDelete: successfulDeletion);
+          },
+          timeout: Duration(seconds: 10),
+        ).then((value) {
+          if (successfulDeletion)
+            updateMediaWithInputEntry(user, inputEntry, isDelete: isDelete);
+        }));
   }
 
   Future<double> _getGoalOfInputEntry(
@@ -416,6 +421,7 @@ class DatabaseService {
             newMedia.episodeWatchCount >= newMedia.episodeCount;
       newMedia.totalTime = math.max(newMedia.totalTime, 0);
       newMedia.episodeWatchCount = math.max(newMedia.episodeWatchCount, 0);
+      newMedia.lastUpDate = DateTime.now();
       docRef.setData(newMedia.toMap(), merge: true);
     });
   }
@@ -439,8 +445,7 @@ class DatabaseService {
       SortType sortType,
       bool showComplete = false,
       bool showDropped = false}) {
-    if(_allPagedResults[type] != null)
-      _allPagedResults[type].clear();
+    if (_allPagedResults[type] != null) _allPagedResults[type].clear();
     _hasMoreMedia[type] = true;
     _lastDocuments[type] = null;
     requestMedia(uid, type,
@@ -460,10 +465,8 @@ class DatabaseService {
     if (_allPagedResults[type] == null)
       _allPagedResults[type] = List<List<Media>>();
 
-    var collectionRef = Firestore.instance
-        .collection('users')
-        .document(uid)
-        .collection(_media);
+    var collectionRef =
+        Firestore.instance.collection('users').document(uid).collection(_media);
 
     var field;
     bool isDescending;
@@ -511,22 +514,26 @@ class DatabaseService {
 
     var currentRequestIndex = _allPagedResults[type].length;
 
-    if (MediaSelectionModel.instance.selectedCategory == category && MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
+    if (MediaSelectionModel.instance.selectedCategory == category &&
+        MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
       pageMediaQuery.snapshots().listen((mediaSnapshot) {
-        if (MediaSelectionModel.instance.selectedCategory == category && MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
+        if (MediaSelectionModel.instance.selectedCategory == category &&
+            MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
           if (mediaSnapshot.documents.isNotEmpty) {
             var media = mediaSnapshot.documents
                 .map((snapshot) => Media.fromMap(snapshot.data))
                 .toList();
 
-            var pageExists = currentRequestIndex < _allPagedResults[type].length;
+            var pageExists =
+                currentRequestIndex < _allPagedResults[type].length;
             if (pageExists) {
               _allPagedResults[type][currentRequestIndex] = media;
             } else {
               _allPagedResults[type].add(media);
             }
 
-            var allMedia = _allPagedResults[type].fold<List<Media>>(List<Media>(),
+            var allMedia = _allPagedResults[type].fold<List<Media>>(
+                List<Media>(),
                 (initialValue, element) => initialValue..addAll(element));
 
             _mediaSubjects[type].add(allMedia);

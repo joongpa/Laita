@@ -35,9 +35,6 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferencesHelper.instance.init();
-  DateTimeProperty.changeInDay().listen((event) {
-    if(event) InputHoursUpdater.instance.resumeUpdate();
-  });
   runZoned(() {
     runApp(MyApp());
   }, onError: Crashlytics.instance.recordError);
@@ -59,23 +56,22 @@ class MyApp extends StatelessWidget {
             value: SharedPreferencesHelper.instance),
       ],
       child: StreamBuilder(
-        stream: InputHoursUpdater.instance.updateStream$,
-        builder: (context, snapshot) {
-          return MaterialApp(
-            builder: (context, child) {
-              return ScrollConfiguration(
-                behavior: MyBehavior(),
-                child: child,
-              );
-            },
-            title: 'LAITA',
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-            ),
-            home: SignInPage(),
-          );
-        }
-      ),
+          stream: InputHoursUpdater.instance.updateStream$,
+          builder: (context, snapshot) {
+            return MaterialApp(
+              builder: (context, child) {
+                return ScrollConfiguration(
+                  behavior: MyBehavior(),
+                  child: child,
+                );
+              },
+              title: 'LAITA',
+              theme: ThemeData(
+                primarySwatch: Colors.blue,
+              ),
+              home: SignInPage(),
+            );
+          }),
     );
   }
 }
@@ -89,25 +85,59 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin{
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   TabController _tabController;
   final bucket = PageStorageBucket();
   int selectedIndex = 0;
+  StreamSubscription dateTimeChangeListener;
 
   final pageNames = ["Daily Goals", "Media", "Statistics", "Log"];
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        if (SharedPreferencesHelper.instance.lastKnownDate !=
+            getDate(DateTime.now())) {
+          InputHoursUpdater.instance.resumeUpdate();
+        }
+        dateTimeChangeListener =
+            DateTimeProperty.changeInDay().listen((event) {
+              if (event) InputHoursUpdater.instance.resumeUpdate();
+            });
+        break;
+      case AppLifecycleState.inactive:
+        SharedPreferencesHelper.instance.lastKnownDate =
+            getDate(DateTime.now());
+        break;
+      case AppLifecycleState.paused:
+        dateTimeChangeListener.cancel();
+        break;
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       TabChangeNotifier.instance.index = _tabController.index;
+    });
+    dateTimeChangeListener = DateTimeProperty.changeInDay().listen((event) {
+      if (event) InputHoursUpdater.instance.resumeUpdate();
     });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    dateTimeChangeListener.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -124,20 +154,26 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     return Scaffold(
       appBar: AppBar(
-        title: (selectedIndex == 1) ? TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'In Progress',),
-            Tab(text: 'Complete'),
-            Tab(text: 'Dropped'),
-          ],
-        ) : Text(pageNames[selectedIndex]),
+        title: (selectedIndex == 1)
+            ? TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(
+                    text: 'In Progress',
+                  ),
+                  Tab(text: 'Complete'),
+                  Tab(text: 'Dropped'),
+                ],
+              )
+            : Text(pageNames[selectedIndex]),
         automaticallyImplyLeading: false,
-        leading: (selectedIndex == 2) ? FlatButton(
-          child: Icon(Icons.tune, color: Colors.white),
-          onPressed: () =>
-              Navigator.of(context).push(createSlideRoute(StatsSettingsPage())),
-        ) : null,
+        leading: (selectedIndex == 2)
+            ? FlatButton(
+                child: Icon(Icons.tune, color: Colors.white),
+                onPressed: () => Navigator.of(context)
+                    .push(createSlideRoute(StatsSettingsPage())),
+              )
+            : null,
       ),
       body: Center(
         child: IndexedStack(
