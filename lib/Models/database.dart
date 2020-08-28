@@ -236,8 +236,20 @@ class DatabaseService {
         bool successfulDeletion = true;
 
         DailyInputEntry agData = await transaction.get(docRef).then((value) {
-          //an error here will cause data loss, be careful
-
+          if(!value.exists) {
+            if (!isDelete) {
+              final agData = DailyInputEntry(
+                dateTime: inputEntry.dateTime,
+                categoryHours: <String, dynamic>{
+                  inputEntry.inputType: inputEntry.amount
+                },
+                inputEntries: [inputEntry],
+              );
+              _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
+              return agData;
+            }
+            return null;
+          }
           //deep copy for comparison
           final oldData = DailyInputEntry.fromMap(value.data);
           final newData = _getUpdatedEntry(DailyInputEntry.fromMap(value.data), inputEntry, isDelete);
@@ -247,18 +259,6 @@ class DatabaseService {
               newData.categoryHours[inputEntry.inputType];
 
           return newData;
-        }).catchError((onError) {
-          if (!isDelete) {
-            final agData = DailyInputEntry(
-              dateTime: inputEntry.dateTime,
-              categoryHours: <String, dynamic>{
-                inputEntry.inputType: inputEntry.amount
-              },
-              inputEntries: [inputEntry],
-            );
-            _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
-            return agData;
-          }
         });
 
         AppUser user = AppUser.fromMap((await transaction.get(userRef)).data);
@@ -269,10 +269,10 @@ class DatabaseService {
         if(mediaRef != null && successfulDeletion) {
           Media media = Media.fromMap((await transaction.get(mediaRef)).data);
           media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
-          transaction.set(mediaRef, media.toMap());
+          transaction.update(mediaRef, media.toMap());
         }
 
-        transaction.set(userRef, user.toMap());
+        transaction.update(userRef, user.toMap());
         transaction.set(docRef, agData.toMap());
       },
     );
