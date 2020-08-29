@@ -232,6 +232,7 @@ class DatabaseService {
           .collection(_media)
           .document(inputEntry.mediaID.toString());
     }
+    DateTime now = DateTime.now();
 
     Firestore.instance.runTransaction(
       (transaction) async {
@@ -268,31 +269,35 @@ class DatabaseService {
           return newData;
         });
         Crashlytics.instance.setBool('Finished dailyInputEntry read', true);
-
-        Crashlytics.instance.crash();
+        Crashlytics.instance.setInt('DailyInputEntry Read Duration', DateTime.now().difference(now).inMilliseconds);
 
         AppUser user = AppUser.fromMap((await transaction.get(userRef)).data);
         if (successfulDeletion) {
           user = _getUpdatedUser(user, inputEntry, isDelete: isDelete);
         }
         Crashlytics.instance.setBool('Finished lifetimeData read', true);
+        Crashlytics.instance.setInt('LifetimeData Read Duration', DateTime.now().difference(now).inMilliseconds);
 
         if (mediaRef != null && successfulDeletion) {
           Media media = Media.fromMap((await transaction.get(mediaRef)).data);
           media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
           Crashlytics.instance.setBool('Finished media reads', true);
+          Crashlytics.instance.setInt('Media Read Duration', DateTime.now().difference(now).inMilliseconds);
           transaction.update(mediaRef, media.toMap());
         } else Crashlytics.instance.setBool('Finished media reads', true);
+        Crashlytics.instance.setInt('Media Read Duration', DateTime.now().difference(now).inMilliseconds);
 
         transaction.update(userRef, user.toMap());
         transaction.set(docRef, agData.toMap());
       },
-      timeout: Duration(seconds: 5),
+      timeout: Duration(seconds: 2)
     ).then((value) {
       ErrorHandlingModel.instance.addValue(false);
     }).catchError((error, stackTrace) {
       ErrorHandlingModel.instance.addValue(true);
       Crashlytics.instance.recordError(error, stackTrace);
+    }).timeout(Duration(seconds: 2), onTimeout: () {
+      Crashlytics.instance.log('Transaction timed out');
     });
   }
 
