@@ -2,12 +2,29 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Media/media_list_view.dart';
 import 'package:miatracker/Media/new_media_page.dart';
+import 'package:miatracker/Models/error_handling_model.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 import '../Map.dart';
 
-class MediaDisplayPage extends StatelessWidget {
+class MediaDisplayPage extends StatefulWidget {
+  final snackBar = SnackBar(content: Text('Something went wrong. Please try again'), duration: Duration(seconds: 1, milliseconds: 500),);
+
+  @override
+  _MediaDisplayPageState createState() => _MediaDisplayPageState();
+}
+
+class _MediaDisplayPageState extends State<MediaDisplayPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    ErrorHandlingModel.instance.hasError.listen((hasError) {
+      if(hasError) Scaffold.of(context).showSnackBar(widget.snackBar);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var user = Provider.of<AppUser>(context);

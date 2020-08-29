@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Media/media_selection_model.dart';
 import 'package:miatracker/Models/DailyInputEntryPacket.dart';
 import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
+import 'package:miatracker/Models/error_handling_model.dart';
 import 'package:miatracker/Models/input_entries_provider.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:rxdart/rxdart.dart';
@@ -106,7 +108,8 @@ class DatabaseService {
       goalEntry.docID = docID;
       InputEntriesProvider.instance.entries[daysAgo(0, goalEntry.dateTime)]
           .add(goalEntry);
-      categoryFromName(goalEntry.inputType, user.categories).goalAmount = goalEntry.amount;
+      categoryFromName(goalEntry.inputType, user.categories).goalAmount =
+          goalEntry.amount;
 
       await userRef.updateData(user.toMap());
       await ref.document(docID).setData(goalEntry.toMap());
@@ -219,11 +222,10 @@ class DatabaseService {
         .document(user.uid)
         .collection(_aggregateInputEntries)
         .document(docID);
-    var userRef =
-        Firestore.instance.collection('users').document(user.uid);
+    var userRef = Firestore.instance.collection('users').document(user.uid);
 
     var mediaRef;
-    if(inputEntry.mediaID != null) {
+    if (inputEntry.mediaID != null) {
       mediaRef = Firestore.instance
           .collection('users')
           .document(user.uid)
@@ -233,10 +235,11 @@ class DatabaseService {
 
     Firestore.instance.runTransaction(
       (transaction) async {
+        Crashlytics.instance.setBool('Finished transaction reads', true);
         bool successfulDeletion = true;
 
         DailyInputEntry agData = await transaction.get(docRef).then((value) {
-          if(!value.exists) {
+          if (!value.exists) {
             if (!isDelete) {
               final agData = DailyInputEntry(
                 dateTime: inputEntry.dateTime,
@@ -252,7 +255,8 @@ class DatabaseService {
           }
           //deep copy for comparison
           final oldData = DailyInputEntry.fromMap(value.data);
-          final newData = _getUpdatedEntry(DailyInputEntry.fromMap(value.data), inputEntry, isDelete);
+          final newData = _getUpdatedEntry(
+              DailyInputEntry.fromMap(value.data), inputEntry, isDelete);
 
           //Make sure data actually changed
           successfulDeletion = oldData.categoryHours[inputEntry.inputType] !=
@@ -262,20 +266,27 @@ class DatabaseService {
         });
 
         AppUser user = AppUser.fromMap((await transaction.get(userRef)).data);
-        if(successfulDeletion) {
+        if (successfulDeletion) {
           user = _getUpdatedUser(user, inputEntry, isDelete: isDelete);
         }
 
-        if(mediaRef != null && successfulDeletion) {
+        if (mediaRef != null && successfulDeletion) {
           Media media = Media.fromMap((await transaction.get(mediaRef)).data);
           media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
+          Crashlytics.instance.setBool('Finished transaction reads', true);
           transaction.update(mediaRef, media.toMap());
-        }
+        } else Crashlytics.instance.setBool('Finished transaction reads', true);
 
         transaction.update(userRef, user.toMap());
         transaction.set(docRef, agData.toMap());
       },
-    );
+      timeout: Duration(seconds: 5),
+    ).then((value) {
+      ErrorHandlingModel.instance.addValue(false);
+    }).catchError((error) {
+      ErrorHandlingModel.instance.addValue(true);
+      Crashlytics.instance.recordError(error, StackTrace.current);
+    });
   }
 
   DailyInputEntry _getUpdatedEntry(
@@ -300,8 +311,10 @@ class DatabaseService {
     return oldEntry;
   }
 
-  AppUser _getUpdatedUser(AppUser oldUser, InputEntry inputEntry, {bool isDelete = false}) {
-    Category category = categoryFromName(inputEntry.inputType, oldUser.categories);
+  AppUser _getUpdatedUser(AppUser oldUser, InputEntry inputEntry,
+      {bool isDelete = false}) {
+    Category category =
+        categoryFromName(inputEntry.inputType, oldUser.categories);
 
     category.lifetimeAmount += ((isDelete) ? -1 : 1) * inputEntry.amount;
     category.lifetimeAmount = aboveZero(category.lifetimeAmount);

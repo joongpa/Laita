@@ -7,6 +7,7 @@ import 'package:miatracker/Map.dart';
 import 'package:miatracker/Media/media_selection_model.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/database.dart';
+import 'package:miatracker/Models/error_handling_model.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'Models/auth.dart';
 import 'package:miatracker/main.dart';
@@ -101,7 +102,8 @@ class SignInPage extends StatelessWidget {
               value: TabChangeNotifier.instance,
             ),
             ChangeNotifierProvider<MediaSelectionModel>.value(
-                value: MediaSelectionModel.instance)
+                value: MediaSelectionModel.instance),
+            ChangeNotifierProvider.value(value: ErrorHandlingModel.instance),
           ],
           child: MyHomePage(
             title: "LAITA",
