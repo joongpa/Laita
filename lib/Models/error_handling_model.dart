@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:rxdart/rxdart.dart';
 
-class ErrorHandlingModel extends ChangeNotifier {
+class ErrorHandlingModel {
   ErrorHandlingModel._();
   static final instance = ErrorHandlingModel._();
 
-  StreamController<bool> _hasError = StreamController();
+  BehaviorSubject<bool> _hasError = BehaviorSubject.seeded(false);
 
   Stream<bool> get hasError => _hasError.stream;
   void addValue(bool value) {

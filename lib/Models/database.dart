@@ -235,7 +235,10 @@ class DatabaseService {
 
     Firestore.instance.runTransaction(
       (transaction) async {
-        Crashlytics.instance.setBool('Finished transaction reads', true);
+        Crashlytics.instance.setBool('Finished dailyInputEntry read', false);
+        Crashlytics.instance.setBool('Finished lifetimeData read', false);
+        Crashlytics.instance.setBool('Finished media reads', false);
+
         bool successfulDeletion = true;
 
         DailyInputEntry agData = await transaction.get(docRef).then((value) {
@@ -264,18 +267,22 @@ class DatabaseService {
 
           return newData;
         });
+        Crashlytics.instance.setBool('Finished dailyInputEntry read', true);
+
+        Crashlytics.instance.crash();
 
         AppUser user = AppUser.fromMap((await transaction.get(userRef)).data);
         if (successfulDeletion) {
           user = _getUpdatedUser(user, inputEntry, isDelete: isDelete);
         }
+        Crashlytics.instance.setBool('Finished lifetimeData read', true);
 
         if (mediaRef != null && successfulDeletion) {
           Media media = Media.fromMap((await transaction.get(mediaRef)).data);
           media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
-          Crashlytics.instance.setBool('Finished transaction reads', true);
+          Crashlytics.instance.setBool('Finished media reads', true);
           transaction.update(mediaRef, media.toMap());
-        } else Crashlytics.instance.setBool('Finished transaction reads', true);
+        } else Crashlytics.instance.setBool('Finished media reads', true);
 
         transaction.update(userRef, user.toMap());
         transaction.set(docRef, agData.toMap());
@@ -283,9 +290,9 @@ class DatabaseService {
       timeout: Duration(seconds: 5),
     ).then((value) {
       ErrorHandlingModel.instance.addValue(false);
-    }).catchError((error) {
+    }).catchError((error, stackTrace) {
       ErrorHandlingModel.instance.addValue(true);
-      Crashlytics.instance.recordError(error, StackTrace.current);
+      Crashlytics.instance.recordError(error, stackTrace);
     });
   }
 

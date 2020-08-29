@@ -103,7 +103,6 @@ class SignInPage extends StatelessWidget {
             ),
             ChangeNotifierProvider<MediaSelectionModel>.value(
                 value: MediaSelectionModel.instance),
-            ChangeNotifierProvider.value(value: ErrorHandlingModel.instance),
           ],
           child: MyHomePage(
             title: "LAITA",

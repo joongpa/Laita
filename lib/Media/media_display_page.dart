@@ -16,13 +16,20 @@ class MediaDisplayPage extends StatefulWidget {
 }
 
 class _MediaDisplayPageState extends State<MediaDisplayPage> {
+  var errorStream;
 
   @override
   void initState() {
     super.initState();
-    ErrorHandlingModel.instance.hasError.listen((hasError) {
+    errorStream ??= ErrorHandlingModel.instance.hasError.listen((hasError) {
       if(hasError) Scaffold.of(context).showSnackBar(widget.snackBar);
     });
+  }
+
+  @override
+  void dispose() {
+    errorStream.cancel();
+    super.dispose();
   }
 
   @override
