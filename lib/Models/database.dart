@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -54,10 +54,10 @@ class DatabaseService {
 
   static final DatabaseService instance = DatabaseService._();
 
-  Stream<AppUser> appUserStream(FirebaseUser user) {
-    var ref = Firestore.instance.collection('users').document(user.uid);
+  Stream<AppUser> appUserStream(auth.User user) {
+    var ref = FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-    return ref.snapshots().map((doc) => AppUser.fromMap(doc.data));
+    return ref.snapshots().map((doc) => AppUser.fromMap(doc.data()));
   }
 
   Future<bool> addInputEntry(AppUser user, InputEntry inputEntry) async {
@@ -92,10 +92,10 @@ class DatabaseService {
   }
 
   Future<bool> addGoalEntry(AppUser user, GoalEntry goalEntry) async {
-    var userRef = Firestore.instance.collection('users').document(user.uid);
-    var ref = Firestore.instance
+    var userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    var ref = FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection(_goalEntries);
 
     try {
@@ -111,8 +111,8 @@ class DatabaseService {
       categoryFromName(goalEntry.inputType, user.categories).goalAmount =
           goalEntry.amount;
 
-      await userRef.updateData(user.toMap());
-      await ref.document(docID).setData(goalEntry.toMap());
+      await userRef.update(user.toMap());
+      await ref.doc(docID).set(goalEntry.toMap());
 
       return true;
     } catch (e) {
@@ -121,51 +121,51 @@ class DatabaseService {
   }
 
   void updateCategories(AppUser user, {Category category, bool isDelete}) {
-    var userRef = Firestore.instance.collection('users').document(user.uid);
+    var userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
     if (isDelete) {
       user.categories.remove(category);
-      userRef.setData(user.toMap());
+      userRef.set(user.toMap());
     } else {
       //2 categories cannot have the same name
       int index = user.categories.indexOf(category);
 
       if (index == -1) {
         user.categories.add(category);
-        userRef.setData(user.toMap(), merge: true);
+        userRef.set(user.toMap());
       }
     }
   }
 
   void editUser(AppUser user) {
-    var userRef = Firestore.instance.collection('users').document(user.uid);
-    userRef.setData(user.toMap());
+    var userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    userRef.set(user.toMap(), SetOptions(merge: true));
   }
 
   Future<List<Entry>> getEntriesAsFuture(String uid,
       {DateTime dateTime}) async {
-    var inputRef = Firestore.instance
+    var inputRef = FirebaseFirestore.instance
         .collection('users')
-        .document(uid)
+        .doc(uid)
         .collection(_aggregateInputEntries)
-        .document(daysAgo(0, dateTime).toString());
+        .doc(daysAgo(0, dateTime).toString());
 
-    var goalRef = Firestore.instance
+    var goalRef = FirebaseFirestore.instance
         .collection('users')
-        .document(uid)
+        .doc(uid)
         .collection(_goalEntries);
     List<Entry> tempList = [];
 
     final gSnap = await goalRef
         .where('dateTime', isGreaterThanOrEqualTo: dateTime)
         .where('dateTime', isLessThan: daysAgo(-1, dateTime))
-        .getDocuments();
+        .get();
 
     try {
       List<InputEntry> iEntries =
-          DailyInputEntry.fromMap((await inputRef.get()).data).inputEntries;
+          DailyInputEntry.fromMap((await inputRef.get()).data()).inputEntries;
 
-      List<GoalEntry> gEntries = gSnap.documents
-          .map<GoalEntry>((doc) => GoalEntry.fromMap(doc.data, doc.documentID))
+      List<GoalEntry> gEntries = gSnap.docs
+          .map<GoalEntry>((doc) => GoalEntry.fromMap(doc.data(), doc.id))
           .toList();
 
       tempList.addAll(iEntries);
@@ -192,9 +192,9 @@ class DatabaseService {
 
   Stream<Map<DateTime, DailyInputEntry>> dailyInputEntriesStream(String uid,
       {@required DateTime startDate, @required DateTime endDate}) {
-    var ref = Firestore.instance
+    var ref = FirebaseFirestore.instance
         .collection('users')
-        .document(uid)
+        .doc(uid)
         .collection(_aggregateInputEntries);
 
     return ref
@@ -203,11 +203,11 @@ class DatabaseService {
         .snapshots()
         .map((list) {
       var map = Map<DateTime, DailyInputEntry>.fromIterables(
-          list.documents
-              .map<DateTime>((doc) => doc.data['dateTime'].toDate())
+          list.docs
+              .map<DateTime>((doc) => doc.data()['dateTime'].toDate())
               .toList(),
-          list.documents
-              .map((doc) => DailyInputEntry.fromMap(doc.data))
+          list.docs
+              .map((doc) => DailyInputEntry.fromMap(doc.data()))
               .toList());
       return map ?? {};
     });
@@ -217,24 +217,24 @@ class DatabaseService {
       {bool isDelete = false}) {
     String docID = daysAgo(0, inputEntry.dateTime).toString();
 
-    var docRef = Firestore.instance
+    var docRef = FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection(_aggregateInputEntries)
-        .document(docID);
-    var userRef = Firestore.instance.collection('users').document(user.uid);
+        .doc(docID);
+    var userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
 
     var mediaRef;
     if (inputEntry.mediaID != null) {
-      mediaRef = Firestore.instance
+      mediaRef = FirebaseFirestore.instance
           .collection('users')
-          .document(user.uid)
+          .doc(user.uid)
           .collection(_media)
-          .document(inputEntry.mediaID.toString());
+          .doc(inputEntry.mediaID.toString());
     }
     DateTime now = DateTime.now();
 
-    Firestore.instance.runTransaction(
+    FirebaseFirestore.instance.runTransaction(
       (transaction) async {
         Crashlytics.instance.setBool('Finished dailyInputEntry read', false);
         Crashlytics.instance.setBool('Finished lifetimeData read', false);
@@ -258,9 +258,9 @@ class DatabaseService {
             return null;
           }
           //deep copy for comparison
-          final oldData = DailyInputEntry.fromMap(value.data);
+          final oldData = DailyInputEntry.fromMap(value.data());
           final newData = _getUpdatedEntry(
-              DailyInputEntry.fromMap(value.data), inputEntry, isDelete);
+              DailyInputEntry.fromMap(value.data()), inputEntry, isDelete);
 
           //Make sure data actually changed
           successfulDeletion = oldData.categoryHours[inputEntry.inputType] !=
@@ -271,7 +271,7 @@ class DatabaseService {
         Crashlytics.instance.setBool('Finished dailyInputEntry read', true);
         Crashlytics.instance.setInt('DailyInputEntry Read Duration', DateTime.now().difference(now).inMilliseconds);
 
-        AppUser user = AppUser.fromMap((await transaction.get(userRef)).data);
+        AppUser user = AppUser.fromMap((await transaction.get(userRef)).data());
         if (successfulDeletion) {
           user = _getUpdatedUser(user, inputEntry, isDelete: isDelete);
         }
@@ -279,7 +279,7 @@ class DatabaseService {
         Crashlytics.instance.setInt('LifetimeData Read Duration', DateTime.now().difference(now).inMilliseconds);
 
         if (mediaRef != null && successfulDeletion) {
-          Media media = Media.fromMap((await transaction.get(mediaRef)).data);
+          Media media = Media.fromMap((await transaction.get(mediaRef)).data());
           media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
           Crashlytics.instance.setBool('Finished media reads', true);
           Crashlytics.instance.setInt('Media Read Duration', DateTime.now().difference(now).inMilliseconds);
@@ -336,40 +336,40 @@ class DatabaseService {
   }
 
   Stream<DailyInputEntry> getFirstDayOfActivity(String uid) {
-    var ref = Firestore.instance
+    var ref = FirebaseFirestore.instance
         .collection('users')
-        .document(uid)
+        .doc(uid)
         .collection(_aggregateInputEntries);
 
     return ref.orderBy('dateTime').limit(1).snapshots().map((singleList) =>
-        DailyInputEntry.fromMap(singleList.documents.first.data));
+        DailyInputEntry.fromMap(singleList.docs.first.data()));
   }
 
   void addMedia(AppUser user, Media media) {
-    var collectionRef = Firestore.instance
+    var collectionRef = FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection(_media);
     var id = DateTime.now().microsecondsSinceEpoch;
     media.id = id;
-    collectionRef.document(id.toString()).setData(media.toMap(), merge: true);
+    collectionRef.doc(id.toString()).set(media.toMap());
   }
 
   void updateMedia(AppUser user, Media media) {
-    var docRef = Firestore.instance
+    var docRef = FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection(_media)
-        .document(media.id.toString());
-    docRef.setData(media.toMap(), merge: true);
+        .doc(media.id.toString());
+    docRef.set(media.toMap(), SetOptions(merge: true));
   }
 
   void deleteMedia(AppUser user, Media media) {
-    var docRef = Firestore.instance
+    var docRef = FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection(_media)
-        .document(media.id.toString());
+        .doc(media.id.toString());
     docRef.delete();
   }
 
@@ -432,7 +432,7 @@ class DatabaseService {
       _allPagedResults[type] = List<List<Media>>();
 
     var collectionRef =
-        Firestore.instance.collection('users').document(uid).collection(_media);
+    FirebaseFirestore.instance.collection('users').doc(uid).collection(_media);
 
     var field;
     bool isDescending;
@@ -485,9 +485,9 @@ class DatabaseService {
       pageMediaQuery.snapshots().listen((mediaSnapshot) {
         if (MediaSelectionModel.instance.selectedCategory == category &&
             MediaSelectionModel.instance.selectedSortTypes[type] == sortType) {
-          if (mediaSnapshot.documents.isNotEmpty) {
-            var media = mediaSnapshot.documents
-                .map((snapshot) => Media.fromMap(snapshot.data))
+          if (mediaSnapshot.docs.isNotEmpty) {
+            var media = mediaSnapshot.docs
+                .map((snapshot) => Media.fromMap(snapshot.data()))
                 .toList();
 
             var pageExists =
@@ -505,7 +505,7 @@ class DatabaseService {
             _mediaSubjects[type].add(allMedia);
 
             if (currentRequestIndex == _allPagedResults[type].length - 1) {
-              _lastDocuments[type] = mediaSnapshot.documents.last;
+              _lastDocuments[type] = mediaSnapshot.docs.last;
             }
             _hasMoreMedia[type] = media.length >= itemsPerPage;
           } else {

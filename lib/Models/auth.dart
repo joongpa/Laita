@@ -2,53 +2,44 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/rxdart.dart';
-import 'user.dart';
 
 class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<FirebaseUser> user;
+  Stream<User> user;
   PublishSubject<bool> loading = PublishSubject();
 
   AuthService._() {
-    user = _auth.onAuthStateChanged;
+    user = _auth.authStateChanges();
   }
   static final AuthService instance = AuthService._();
 
-  Future<FirebaseUser> googleSignIn() async {
+  Future<User> googleSignIn() async {
     loading.add(true);
     GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    final AuthResult authResult = await _auth.signInWithCredential(credential);
-    final FirebaseUser user = authResult.user;
+    final UserCredential authResult = await _auth.signInWithCredential(credential);
+    final User user = authResult.user;
 
     _updateUserData(user);
     loading.add(false);
     return user;
   }
 
-  void _updateUserData(FirebaseUser user) {
-    DocumentReference ref = _db.collection('users').document(user.uid);
+  void _updateUserData(User user) {
+    DocumentReference ref = _db.collection('users').doc(user.uid);
 
-    ref.setData({
+    ref.set({
       'uid': user.uid,
       'email': user.email,
       'displayName': user.displayName,
-    }, merge: true);
-  }
-
-  void signInAnonymously() async {
-    loading.add(true);
-    AuthResult auth = await _auth.signInAnonymously();
-    FirebaseUser user = auth.user;
-    _updateUserData(user);
-    loading.add(false);
+    }, SetOptions(merge: true));
   }
 
   void signOut() {

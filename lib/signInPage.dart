@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_list.dart';
@@ -7,7 +7,6 @@ import 'package:miatracker/Map.dart';
 import 'package:miatracker/Media/media_selection_model.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
 import 'package:miatracker/Models/database.dart';
-import 'package:miatracker/Models/error_handling_model.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'Models/auth.dart';
 import 'package:miatracker/main.dart';
@@ -18,7 +17,7 @@ import 'Models/user.dart';
 class SignInPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var user = Provider.of<FirebaseUser>(context);
+    var user = Provider.of<auth.User>(context);
     var loading = Provider.of<bool>(context) ?? false;
     bool loggedIn = user != null;
 

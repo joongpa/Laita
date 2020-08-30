@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -34,37 +35,66 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
 
-    return MultiProvider(
-      providers: [
-        StreamProvider<bool>.value(value: AuthService.instance.loading),
-        StreamProvider<FirebaseUser>.value(
-            value: FirebaseAuth.instance.onAuthStateChanged),
-        ChangeNotifierProvider<SharedPreferencesHelper>.value(
-            value: SharedPreferencesHelper.instance),
-      ],
-      child: StreamBuilder(
-          stream: InputHoursUpdater.instance.updateStream$,
-          builder: (context, snapshot) {
-            return MaterialApp(
-              builder: (context, child) {
-                return ScrollConfiguration(
-                  behavior: MyBehavior(),
-                  child: child,
-                );
-              },
-              title: 'LAITA',
-              theme: ThemeData(
-                primarySwatch: Colors.blue,
+    return FutureBuilder<Object>(
+      future: _initialization,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return MultiProvider(
+            providers: [
+              StreamProvider<bool>.value(value: AuthService.instance.loading),
+              StreamProvider<auth.User>.value(
+                  value: auth.FirebaseAuth.instance.authStateChanges()),
+              ChangeNotifierProvider<SharedPreferencesHelper>.value(
+                  value: SharedPreferencesHelper.instance),
+            ],
+            child: StreamBuilder(
+                stream: InputHoursUpdater.instance.updateStream$,
+                builder: (context, snapshot) {
+                  return MaterialApp(
+                    builder: (context, child) {
+                      return ScrollConfiguration(
+                        behavior: MyBehavior(),
+                        child: child,
+                      );
+                    },
+                    title: 'LAITA',
+                    theme: ThemeData(
+                      primarySwatch: Colors.blue,
+                    ),
+                    home: SignInPage(),
+                  );
+                }),
+          );
+        }
+        else {
+          return MaterialApp(
+            home: SafeArea(
+              child: Scaffold(
+                body: Container(
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.white, Colors.blue]
+                      )
+                  ),
+                  child: Center(
+                    child: Card(child: CircularProgressIndicator()),
+                  ),
+                ),
               ),
-              home: SignInPage(),
-            );
-          }),
+            ),
+          );
+        }
+      }
     );
   }
 }
