@@ -98,6 +98,7 @@ class UsefulShit {
 }
 
 String convertToStatsDisplay(double time, [bool isTimeBased = true]) {
+  time = roundTo2Decimals(time);
   if(time < 0) return (isTimeBased) ? '0:00' : '0.0';
   int hours = time.floor();
   int minutes = ((time % 1) * 60).round();

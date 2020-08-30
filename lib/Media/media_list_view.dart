@@ -282,7 +282,7 @@ class _MediaListViewState extends State<MediaListView> with WidgetsBindingObserv
                         Text(
                             'Created ${getDate(snapshot.data[index - 1].startDate)}'),
                         Text(
-                            'Total time: ${convertToStatsDisplay(snapshot.data[index - 1].totalTime)}')
+                            'Total time: ${convertToDisplay(snapshot.data[index - 1].totalTime)}')
                       ],
                     ),
                     leading: Column(

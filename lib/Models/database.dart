@@ -214,7 +214,7 @@ class DatabaseService {
   }
 
   void _updateAggregateData(AppUser user, InputEntry inputEntry,
-      {bool isDelete = false}) {
+      {bool isDelete = false, bool recursive = false}) {
     String docID = daysAgo(0, inputEntry.dateTime).toString();
 
     var docRef = FirebaseFirestore.instance
@@ -290,15 +290,21 @@ class DatabaseService {
         transaction.update(userRef, user.toMap());
         transaction.set(docRef, agData.toMap());
       },
-      timeout: Duration(seconds: 30),
+      timeout: Duration(seconds: 5),
     ).then((value) {
       ErrorHandlingModel.instance.addValue(null);
     }).catchError((error, stackTrace) {
-      ErrorHandlingModel.instance.addValue('Something went wrong. Please try again');
-      Crashlytics.instance.recordError(error, stackTrace);
+      if(!recursive)
+        _updateAggregateData(user, inputEntry, isDelete: isDelete, recursive: true);
+      else {
+        ErrorHandlingModel.instance.addValue('Something went wrong. Please try again');
+        Crashlytics.instance.recordError(error, stackTrace);
+      }
     }).timeout(Duration(seconds: 2), onTimeout: () {
-      ErrorHandlingModel.instance.addValue('Data may take several seconds to update');
-      Crashlytics.instance.log('Transaction duration exceeded 2 seconds');
+      if(!recursive) {
+        ErrorHandlingModel.instance.addValue('Data may take several seconds to update');
+        Crashlytics.instance.log('Transaction duration exceeded 2 seconds');
+      }
     });
   }
 
