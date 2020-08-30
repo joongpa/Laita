@@ -7,10 +7,10 @@ class ErrorHandlingModel {
   ErrorHandlingModel._();
   static final instance = ErrorHandlingModel._();
 
-  BehaviorSubject<bool> _hasError = BehaviorSubject.seeded(false);
+  BehaviorSubject<String> _hasError = BehaviorSubject.seeded(null);
 
-  Stream<bool> get hasError => _hasError.stream;
-  void addValue(bool value) {
+  Stream<String> get hasError => _hasError.stream;
+  void addValue(String value) {
     _hasError.add(value);
   }
 }

@@ -290,14 +290,15 @@ class DatabaseService {
         transaction.update(userRef, user.toMap());
         transaction.set(docRef, agData.toMap());
       },
-      timeout: Duration(seconds: 2)
+      timeout: Duration(seconds: 30),
     ).then((value) {
-      ErrorHandlingModel.instance.addValue(false);
+      ErrorHandlingModel.instance.addValue(null);
     }).catchError((error, stackTrace) {
-      ErrorHandlingModel.instance.addValue(true);
+      ErrorHandlingModel.instance.addValue('Something went wrong. Please try again');
       Crashlytics.instance.recordError(error, stackTrace);
     }).timeout(Duration(seconds: 2), onTimeout: () {
-      Crashlytics.instance.log('Transaction timed out');
+      ErrorHandlingModel.instance.addValue('Data may take several seconds to update');
+      Crashlytics.instance.log('Transaction duration exceeded 2 seconds');
     });
   }
 

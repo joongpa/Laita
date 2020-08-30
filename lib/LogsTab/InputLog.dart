@@ -80,55 +80,57 @@ class InputLog extends StatelessWidget {
                   ));
                 }
 
-                return PopupMenuButton(
-                  itemBuilder: (context) {
-                    return [CustomMenuItem(
-                      value: entry,
-                      text: Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      onPressed: () async {
-                        bool approved = await asyncConfirmDialog(context,
-                            title: 'Confirm Delete',
-                            description:
-                            'Delete entry? This action cannot be undone.');
-                        if (approved) {
-                          value.remove(user, entry);
-                        }
-                      },
-                    )];
+                return Dismissible(
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    alignment: AlignmentDirectional.centerEnd,
+                    color: Colors.red,
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  key: UniqueKey(),
+                  confirmDismiss: (disDirection) async {
+                    return await asyncConfirmDialog(context,
+                        title: "Confirm Delete",
+                        description:
+                        'Delete entry? This action cannot be undone');
+                  },
+                  onDismissed: (dis) {
+                    value.remove(user, entry);
                   },
                   child: Card(
                       child: ListTile(
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text(subtitleText.trim(), maxLines: 4, overflow: TextOverflow.ellipsis,),
-                    ),
-                    leading: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          entry.inputType,
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text(subtitleText.trim(), maxLines: 4, overflow: TextOverflow.ellipsis,),
                         ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                            color: categoryFromName(
+                        leading: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              entry.inputType,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                                color: categoryFromName(
                                     entry.inputType, user.categories)
-                                .color,
-                            width: 40,
-                            height: 10)
-                      ],
-                    ),
-                    title: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                          '${convertToDisplay(entry.amount, category.isTimeBased)}'),
-                    ),
-                    trailing: Text(entry.time),
-                  )),
+                                    .color,
+                                width: 40,
+                                height: 10)
+                          ],
+                        ),
+                        title: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                              '${convertToDisplay(entry.amount, category.isTimeBased)}'),
+                        ),
+                        trailing: Text(entry.time),
+                      )),
                 );
               });
         },

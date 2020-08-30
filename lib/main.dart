@@ -1,26 +1,20 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:miatracker/DailyGoalsTab/AddHours.dart';
 import 'package:miatracker/DailyGoalsTab/ProgressListWidget.dart';
 import 'package:miatracker/DrawerMenu.dart';
 import 'package:flutter/services.dart';
 import 'package:miatracker/Media/media_display_page.dart';
-import 'package:miatracker/Media/new_media_page.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
-import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/date_time_property.dart';
-import 'package:miatracker/Models/error_handling_model.dart';
 import 'package:miatracker/Models/shared_preferences.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/StatsTab/stats_settings_page.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'Map.dart';
-import 'Models/category.dart';
 import 'Models/auth.dart';
 import 'package:miatracker/signInPage.dart';
 import 'package:provider/provider.dart';
@@ -36,9 +30,7 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferencesHelper.instance.init();
-  runZoned(() {
-    runApp(MyApp());
-  }, onError: Crashlytics.instance.recordError);
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

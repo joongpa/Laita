@@ -9,8 +9,6 @@ import 'package:provider/provider.dart';
 import '../Map.dart';
 
 class MediaDisplayPage extends StatefulWidget {
-  final snackBar = SnackBar(content: Text('Something went wrong. Please try again'), duration: Duration(seconds: 1, milliseconds: 500),);
-
   @override
   _MediaDisplayPageState createState() => _MediaDisplayPageState();
 }
@@ -21,8 +19,8 @@ class _MediaDisplayPageState extends State<MediaDisplayPage> {
   @override
   void initState() {
     super.initState();
-    errorStream ??= ErrorHandlingModel.instance.hasError.listen((hasError) {
-      if(hasError) Scaffold.of(context).showSnackBar(widget.snackBar);
+    errorStream ??= ErrorHandlingModel.instance.hasError.listen((text) {
+      if (text != null) Scaffold.of(context).showSnackBar(_createSnackBar(text));
     });
   }
 
@@ -88,6 +86,13 @@ class _MediaDisplayPageState extends State<MediaDisplayPage> {
           )
         ],
       ),
+    );
+  }
+
+  SnackBar _createSnackBar(String text) {
+    return SnackBar(
+      content: Text(text),
+      duration: Duration(seconds: 2),
     );
   }
 }
