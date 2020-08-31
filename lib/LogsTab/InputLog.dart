@@ -1,19 +1,15 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/LogsTab/ConfirmDialog.dart';
-import 'package:miatracker/Models/Entry.dart';
 import 'package:miatracker/Models/GoalEntry.dart';
-import 'package:miatracker/Models/InputHoursUpdater.dart';
-import 'package:miatracker/Models/category.dart';
-import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/input_entries_provider.dart';
 import 'package:provider/provider.dart';
 import '../Models/user.dart';
 
 import '../Models/InputEntry.dart';
 import '../Map.dart';
+import 'custom_menu_item.dart';
 
 class InputLog extends StatelessWidget {
   final durationFormat = NumberFormat("0.0");
@@ -100,41 +96,41 @@ class InputLog extends StatelessWidget {
                     return await asyncConfirmDialog(context,
                         title: "Confirm Delete",
                         description:
-                            'Delete entry? This action cannot be undone');
+                        'Delete entry? This action cannot be undone');
                   },
                   onDismissed: (dis) {
                     value.remove(user, entry);
                   },
                   child: Card(
                       child: ListTile(
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text(subtitleText.trim(), maxLines: 4, overflow: TextOverflow.ellipsis,),
-                    ),
-                    leading: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          entry.inputType,
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text(subtitleText.trim(), maxLines: 4, overflow: TextOverflow.ellipsis,),
                         ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                            color: categoryFromName(
+                        leading: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              entry.inputType,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                                color: categoryFromName(
                                     entry.inputType, user.categories)
-                                .color,
-                            width: 40,
-                            height: 10)
-                      ],
-                    ),
-                    title: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                          '${convertToDisplay(entry.amount, category.isTimeBased)}'),
-                    ),
-                    trailing: Text(entry.time),
-                  )),
+                                    .color,
+                                width: 40,
+                                height: 10)
+                          ],
+                        ),
+                        title: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                              '${convertToDisplay(entry.amount, category.isTimeBased)}'),
+                        ),
+                        trailing: Text(entry.time),
+                      )),
                 );
               });
         },

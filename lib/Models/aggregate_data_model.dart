@@ -7,10 +7,9 @@ import 'InputEntry.dart';
 class DailyInputEntry {
   DateTime dateTime;
   Map<String, dynamic> categoryHours;
-  Map<String, dynamic> goalAmounts;
   List<InputEntry> inputEntries;
 
-  DailyInputEntry({this.dateTime, this.categoryHours, this.goalAmounts, this.inputEntries}) {
+  DailyInputEntry({this.dateTime, this.categoryHours, this.inputEntries}) {
     this.dateTime = daysAgo(0, dateTime);
   }
 
@@ -25,7 +24,6 @@ class DailyInputEntry {
     return DailyInputEntry(
     dateTime: (map['dateTime'] != null) ? map['dateTime'].toDate() : null,
     categoryHours: map['categoryHours'] ?? {},
-    goalAmounts: map['goalAmounts'] ?? {},
     inputEntries: tempList,
   );
   }
@@ -39,7 +37,6 @@ class DailyInputEntry {
     return {
     "dateTime": dateTime,
     "categoryHours": categoryHours,
-    'goalAmounts': goalAmounts,
     'inputEntries': tempList,
   };
   }

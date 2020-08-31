@@ -1,5 +1,5 @@
 name: miatracker
-description: A new Flutter application.
+description: Language-Agnostic Input Tracker App
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -11,21 +11,22 @@ description: A new Flutter application.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.1+3
+version: 1.0.8+10
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
+  flutter_launcher_icons: ^0.7.5
   flutter_signin_button: ^1.0.0
   firebase_crashlytics: ^0.1.4+1
   shared_preferences: ^0.5.8
   fl_chart: ^0.11.0
   google_sign_in: ^4.5.1
   firebase_analytics: ^5.0.16
-  firebase_core: ^0.4.5
-  cloud_firestore: ^0.13.7
-  firebase_auth: ^0.16.1
+  firebase_core: ^0.5.0
+  cloud_firestore: ^0.14.0+2
+  firebase_auth: ^0.18.0+1
   percent_indicator: ^2.1.5
   intl: ^0.16.1
   rxdart: ^0.24.1

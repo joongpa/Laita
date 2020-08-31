@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
 
-import 'DailyGoalsTab/AddHours.dart';
 import 'Models/media.dart';
 import 'Models/user.dart';
-import 'dart:math' as math;
 
 enum SortType {
   lastUpdated, alphabetical, mostHours, newest, oldest
@@ -100,6 +98,7 @@ class UsefulShit {
 }
 
 String convertToStatsDisplay(double time, [bool isTimeBased = true]) {
+  time = roundTo2Decimals(time);
   if(time < 0) return (isTimeBased) ? '0:00' : '0.0';
   int hours = time.floor();
   int minutes = ((time % 1) * 60).round();
@@ -127,13 +126,17 @@ Category categoryFromName(String name, List<Category> categories) {
 }
 
 double parseTime(String input) {
-  var hhMM = input.split(':');
-  int hours = int.tryParse(hhMM[0]);
-  int minutes = int.tryParse(hhMM[1]);
+  try {
+    var hhMM = input.split(':');
+    int hours = int.tryParse(hhMM[0]);
+    int minutes = int.tryParse(hhMM[1]);
 
-  if(hours == null || minutes == null || hhMM[1].length != 2) return null;
+    if(hours == null || minutes == null || hhMM[1].length != 2) return null;
 
-  return hours.toDouble() + minutes.toDouble()/60;
+    return hours.toDouble() + minutes.toDouble()/60;
+  } catch (e) {
+    return null;
+  }
 
 }
 

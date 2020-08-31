@@ -1,8 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:miatracker/Models/InputEntry.dart';
-import 'package:miatracker/Models/category.dart';
 import 'package:miatracker/Models/database.dart';
 import 'dart:math' as math;
 import '../Map.dart' as constants;

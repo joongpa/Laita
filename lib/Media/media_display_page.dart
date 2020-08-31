@@ -1,23 +1,35 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:miatracker/DailyGoalsTab/AddHours.dart';
-import 'package:miatracker/LogsTab/ConfirmDialog.dart';
-import 'package:miatracker/LogsTab/custom_menu_item.dart';
-import 'package:miatracker/Media/edit_media_page.dart';
 import 'package:miatracker/Media/media_list_view.dart';
-import 'package:miatracker/Media/media_selection_model.dart';
-import 'package:miatracker/Media/new_media_entry.dart';
 import 'package:miatracker/Media/new_media_page.dart';
-import 'package:miatracker/Models/database.dart';
-import 'package:miatracker/Models/media.dart';
-import 'package:miatracker/Models/shared_preferences.dart';
+import 'package:miatracker/Models/error_handling_model.dart';
 import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 import '../Map.dart';
 
-class MediaDisplayPage extends StatelessWidget {
+class MediaDisplayPage extends StatefulWidget {
+  @override
+  _MediaDisplayPageState createState() => _MediaDisplayPageState();
+}
+
+class _MediaDisplayPageState extends State<MediaDisplayPage> {
+  var errorStream;
+
+  @override
+  void initState() {
+    super.initState();
+    errorStream ??= ErrorHandlingModel.instance.hasError.listen((text) {
+      if (text != null) Scaffold.of(context).showSnackBar(_createSnackBar(text));
+    });
+  }
+
+  @override
+  void dispose() {
+    errorStream.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     var user = Provider.of<AppUser>(context);
@@ -74,6 +86,13 @@ class MediaDisplayPage extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  SnackBar _createSnackBar(String text) {
+    return SnackBar(
+      content: Text(text),
+      duration: Duration(seconds: 2),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:miatracker/Models/DailyInputEntryPacket.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
@@ -23,9 +24,9 @@ class InputChart extends StatelessWidget {
     AppUser user = Provider.of<AppUser>(context);
     var dateTimes = Provider.of<TimeFrameModel>(context);
 
-    Map<DateTime, DailyInputEntry> entries =
-        Provider.of<Map<DateTime, DailyInputEntry>>(context);
-    if (user == null || entries == null) return Center(child: CircularProgressIndicator());
+    var entries = Provider.of<DailyInputEntryPacket>(context);
+    if (user == null || entries == null || entries.dailyInputEntries == null)
+      return Container();
 
     List<model.Category> categories = user.categories
         .where((element) => element.isTimeBased == isTimeBased)
@@ -42,13 +43,13 @@ class InputChart extends StatelessWidget {
                     dateTimes.dateStartEndTimes[1]);
             j++) {
           double hours = 0;
-          if (entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])] != null &&
-              entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
+          if (entries.dailyInputEntries[daysAgo(-j, dateTimes.dateStartEndTimes[0])] != null &&
+              entries.dailyInputEntries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
                       .categoryHours[categories[i].name] !=
                   null) {
             hours = math.max(
                 0,
-                entries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
+                entries.dailyInputEntries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
                     .categoryHours[categories[i].name]);
           }
           inputSeriesList.add(FlSpot(j.toDouble(), hours));
@@ -65,12 +66,14 @@ class InputChart extends StatelessWidget {
 
     return LineChart(
       LineChartData(
-        lineTouchData: LineTouchData(
-          enabled: false,
-        ),
-        maxY: math.max(maxValue.ceilToDouble() + 0.05, 1.05),
+          lineTouchData: LineTouchData(
+            enabled: false,
+          ),
+          maxY: math.max(maxValue.ceilToDouble() + 0.05, 1.05),
           gridData: FlGridData(
-              show: true, drawHorizontalLine: true, horizontalInterval: getIntervalFromMaxValue(maxValue)),
+              show: true,
+              drawHorizontalLine: true,
+              horizontalInterval: getIntervalFromMaxValue(maxValue)),
           titlesData: FlTitlesData(
             bottomTitles: _getXAxis(series, dateTimes.dateStartEndTimes),
             leftTitles: SideTitles(
@@ -80,7 +83,9 @@ class InputChart extends StatelessWidget {
               getTitles: (value) {
                 return convertToDisplay(value, isTimeBased);
               },
-              checkToShowTitle: (minValue, maxValue, sideTitles, appliedInterval, value) => (value % 0.5 == 0),
+              checkToShowTitle:
+                  (minValue, maxValue, sideTitles, appliedInterval, value) =>
+                      (value % 0.5 == 0),
             ),
           ),
           borderData: FlBorderData(
@@ -94,10 +99,13 @@ class InputChart extends StatelessWidget {
   }
 
   double getIntervalFromMaxValue(double maxValue) {
-    if(!isTimeBased) return 1;
-    if(maxValue >= 5) return 1;
-    else if(maxValue >= 2) return 0.5;
-    else return 0.25;
+    if (!isTimeBased) return 1;
+    if (maxValue >= 5)
+      return 1;
+    else if (maxValue >= 2)
+      return 0.5;
+    else
+      return 0.25;
   }
 
   double getMaxValue(List<LineChartBarData> series) {

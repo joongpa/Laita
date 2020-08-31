@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Map.dart';
+
 
 class SharedPreferencesHelper extends ChangeNotifier{
   SharedPreferencesHelper._();
@@ -11,20 +13,13 @@ class SharedPreferencesHelper extends ChangeNotifier{
   String _showAccuracyAsFraction = 'showAccuracyAsFraction';
   String _showCompletedCategoriesInLifetimeSummary = 'showCompletedCategoriesInLifetimeSummary';
   String _showCompletedCategoriesInGraph = 'showCompletedCategoriesInGraph';
-  //String _selectedSortValue = 'selectedSortValue';
+  String _lastKnownDate = 'lastKnownDate';
 
   bool get showAccuracyAsFraction => _pref.get(_showAccuracyAsFraction) ?? false;
   bool get showCompletedCategoriesInLifetimeSummary => _pref.get(_showCompletedCategoriesInLifetimeSummary) ?? true;
   bool get showCompletedCategoriesInGraph => _pref.get(_showCompletedCategoriesInGraph) ?? false;
+  String get lastKnownDate => _pref.get(_lastKnownDate) ?? getDate(DateTime.now());
 
-//  SortType get selectedSortValue {
-//    String sortType = _pref.get(_selectedSortValue);
-//    try {
-//      return SortType.values.where((sort) => sort.name == sortType).first;
-//    } catch (e) {
-//      return null;
-//    }
-//  }
 
   set showAccuracyAsFraction(bool value) {
     _pref.setBool(_showAccuracyAsFraction, value);
@@ -41,9 +36,9 @@ class SharedPreferencesHelper extends ChangeNotifier{
     notifyListeners();
   }
 
-//  set selectedSortType(SortType sortType) {
-//    _pref.setString(_selectedSortValue, sortType.name);
-//  }
+  set lastKnownDate(String dateTimeString) {
+    _pref.setString(_lastKnownDate, dateTimeString);
+  }
 
   init() async {
     _pref = await SharedPreferences.getInstance();

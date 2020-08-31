@@ -1,14 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:miatracker/Map.dart';
-import 'package:miatracker/Models/GoalEntry.dart';
-import 'package:miatracker/Models/category.dart';
-import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
 
 import 'AddHours.dart';
 

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:miatracker/Map.dart';
+import 'package:miatracker/Models/DailyInputEntryPacket.dart';
 import 'package:miatracker/Models/InputHoursUpdater.dart';
 import 'package:miatracker/Models/TimeFrameModel.dart';
 import 'package:miatracker/Models/aggregate_data_model.dart';
@@ -29,7 +30,7 @@ class StatisticsSummaryWidget extends StatelessWidget {
         )
       ],
       child: Consumer<TimeFrameModel>(builder: (context, value, child) {
-        return StreamProvider<Map<DateTime, DailyInputEntry>>.value(
+        return StreamProvider<DailyInputEntryPacket>.value(
           value: DatabaseService.instance.getDailyInputEntriesOnDays(user.uid,
               startDate: value.dateStartEndTimes[0],
               endDate: value.dateStartEndTimes[1]),

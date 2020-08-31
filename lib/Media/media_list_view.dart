@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:miatracker/LogsTab/ConfirmDialog.dart';
 import 'package:miatracker/LogsTab/custom_menu_item.dart';
 import 'package:miatracker/Media/media_selection_model.dart';
-import 'package:miatracker/Models/Lifecycle.dart';
 import 'package:miatracker/Models/database.dart';
 import 'package:miatracker/Models/media.dart';
-import 'package:miatracker/Models/shared_preferences.dart';
-import 'package:miatracker/Models/tab_change_notifier.dart';
 import 'package:miatracker/Models/user.dart';
 import 'package:provider/provider.dart';
 
@@ -285,7 +282,7 @@ class _MediaListViewState extends State<MediaListView> with WidgetsBindingObserv
                         Text(
                             'Created ${getDate(snapshot.data[index - 1].startDate)}'),
                         Text(
-                            'Total time: ${convertToStatsDisplay(snapshot.data[index - 1].totalTime)}')
+                            'Total time: ${convertToDisplay(snapshot.data[index - 1].totalTime)}')
                       ],
                     ),
                     leading: Column(

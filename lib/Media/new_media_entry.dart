@@ -54,7 +54,11 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
         title: Text("New Immersion Entry"),
         leading: FlatButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Icon(Icons.close, color: Colors.white,),),
+          child: Icon(
+            Icons.close,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: Center(
         child: Padding(
@@ -75,23 +79,25 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
                         children: [
                           RichText(
                             text: TextSpan(
-                              text: 'From Ep/Ch ',
-                              style: TextStyle(color: Colors.grey),
-                              children: [
-                                TextSpan(
-                                  text: '${widget.media.episodeWatchCount}',
-                                  style: TextStyle(color: Colors.black, fontSize: 17)
-                                )
-                              ]
-                            ),
+                                text: 'From Ep/Ch ',
+                                style: TextStyle(color: Colors.grey),
+                                children: [
+                                  TextSpan(
+                                      text: '${widget.media.episodeWatchCount}',
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 17))
+                                ]),
                           ),
                           TextFormField(
                             controller: endController,
                             keyboardType: TextInputType.datetime,
-                            decoration: InputDecoration(labelText: 'To Ep/Ch #'),
+                            decoration:
+                                InputDecoration(labelText: 'To Ep/Ch #'),
                             onFieldSubmitted: (value) {
-                              newWatchCount = int.tryParse(value) ?? newWatchCount;
-                              newWatchCount = math.max<int>(newWatchCount, widget.media.episodeWatchCount);
+                              newWatchCount =
+                                  int.tryParse(value) ?? newWatchCount;
+                              newWatchCount = math.max<int>(newWatchCount,
+                                  widget.media.episodeWatchCount);
                               endController.text = newWatchCount.toString();
                               setState(() {
                                 recalculateTime();
@@ -112,52 +118,68 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
                       child: Column(
                         children: [
                           CheckboxListTile(
-                            title: Text('Complete', textAlign: TextAlign.center,),
+                            title: Text(
+                              'Complete',
+                              textAlign: TextAlign.center,
+                            ),
                             value: widget.media.isCompleted,
-                            onChanged: (widget.media.episodeCount != null) ? null : (value) {
-                              setState(() {
-                                widget.media.isCompleted = value;
-                              });
-                            },
+                            onChanged: (widget.media.episodeCount != null)
+                                ? null
+                                : (value) {
+                                    setState(() {
+                                      widget.media.isCompleted = value;
+                                    });
+                                  },
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               RawMaterialButton(
-                                constraints: BoxConstraints(),
-                                padding: EdgeInsets.all(10),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                onPressed: () {
-                                  if(newWatchCount > widget.media.episodeWatchCount) {
-                                    setState(() {
-                                      newWatchCount--;
-                                      recalculateTime();
-                                    });
-                                    endController.text = newWatchCount.toString();
-                                  }
-                                },
-                                shape: CircleBorder(),
-                                fillColor: Colors.blue,
-                                child: Icon(Icons.remove, color: Colors.white,)
-                              ),
+                                  constraints: BoxConstraints(),
+                                  padding: EdgeInsets.all(10),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  onPressed: () {
+                                    if (newWatchCount >
+                                        widget.media.episodeWatchCount) {
+                                      setState(() {
+                                        newWatchCount--;
+                                        recalculateTime();
+                                      });
+                                      endController.text =
+                                          newWatchCount.toString();
+                                    }
+                                  },
+                                  shape: CircleBorder(),
+                                  fillColor: Colors.blue,
+                                  child: Icon(
+                                    Icons.remove,
+                                    color: Colors.white,
+                                  )),
                               SizedBox(width: 50),
                               RawMaterialButton(
-                                padding: EdgeInsets.all(10),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                constraints: BoxConstraints(),
-                                onPressed: () {
-                                  if (widget.media.episodeCount == null || newWatchCount < widget.media.episodeCount) {
-                                    setState(() {
-                                      newWatchCount++;
-                                      recalculateTime();
-                                    });
-                                    endController.text = newWatchCount.toString();
-                                  }
-                                },
-                                shape: CircleBorder(),
-                                fillColor: Colors.blue,
-                                child: Icon(Icons.add, color: Colors.white,)
-                              ),
+                                  padding: EdgeInsets.all(10),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  constraints: BoxConstraints(),
+                                  onPressed: () {
+                                    if (widget.media.episodeCount == null ||
+                                        newWatchCount <
+                                            widget.media.episodeCount) {
+                                      setState(() {
+                                        newWatchCount++;
+                                        recalculateTime();
+                                      });
+                                      endController.text =
+                                          newWatchCount.toString();
+                                    }
+                                  },
+                                  shape: CircleBorder(),
+                                  fillColor: Colors.blue,
+                                  child: Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                  )),
                             ],
                           ),
                         ],
@@ -166,7 +188,9 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
                   ],
                 ),
               ),
-              SizedBox(height: 20,),
+              SizedBox(
+                height: 20,
+              ),
               DatePicker(
                 selectedDate: dateTime,
                 onChanged: (dt) {
@@ -260,6 +284,11 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
               ),
               SizedBox(height: 50),
               _submitButton(widget.user, widget.user.categories),
+              SizedBox(height: 20),
+              Text(
+                'It may take a few seconds for "${widget.media.name}" to update in the media page',
+                style: TextStyle(color: Colors.grey),
+              )
             ],
           ),
         ),
@@ -268,46 +297,56 @@ class _NewMediaEntryState extends State<NewMediaEntry> {
   }
 
   Widget _submitButton(AppUser user, List<Category> categories) => RaisedButton(
-    child: Text(
-      "Done",
-      style: TextStyle(
-        color: Colors.white,
-      ),
-    ),
-    onPressed:
-    buttonDisabled ? null : () => _buttonAction(user, categories),
-    color: Colors.lightBlue,
-  );
+        child: Text(
+          "Done",
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        onPressed:
+            buttonDisabled ? null : () => _buttonAction(user, categories),
+        color: Colors.lightBlue,
+      );
 
   _buttonAction(AppUser user, List<Category> categories) {
-    if(_globalKey.currentState.validate()) {
-      double sum = hours.toDouble() + (minutes.toDouble()/60);
-      DatabaseService.instance.addInputEntry(user, InputEntry(
-        episodesWatched: newWatchCount - widget.media.episodeWatchCount,
-        description: constants.generateDescription(widget.media, episodesWatched: newWatchCount - widget.media.episodeWatchCount, currentEpisode: newWatchCount),
-        inputType: widget.media.categoryName,
-        amount: sum,
-        dateTime: dateTime,
-        mediaID: widget.media.id,
-      ));
-      widget.media.lastUpDate = DateTime.now();
-      DatabaseService.instance.updateMedia(user, widget.media);
+    if (_globalKey.currentState.validate()) {
+      double sum = hours.toDouble() + (minutes.toDouble() / 60);
+      DatabaseService.instance.addInputEntry(
+          user,
+          InputEntry(
+            episodesWatched: newWatchCount - widget.media.episodeWatchCount,
+            description: constants.generateDescription(widget.media,
+                episodesWatched: newWatchCount - widget.media.episodeWatchCount,
+                currentEpisode: newWatchCount),
+            inputType: widget.media.categoryName,
+            amount: sum,
+            dateTime: dateTime,
+            mediaID: widget.media.id,
+          ));
       Navigator.pop(context);
     }
   }
 
   Widget choiceButton(String text) => Padding(
-    padding: EdgeInsets.all(10.0),
-    child: Text(text),
-  );
+        padding: EdgeInsets.all(10.0),
+        child: Text(text),
+      );
 
   void recalculateTime() {
-    hours = ((newWatchCount - widget.media.episodeWatchCount) * widget.media.timePerUnit).floor().toDouble();
-    minutes = (((newWatchCount - widget.media.episodeWatchCount) * widget.media.timePerUnit) % 1 * 60).roundToDouble();
-    if(hours != 0 || minutes != 0)
+    hours = ((newWatchCount - widget.media.episodeWatchCount) *
+            widget.media.timePerUnit)
+        .floor()
+        .toDouble();
+    minutes = (((newWatchCount - widget.media.episodeWatchCount) *
+                widget.media.timePerUnit) %
+            1 *
+            60)
+        .roundToDouble();
+    if (hours != 0 || minutes != 0)
       buttonDisabled = false;
-    else if (minutes == 0 && hours == 0)
-      buttonDisabled = true;
-    widget.media.isCompleted = (widget.media.episodeCount == null) ? false : newWatchCount >= widget.media.episodeCount;
+    else if (minutes == 0 && hours == 0) buttonDisabled = true;
+    widget.media.isCompleted = (widget.media.episodeCount == null)
+        ? false
+        : newWatchCount >= widget.media.episodeCount;
   }
 }
