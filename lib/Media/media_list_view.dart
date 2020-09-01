@@ -297,8 +297,7 @@ class _MediaListViewState extends State<MediaListView> with WidgetsBindingObserv
                         Container(
                             color: categoryFromName(
                                     snapshot.data[index - 1].categoryName,
-                                    user.categories)
-                                .color,
+                                    user.categories).color,
                             width: 40,
                             height: 10)
                       ],
