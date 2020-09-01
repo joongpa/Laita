@@ -70,6 +70,7 @@ class InputChart extends StatelessWidget {
             enabled: false,
           ),
           maxY: math.max(maxValue.ceilToDouble() + 0.05, 1.05),
+          minY: 0,
           gridData: FlGridData(
               show: true,
               drawHorizontalLine: true,
