@@ -22,7 +22,7 @@ class DailyInputEntry {
     } catch (e) {}
 
     return DailyInputEntry(
-    dateTime: (map['dateTime'] != null) ? map['dateTime'].toDate() : null,
+    dateTime: (map['dateTime'] != null) ? map['dateTime'].toDate().toUtc() : null,
     categoryHours: map['categoryHours'] ?? {},
     inputEntries: tempList,
   );

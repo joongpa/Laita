@@ -80,7 +80,7 @@ bool sameMonth(DateTime date, DateTime date2) {
 
 DateTime daysAgo(int days, [DateTime dateTime]) {
   dateTime = dateTime ?? DateTime.now();
-  return DateTime(dateTime.year, dateTime.month, dateTime.day - days);
+  return DateTime.utc(dateTime.year, dateTime.month, dateTime.day - days);
 }
 
 DateTime monthsAgo(int months, [DateTime dateTime, bool dayIndependent = false]) {

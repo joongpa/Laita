@@ -147,7 +147,7 @@ class DatabaseService {
         .collection('users')
         .doc(uid)
         .collection(_aggregateInputEntries)
-        .doc(daysAgo(0, dateTime).toString());
+        .doc(daysAgo(0, dateTime).toString().replaceFirst('Z', ''));
 
     var goalRef = FirebaseFirestore.instance
         .collection('users')
@@ -156,7 +156,7 @@ class DatabaseService {
     List<Entry> tempList = [];
 
     final gSnap = await goalRef
-        .where('dateTime', isGreaterThanOrEqualTo: dateTime)
+        .where('dateTime', isGreaterThanOrEqualTo: daysAgo(0, dateTime))
         .where('dateTime', isLessThan: daysAgo(-1, dateTime))
         .get();
 
@@ -204,7 +204,7 @@ class DatabaseService {
         .map((list) {
       var map = Map<DateTime, DailyInputEntry>.fromIterables(
           list.docs
-              .map<DateTime>((doc) => doc.data()['dateTime'].toDate())
+              .map((doc) => DailyInputEntry.fromMap(doc.data()).dateTime)
               .toList(),
           list.docs
               .map((doc) => DailyInputEntry.fromMap(doc.data()))
@@ -246,7 +246,7 @@ class DatabaseService {
           if (!value.exists) {
             if (!isDelete) {
               final agData = DailyInputEntry(
-                dateTime: inputEntry.dateTime,
+                dateTime: daysAgo(0, inputEntry.dateTime),
                 categoryHours: <String, dynamic>{
                   inputEntry.inputType: inputEntry.amount
                 },

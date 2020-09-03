@@ -2,7 +2,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:miatracker/Map.dart';
-import 'package:rxdart/rxdart.dart';
 
 enum TimeSpan{
   HalfYear, Month, Week
