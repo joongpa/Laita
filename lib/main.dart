@@ -26,7 +26,7 @@ import 'StatsTab/StatisticsSummaryWidget.dart';
 import 'anti_scroll_glow.dart';
 
 void main() async {
-  Crashlytics.instance.enableInDevMode = true;
+  Crashlytics.instance.enableInDevMode = false;
   FlutterError.onError = Crashlytics.instance.recordFlutterError;
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,58 +44,61 @@ class MyApp extends StatelessWidget {
     ]);
 
     return FutureBuilder<Object>(
-      future: _initialization,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return MultiProvider(
-            providers: [
-              StreamProvider<bool>.value(value: AuthService.instance.loading),
-              StreamProvider<auth.User>.value(
-                  value: auth.FirebaseAuth.instance.authStateChanges()),
-              ChangeNotifierProvider<SharedPreferencesHelper>.value(
-                  value: SharedPreferencesHelper.instance),
-            ],
-            child: StreamBuilder(
-                stream: InputHoursUpdater.instance.updateStream$,
-                builder: (context, snapshot) {
-                  return MaterialApp(
-                    builder: (context, child) {
-                      return ScrollConfiguration(
-                        behavior: MyBehavior(),
-                        child: child,
-                      );
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return MultiProvider(
+              providers: [
+                StreamProvider<bool>.value(value: AuthService.instance.loading),
+                StreamProvider<auth.User>.value(
+                    updateShouldNotify: (newUser, oldUser) {
+                      return newUser != oldUser;
                     },
-                    title: 'LAITA',
-                    theme: ThemeData(
-                      primarySwatch: Colors.blue,
+                    value: auth.FirebaseAuth.instance.authStateChanges()),
+                ChangeNotifierProvider<SharedPreferencesHelper>.value(
+                    value: SharedPreferencesHelper.instance),
+              ],
+              child: StreamBuilder(
+                  stream: InputHoursUpdater.instance.updateStream$,
+                  builder: (context, snapshot) {
+                    return MaterialApp(
+                      builder: (context, child) {
+                        return ScrollConfiguration(
+                          behavior: MyBehavior(),
+                          child: child,
+                        );
+                      },
+                      title: 'LAITA',
+                      theme: ThemeData(
+                        primarySwatch: Colors.blue,
+                      ),
+                      home: SignInPage(),
+                    );
+                  }),
+            );
+          } else {
+            return MaterialApp(
+              home: SafeArea(
+                child: Scaffold(
+                  body: Container(
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.white, Colors.blue])),
+                    child: Center(
+                      child: Card(
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      )),
                     ),
-                    home: SignInPage(),
-                  );
-                }),
-          );
-        }
-        else {
-          return MaterialApp(
-            home: SafeArea(
-              child: Scaffold(
-                body: Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.white, Colors.blue]
-                      )
-                  ),
-                  child: Center(
-                    child: Card(child: CircularProgressIndicator()),
                   ),
                 ),
               ),
-            ),
-          );
-        }
-      }
-    );
+            );
+          }
+        });
   }
 }
 
@@ -126,10 +129,9 @@ class _MyHomePageState extends State<MyHomePage>
             getDate(DateTime.now())) {
           InputHoursUpdater.instance.resumeUpdate();
         }
-        dateTimeChangeListener =
-            DateTimeProperty.changeInDay().listen((event) {
-              if (event) InputHoursUpdater.instance.resumeUpdate();
-            });
+        dateTimeChangeListener = DateTimeProperty.changeInDay().listen((event) {
+          if (event) InputHoursUpdater.instance.resumeUpdate();
+        });
         break;
       case AppLifecycleState.inactive:
         SharedPreferencesHelper.instance.lastKnownDate =

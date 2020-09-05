@@ -156,8 +156,8 @@ class DatabaseService {
     List<Entry> tempList = [];
 
     final gSnap = await goalRef
-        .where('dateTime', isGreaterThanOrEqualTo: daysAgo(0, dateTime))
-        .where('dateTime', isLessThan: daysAgo(-1, dateTime))
+        .where('dateTime', isGreaterThanOrEqualTo: daysAgo(0, dateTime).toLocal())
+        .where('dateTime', isLessThan: daysAgo(-1, dateTime).toLocal())
         .get();
 
     try {
@@ -199,7 +199,7 @@ class DatabaseService {
 
     return ref
         .where('dateTime',
-            isGreaterThanOrEqualTo: startDate, isLessThan: endDate)
+            isGreaterThanOrEqualTo: startDate.toLocal(), isLessThan: endDate.toLocal())
         .snapshots()
         .map((list) {
       var map = Map<DateTime, DailyInputEntry>.fromIterables(
@@ -215,7 +215,7 @@ class DatabaseService {
 
   void _updateAggregateData(AppUser user, InputEntry inputEntry,
       {bool isDelete = false, bool recursive = false}) {
-    String docID = daysAgo(0, inputEntry.dateTime).toString();
+    String docID = daysAgo(0, inputEntry.dateTime).toString().replaceFirst('Z', '');
 
     var docRef = FirebaseFirestore.instance
         .collection('users')

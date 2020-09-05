@@ -69,9 +69,7 @@ int daysBetween(DateTime d1, DateTime d2) {
 }
 
 bool sameDay(DateTime date, DateTime date2) {
-  return (date.year == date2.year) &&
-      (date.month == date2.month) &&
-      (date.day == date2.day);
+  return daysBetween(date, date2) == 0;
 }
 
 bool sameMonth(DateTime date, DateTime date2) {
@@ -79,14 +77,19 @@ bool sameMonth(DateTime date, DateTime date2) {
 }
 
 DateTime daysAgo(int days, [DateTime dateTime]) {
-  dateTime = dateTime ?? DateTime.now();
+  dateTime ??= DateTime.now();
   return DateTime.utc(dateTime.year, dateTime.month, dateTime.day - days);
+}
+
+DateTime daysAgoNoUTC(int days, [DateTime dateTime]) {
+  dateTime ??= DateTime.now();
+  return DateTime(dateTime.year, dateTime.month, dateTime.day - days);
 }
 
 DateTime monthsAgo(int months, [DateTime dateTime, bool dayIndependent = false]) {
   dateTime = dateTime ?? DateTime.now();
   if (dateTime.day != 1 && months > 0 && !dayIndependent) months = 0;
-  return DateTime(dateTime.year, dateTime.month - months, 1);
+  return DateTime.utc(dateTime.year, dateTime.month - months, 1);
 }
 
 class UsefulShit {
