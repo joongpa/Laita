@@ -50,7 +50,7 @@ class InputChart extends StatelessWidget {
             hours = math.max(
                 0,
                 entries.dailyInputEntries[daysAgo(-j, dateTimes.dateStartEndTimes[0])]
-                    .categoryHours[categories[i].name]);
+                    .categoryHours[categories[i].name].toDouble());
           }
           inputSeriesList.add(FlSpot(j.toDouble(), hours));
         }

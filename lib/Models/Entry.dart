@@ -6,7 +6,9 @@ abstract class Entry implements Comparable<Entry>{
   String inputType;
   double amount;
 
-  Entry({this.docID, this.dateTime, this.inputType, this.amount});
+  Entry({this.docID, this.dateTime, this.inputType, this.amount}) {
+    amount = amount.toDouble();
+  }
 
   Entry.now({this.docID, this.inputType, this.amount}) {
     dateTime = DateTime.now();

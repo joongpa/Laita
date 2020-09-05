@@ -19,7 +19,8 @@ class DailyInputEntry {
     List<InputEntry> tempList = [];
     try {
       tempList = List<InputEntry>.from(map['inputEntries'].map((i) => InputEntry.fromMap(i)));
-    } catch (e) {}
+    } catch (e) {
+    }
 
     return DailyInputEntry(
     dateTime: (map['dateTime'] != null) ? map['dateTime'].toDate().toUtc() : null,

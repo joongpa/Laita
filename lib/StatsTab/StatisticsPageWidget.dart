@@ -33,7 +33,7 @@ class StatisticsPageWidget extends StatelessWidget {
     else
       hours = entries.dailyInputEntries.values
           .where((e) => e != null)
-          .map<double>((e) => (e.categoryHours[inputType.name] ?? 0))
+          .map<double>((e) => (e.categoryHours[inputType.name] ?? 0.0).toDouble())
           .reduce((a, b) => a + b);
     String value =
         convertToStatsDisplay(hours / countedDays, inputType.isTimeBased);
