@@ -37,7 +37,7 @@ class StatisticsPageWidget extends StatelessWidget {
           .reduce((a, b) => a + b);
     String value =
         convertToStatsDisplay(hours / countedDays, inputType.isTimeBased);
-    Color color = (hours / countedDays >= inputType.goalAmount)
+    Color color = (roundTo2Decimals(hours / countedDays) >= inputType.goalAmount)
         ? Colors.green[800]
         : Colors.red[900];
     return _getWidget(value, color);

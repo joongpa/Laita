@@ -30,7 +30,7 @@ class SingleAccuracyWidget extends StatelessWidget {
 
     var successes = entries.dailyInputEntries.values.toSet().where((element) {
       try {
-        return roundTo2Decimals(element.categoryHours[inputType.name]) >=
+        return roundTo2Decimals(element.categoryHours[inputType.name].toDouble()) >=
                 inputType.goalAmount &&
             element.categoryHours[inputType.name] != 0;
       } catch (e) {

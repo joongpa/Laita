@@ -66,13 +66,6 @@ class DatabaseService {
           '${inputEntry.dateTime} ${inputEntry.inputType} ${inputEntry.amount} ${UniqueKey().hashCode}';
       inputEntry.docID = docID;
       _updateAggregateData(user, inputEntry);
-
-      if (InputEntriesProvider
-              .instance.entries[daysAgo(0, inputEntry.dateTime)] !=
-          null) {
-        InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)]
-            .add(inputEntry);
-      }
       return true;
     } catch (e) {
       print(e.toString());
@@ -214,8 +207,10 @@ class DatabaseService {
   }
 
   void _updateAggregateData(AppUser user, InputEntry inputEntry,
-      {bool isDelete = false, bool recursive = false}) {
+      {bool isDelete = false}) async {
     String docID = daysAgo(0, inputEntry.dateTime).toString().replaceFirst('Z', '');
+    bool transactionSuccessful = false;
+    int retryAttemptsAllowed = 5;
 
     var docRef = FirebaseFirestore.instance
         .collection('users')
@@ -232,80 +227,75 @@ class DatabaseService {
           .collection(_media)
           .doc(inputEntry.mediaID.toString());
     }
-    DateTime now = DateTime.now();
 
-    FirebaseFirestore.instance.runTransaction(
-      (transaction) async {
-        Crashlytics.instance.setBool('Finished dailyInputEntry read', false);
-        Crashlytics.instance.setBool('Finished lifetimeData read', false);
-        Crashlytics.instance.setBool('Finished media reads', false);
+    int attempts = 0;
+    while(!transactionSuccessful && attempts < retryAttemptsAllowed) {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+          bool successfulDeletion = true;
 
-        bool successfulDeletion = true;
-
-        DailyInputEntry agData = await transaction.get(docRef).then((value) {
-          if (!value.exists) {
-            if (!isDelete) {
-              final agData = DailyInputEntry(
-                dateTime: daysAgo(0, inputEntry.dateTime),
-                categoryHours: <String, dynamic>{
-                  inputEntry.inputType: inputEntry.amount
-                },
-                inputEntries: [inputEntry],
-              );
-              _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
-              return agData;
+          DailyInputEntry agData = await transaction.get(docRef).then((value) {
+            if (!value.exists) {
+              if (!isDelete) {
+                final agData = DailyInputEntry(
+                  dateTime: daysAgo(0, inputEntry.dateTime),
+                  categoryHours: <String, dynamic>{
+                    inputEntry.inputType: inputEntry.amount
+                  },
+                  inputEntries: [inputEntry],
+                );
+                _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = agData;
+                return agData;
+              }
+              return null;
             }
-            return null;
+            //deep copy for comparison
+            final oldData = DailyInputEntry.fromMap(value.data());
+            final newData = _getUpdatedEntry(
+                DailyInputEntry.fromMap(value.data()), inputEntry, isDelete);
+
+            //Make sure data actually changed
+            successfulDeletion = oldData.categoryHours[inputEntry.inputType] !=
+                newData.categoryHours[inputEntry.inputType];
+
+            return newData;
+          });
+
+          AppUser user = AppUser.fromMap((await transaction.get(userRef)).data());
+          if (successfulDeletion) {
+            user = _getUpdatedUser(user, inputEntry, isDelete: isDelete);
           }
-          //deep copy for comparison
-          final oldData = DailyInputEntry.fromMap(value.data());
-          final newData = _getUpdatedEntry(
-              DailyInputEntry.fromMap(value.data()), inputEntry, isDelete);
 
-          //Make sure data actually changed
-          successfulDeletion = oldData.categoryHours[inputEntry.inputType] !=
-              newData.categoryHours[inputEntry.inputType];
+          if (mediaRef != null && successfulDeletion) {
+            Media media = Media.fromMap((await transaction.get(mediaRef)).data());
+            media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
+            transaction.update(mediaRef, media.toMap());
+          }
 
-          return newData;
-        });
-        Crashlytics.instance.setBool('Finished dailyInputEntry read', true);
-        Crashlytics.instance.setInt('DailyInputEntry Read Duration', DateTime.now().difference(now).inMilliseconds);
-
-        AppUser user = AppUser.fromMap((await transaction.get(userRef)).data());
-        if (successfulDeletion) {
-          user = _getUpdatedUser(user, inputEntry, isDelete: isDelete);
+          transaction.update(userRef, user.toMap());
+          transaction.set(docRef, agData.toMap());
+          if(!isDelete) updateOfflineEntries(inputEntry);
+          transactionSuccessful = true;
+        },
+      ).timeout(Duration(seconds: 2), onTimeout: () {
+        if(attempts == 0) {
+          ErrorHandlingModel.instance.addValue('This is taking a while... You can continue using the app');
+          Crashlytics.instance.log('Transaction duration exceeded 2 seconds');
         }
-        Crashlytics.instance.setBool('Finished lifetimeData read', true);
-        Crashlytics.instance.setInt('LifetimeData Read Duration', DateTime.now().difference(now).inMilliseconds);
+      });
+    }
 
-        if (mediaRef != null && successfulDeletion) {
-          Media media = Media.fromMap((await transaction.get(mediaRef)).data());
-          media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
-          Crashlytics.instance.setBool('Finished media reads', true);
-          Crashlytics.instance.setInt('Media Read Duration', DateTime.now().difference(now).inMilliseconds);
-          transaction.update(mediaRef, media.toMap());
-        } else Crashlytics.instance.setBool('Finished media reads', true);
-        Crashlytics.instance.setInt('Media Read Duration', DateTime.now().difference(now).inMilliseconds);
+    if(!transactionSuccessful) {
+      ErrorHandlingModel.instance.addValue('Something went wrong. Please try again');
+    }
+  }
 
-        transaction.update(userRef, user.toMap());
-        transaction.set(docRef, agData.toMap());
-      },
-      timeout: Duration(seconds: 5),
-    ).then((value) {
-      ErrorHandlingModel.instance.addValue(null);
-    }).catchError((error, stackTrace) {
-      if(!recursive)
-        _updateAggregateData(user, inputEntry, isDelete: isDelete, recursive: true);
-      else {
-        ErrorHandlingModel.instance.addValue('Something went wrong. Please try again');
-        Crashlytics.instance.recordError(error, stackTrace);
-      }
-    }).timeout(Duration(seconds: 2), onTimeout: () {
-      if(!recursive) {
-        ErrorHandlingModel.instance.addValue('Data may take several seconds to update');
-        Crashlytics.instance.log('Transaction duration exceeded 2 seconds');
-      }
-    });
+  void updateOfflineEntries(InputEntry inputEntry) {
+    if (InputEntriesProvider
+        .instance.entries[daysAgo(0, inputEntry.dateTime)] !=
+        null) {
+      InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)]
+          .add(inputEntry);
+    }
   }
 
   DailyInputEntry _getUpdatedEntry(
