@@ -282,6 +282,7 @@ class DatabaseService {
           Crashlytics.instance.log('Transaction duration exceeded 2 seconds');
         }
       });
+      attempts++;
     }
 
     if(!transactionSuccessful) {
