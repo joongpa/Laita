@@ -281,8 +281,10 @@ class DatabaseService {
           ErrorHandlingModel.instance.addValue('This is taking a while... You can continue using the app');
           Crashlytics.instance.log('Transaction duration exceeded 2 seconds');
         }
-      });
+      }).catchError((error) {});
       attempts++;
+
+      await Future.delayed(Duration(seconds: 2));
     }
 
     if(!transactionSuccessful) {
