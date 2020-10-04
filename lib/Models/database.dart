@@ -149,7 +149,8 @@ class DatabaseService {
     List<Entry> tempList = [];
 
     final gSnap = await goalRef
-        .where('dateTime', isGreaterThanOrEqualTo: daysAgo(0, dateTime).toLocal())
+        .where('dateTime',
+            isGreaterThanOrEqualTo: daysAgo(0, dateTime).toLocal())
         .where('dateTime', isLessThan: daysAgo(-1, dateTime).toLocal())
         .get();
 
@@ -192,23 +193,23 @@ class DatabaseService {
 
     return ref
         .where('dateTime',
-            isGreaterThanOrEqualTo: startDate.toLocal(), isLessThan: endDate.toLocal())
+            isGreaterThanOrEqualTo: startDate.toLocal(),
+            isLessThan: endDate.toLocal())
         .snapshots()
         .map((list) {
       var map = Map<DateTime, DailyInputEntry>.fromIterables(
           list.docs
               .map((doc) => DailyInputEntry.fromMap(doc.data()).dateTime)
               .toList(),
-          list.docs
-              .map((doc) => DailyInputEntry.fromMap(doc.data()))
-              .toList());
+          list.docs.map((doc) => DailyInputEntry.fromMap(doc.data())).toList());
       return map ?? {};
     });
   }
 
   void _updateAggregateData(AppUser user, InputEntry inputEntry,
       {bool isDelete = false}) async {
-    String docID = daysAgo(0, inputEntry.dateTime).toString().replaceFirst('Z', '');
+    String docID =
+        daysAgo(0, inputEntry.dateTime).toString().replaceFirst('Z', '');
     bool transactionSuccessful = false;
     int retryAttemptsAllowed = 5;
 
@@ -228,9 +229,9 @@ class DatabaseService {
           .doc(inputEntry.mediaID.toString());
     }
 
-    int attempts = 0;
-    while(!transactionSuccessful && attempts < retryAttemptsAllowed) {
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
+    for (int i = 0; i < retryAttemptsAllowed; i++) {
+      await FirebaseFirestore.instance.runTransaction(
+        (transaction) async {
           bool successfulDeletion = true;
 
           DailyInputEntry agData = await transaction.get(docRef).then((value) {
@@ -260,57 +261,68 @@ class DatabaseService {
             return newData;
           });
 
-          AppUser user = AppUser.fromMap((await transaction.get(userRef)).data());
+          AppUser user =
+              AppUser.fromMap((await transaction.get(userRef)).data());
           if (successfulDeletion) {
             user = _getUpdatedUser(user, inputEntry, isDelete: isDelete);
           }
 
           if (mediaRef != null && successfulDeletion) {
-            Media media = Media.fromMap((await transaction.get(mediaRef)).data());
+            Media media =
+                Media.fromMap((await transaction.get(mediaRef)).data());
             media = _getUpdatedMedia(media, inputEntry, isDelete: isDelete);
             transaction.update(mediaRef, media.toMap());
           }
-
           transaction.update(userRef, user.toMap());
           transaction.set(docRef, agData.toMap());
-          if(!isDelete) updateOfflineEntries(inputEntry);
-          transactionSuccessful = true;
         },
       ).timeout(Duration(seconds: 2), onTimeout: () {
-        if(attempts == 0) {
-          ErrorHandlingModel.instance.addValue('This is taking a while... You can continue using the app');
+        if (i == 0) {
+          ErrorHandlingModel.instance.addValue(
+              'This is taking a while... You can continue using the app');
           Crashlytics.instance.log('Transaction duration exceeded 2 seconds');
         }
-      }).catchError((error) {});
-      attempts++;
-
-      await Future.delayed(Duration(seconds: 2));
+      }).then((_) {
+        if (!isDelete) updateOfflineEntries(inputEntry);
+        transactionSuccessful = true;
+      }).catchError((error, stack) {
+        Crashlytics.instance.recordError(error, stack);
+      });
+      if(transactionSuccessful) break;
+      await Future.delayed(Duration(seconds: 4));
     }
-
-    if(!transactionSuccessful) {
-      ErrorHandlingModel.instance.addValue('Something went wrong. Please try again');
+    if (!transactionSuccessful) {
+      ErrorHandlingModel.instance
+          .addValue('Something went wrong. Please try again');
     }
   }
 
   void updateOfflineEntries(InputEntry inputEntry) {
     if (InputEntriesProvider
-        .instance.entries[daysAgo(0, inputEntry.dateTime)] !=
+            .instance.entries[daysAgo(0, inputEntry.dateTime)] !=
         null) {
-      InputEntriesProvider.instance.entries[daysAgo(0, inputEntry.dateTime)]
-          .add(inputEntry);
+      InputEntriesProvider
+          .instance.entries[daysAgo(0, inputEntry.dateTime)] = _addUnique(
+          inputEntry,
+          InputEntriesProvider
+              .instance.entries[daysAgo(0, inputEntry.dateTime)]);
     }
   }
 
   DailyInputEntry _getUpdatedEntry(
       DailyInputEntry oldEntry, InputEntry inputEntry, bool isDelete) {
     try {
-      bool successfulDeletion = true;
+      int previousSize = oldEntry.inputEntries.length;
       if (isDelete) {
-        successfulDeletion = oldEntry.inputEntries.remove(inputEntry);
-      } else
-        oldEntry.inputEntries.add(inputEntry);
+        oldEntry.inputEntries.remove(inputEntry);
+      } else {
+        oldEntry.inputEntries = _addUnique(inputEntry, oldEntry.inputEntries);
+      }
+      int newSize = oldEntry.inputEntries.length;
 
-      if (successfulDeletion) {
+      bool goodTransaction = newSize != previousSize;
+
+      if (goodTransaction) {
         oldEntry.categoryHours[inputEntry.inputType] =
             (((isDelete) ? -1 : 1) * inputEntry.amount) +
                 (oldEntry.categoryHours[inputEntry.inputType] ?? 0.0);
@@ -321,6 +333,12 @@ class DatabaseService {
       _aggregateEntries[daysAgo(0, inputEntry.dateTime)] = oldEntry;
     } catch (e) {}
     return oldEntry;
+  }
+
+  List<Entry> _addUnique(InputEntry inputEntry, List<Entry> entries) {
+    var set = entries.toSet();
+    set.add(inputEntry);
+    return set.toList();
   }
 
   AppUser _getUpdatedUser(AppUser oldUser, InputEntry inputEntry,
@@ -340,8 +358,8 @@ class DatabaseService {
         .doc(uid)
         .collection(_aggregateInputEntries);
 
-    return ref.orderBy('dateTime').limit(1).snapshots().map((singleList) =>
-        DailyInputEntry.fromMap(singleList.docs.first.data()));
+    return ref.orderBy('dateTime').limit(1).snapshots().map(
+        (singleList) => DailyInputEntry.fromMap(singleList.docs.first.data()));
   }
 
   void addMedia(AppUser user, Media media) {
@@ -430,8 +448,10 @@ class DatabaseService {
     if (_allPagedResults[type] == null)
       _allPagedResults[type] = List<List<Media>>();
 
-    var collectionRef =
-    FirebaseFirestore.instance.collection('users').doc(uid).collection(_media);
+    var collectionRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection(_media);
 
     var field;
     bool isDescending;
